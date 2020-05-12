@@ -1,0 +1,11 @@
+[Unit]
+Description=UNICORE TSI
+
+[Service]
+Type=forking
+ExecStart=/usr/share/unicore/tsi/bin/start.sh
+ExecStop=/usr/share/unicore/tsi/bin/stop.sh
+PIDFile=/var/run/unicore/tsi.pid
+
+[Install]
+WantedBy=multi-user.target

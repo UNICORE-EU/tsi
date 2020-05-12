@@ -1,0 +1,5 @@
+JOBID USER STAT QUEUE FROM_HOST EXEC_HOST JOB_NAME SUBMIT_TIME
+1000  bob  EXIT normal gridnode1  gridnode3   date Jun 19 12:45
+1001  eve  DONE normal gridnode1  gridnode3   date Jun 22 12:45
+1002  alice  RUN large gridnode1  gridnode3   date Jun 1 12:45
+1003  joe  PEND batch gridnode1  gridnode3   date Jun 13 12:45

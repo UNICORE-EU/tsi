@@ -1,0 +1,5 @@
+@component-prefix@@component-name@@component-suffix@ (@component-version@-@component-release@@component-disttag@) unstable; urgency=low
+
+  * Initial Debian release
+
+ -- Bernd Schuller <unicore-support@lists.sourceforge.net>  Wed, 15 Feb 2012 11:51:33 +0100

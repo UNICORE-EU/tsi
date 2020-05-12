@@ -1,0 +1,7 @@
+zam285.zam.kfa-juelich.de:
+
+Job ID               Username Queue    Jobname    SessID NDS   TSK Memory Time  S Time
+ -------------------- -------- -------- ---------- ------ ----- --- ------ ----- - -----
+ 83.zam285.zam.kfa-ju rbreu    batch    New_Script  16522     1  -- 1000mb 00:00 C 00:00
+ 84.zam285.zam.kfa-ju rbreu    fast     torque_tes  16864     1  --    --  01:00 R   --
+ 85.zam285.zam.kfa-ju rbreu    slow     torque_tes    --      1  --    --  01:00 Q   --

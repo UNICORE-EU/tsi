@@ -1,0 +1,27 @@
+JobId=8017847 JobName=small0.0
+   UserId=foo(123) GroupId=bar(456) MCS_label=N/A
+   Priority=50531 Nice=0 Account=ias-2 QOS=nocont
+   JobState=RUNNING Reason=None Dependency=(null)
+   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0
+   RunTime=00:09:09 TimeLimit=05:59:00 TimeMin=N/A
+   SubmitTime=2020-02-08T09:35:43 EligibleTime=2020-02-14T11:31:59
+   AccrueTime=Unknown
+   StartTime=2020-02-14T11:31:59 EndTime=2020-02-14T17:31:09 Deadline=N/A
+   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2020-02-14T11:31:59
+   Partition=gpus AllocNode:Sid=jrl12:21955
+   ReqNodeList=(null) ExcNodeList=(null)
+   NodeList=jrc0025
+   BatchHost=jrc0025
+   NumNodes=1 NumCPUs=48 NumTasks=1 CPUs/Task=4 ReqB:S:C:T=0:0:*:*
+   TRES=cpu=48,node=1,billing=48
+   Socks/Node=* NtasksPerN:B:S:C=1:0:*:* CoreSpec=*
+   MinCPUsNode=4 MinMemoryNode=0 MinTmpDiskNode=0
+   Features=(null) DelayBoot=00:00:00
+   OverSubscribe=NO Contiguous=0 Licenses=project@just:1,scratch@just:1,home@just:1,fastdata@just:1 Network=(null)
+   Command=/p/scratch/blah
+   WorkDir=/p/scratch/spam
+   StdErr=/p/scratch/foo
+   StdIn=/dev/null
+   StdOut=/p/scratch/bar
+   Power=
+   TresPerNode=gpu:4,mem128

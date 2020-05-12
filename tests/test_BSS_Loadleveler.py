@@ -1,0 +1,93 @@
+import io
+import logging
+import os
+import time
+import unittest
+import loadleveler.BSS
+import MockConnector
+from lib import TSI
+
+
+class TestBSSLoadLeveler(unittest.TestCase):
+    def setUp(self):
+        # setup logger
+        self.LOG = logging.getLogger("tsi.testing")
+        self.LOG.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        self.LOG.handlers = [ch]
+        self.bss = loadleveler.BSS.BSS()
+
+    def test_init(self):
+        config = {'tsi.testing': True}
+        self.bss.init(config, self.LOG)
+        self.assertTrue(config['tsi.submit_cmd'] is not None)
+
+    def test_parse_qstat(self):
+        with open("tests/input/qstat_ll.txt", "r") as sample:
+            qstat_output = sample.read()
+        result = self.bss.parse_status_listing(qstat_output)
+        self.assertTrue("QSTAT\n" in result)
+        self.assertTrue("266540 RUNNING m001\n" in result)
+        self.assertTrue("266560 RUNNING m002\n" in result)
+        self.assertTrue("266530 COMPLETED m001\n" in result)
+
+    def test_extract_job_id(self):
+        submit_result = 'llsubmit: The job "login3.cluster.com.12345" has been submitted.'
+        self.assertTrue("12345"==self.bss.extract_job_id(submit_result))
+
+    def has_directive(self, cmds, name, value=None):
+        result = False
+        for line in cmds:
+            if line.startswith(name):
+                if value:
+                    result=value in line
+                else:
+                    result=True
+                if result:
+                    break
+        return result
+
+    def test_submit(self):
+        config = {'tsi.testing': True}
+        TSI.setup_defaults(config)
+        self.bss.init(config, self.LOG)
+
+        # mock submit cmd
+        config['tsi.submit_cmd'] = "echo 1234.server"
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % int(100 * time.time())
+        os.mkdir(uspace)
+        msg = """#!/bin/bash
+#TSI_SUBMIT
+#TSI_OUTCOME_DIR %s
+#TSI_USPACE_DIR %s
+#TSI_STDOUT stdout
+#TSI_STDERR stderr
+#TSI_SCRIPT
+#TSI_QUEUE fast
+#TSI_PROJECT myproject
+#TSI_TIME 120
+#TSI_MEMORY 32
+#TSI_NODES 2
+#TSI_PROCESSORS_PER_NODE 64
+#TSI_ARRAY 10
+#TSI_ARRAY_LIMIT 2
+#TSI_JOBNAME test_job
+#TSI_SCRIPT
+echo "Hello World!"
+sleep 3
+""" % (uspace, uspace)
+        submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
+        print(submit_cmds)
+        self.assertTrue(self.has_directive(submit_cmds, "# @ account_no = ", "myproject"))
+        self.assertTrue(self.has_directive(submit_cmds, "# @ class = ", "fast"))
+        self.assertTrue(self.has_directive(submit_cmds, "# @ bg_size = ", "2"))
+        self.assertTrue(self.has_directive(submit_cmds, "# @ cpu_limit = ", "120"))
+
+
+if __name__ == '__main__':
+    unittest.main()

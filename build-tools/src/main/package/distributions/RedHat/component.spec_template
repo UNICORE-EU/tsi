@@ -1,0 +1,65 @@
+Buildroot: %{_builddir}/%{name}-root
+Name: unicore-@component-name@@component-suffix@
+Version: @component-version@
+Release: @component-release@@component-disttag@
+Provides: unicore-@component-name@
+
+Summary: UNICORE TSI
+License: BSD
+Distribution: RedHat
+Group: System Environment/Daemons
+URL: http://www.unicore.eu
+#Requires: 
+BuildArch: @component-architecture@
+Packager: UNICORE unicore-support@lists.sourceforge.net
+
+@preamble@
+
+%description
+UNICORE (Uniform Interface to Computing Resources) offers a
+ready-to-run Grid system including client and server software.
+UNICORE makes distributed computing and data resources available
+in a seamless and secure way in intranets and the internet.
+
+This package contains the UNICORE Target System Interface (TSI),
+wrapping LRMS specific details behind an abstract interface. The TSI
+is the only UNICORE component required to run as root.
+
+%changelog
+* Thu May 27 2014 Bernd Schuller <unicore-support@lists.sourceforge.net> 
+-BSS-specific TSI packages
+
+* Thu Feb 2 2012 Bernd Schuller <unicore-support@lists.sourceforge.net> 
+-Restructured to use the packman tool
+
+* Fri Feb 11 2011 Bjoern Hagemeier <unicore-support@lists.sourceforge.net> 
+-Initial rpm package
+
+@install_command@
+
+%files
+
+#
+# other files and dirs
+#
+%attr(644 root root) "/usr/lib/systemd/system/unicore-@component-name@.service"
+
+%attr(744 root root) "/etc/unicore/tsi/tsi.properties"
+%attr(744 root root) "/etc/unicore/tsi/startup.properties"
+%attr(744 root root) "/etc/unicore/tsi/logging.config"
+%dir %attr(755 root root) "/var/log/unicore/tsi"
+%dir %attr(755 root root) "/var/run/unicore/tsi/"
+
+%dir %attr(755 root root) /usr/share/doc/unicore/tsi
+%attr(644 root root) /usr/share/doc/unicore/tsi
+%dir %attr(755 root root)  "/usr/share/unicore/tsi"
+%attr(644 root root) "/usr/share/unicore/tsi/*"
+
+%post
+/usr/bin/systemctl enable unicore-@component-name@.service
+
+%preun
+/usr/bin/systemctl stop unicore-@component-name@.service > /dev/null 2>&1
+/usr/bin/systemctl disable unicore-@component-name@.service
+
+

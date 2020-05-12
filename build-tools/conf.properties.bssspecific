@@ -1,0 +1,48 @@
+# component name. Without prefix "unicore-"
+component.package.name=tsi
+
+# maven module is just a pom
+dependency.type=pom
+skip.copy.jars=true
+
+# root dir for src.tar.gz.
+src.tar.gz.main.dir=/
+
+# pre command in specfile install macro
+#pre.src.rpm.command=
+
+# Files from src to be copied into packages
+linux.files.usr.share.unicore.tsi.bin.1=bin/*
+linux.files.usr.share.unicore.tsi.lib.1=lib/*
+
+# common files
+ 
+# linux files
+noMap.linux.files.usr.share.unicore.tsi.lib.1=lib/*
+noMap.linux.files.usr.share.doc.unicore.tsi.1=docs/*
+ 
+# targz files
+targz.files.withFileMode0700.bin.1=bin/*
+targz.files.withFileMode0600.conf.1=conf/*
+targz.files.doc.1=docs/*
+targz.files.withFileMode0600.lib.1=lib/*
+targz.files.withFileMode0600.logs.1=
+
+# templates vars
+
+linux.templates.log=/var/log/unicore/tsi
+linux.templates.pid=/var/run/unicore/tsi.pid
+linux.templates.doc=/usr/share/doc/unicore/tsi
+linux.templates.bin=/usr/share/unicore/tsi/bin
+linux.templates.lib=/usr/share/unicore/tsi/lib
+linux.templates.etc=/etc/unicore/tsi
+linux.templates.tsiPath=/usr/share/unicore/tsi/lib
+
+targz.templates.log=logs
+targz.templates.pid=tsi.pid
+targz.templates.doc=doc
+targz.templates.bin=bin
+targz.templates.lib=lib
+targz.templates.etc=conf
+targz.templates.tsiPath=./lib
+
