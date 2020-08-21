@@ -103,8 +103,8 @@ class BSS(BSSBase):
         if qos != "NONE":
             submit_cmds.append("#SBATCH --qos=%s" % qos)
         
-        if memory > 0:
-            # memory per node
+        if memory >= 0:
+            # memory per node, '0' means that the job requests all of the memory on each node
             submit_cmds.append("#SBATCH --mem=%s" % memory)
 
         if req_time > 0:
