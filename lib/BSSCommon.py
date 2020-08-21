@@ -110,7 +110,7 @@ class BSSBase(object):
         with open(submit_file_name, "w") as submit:
             for line in submit_cmds:
                 submit.write(line + u"\n")
-            Utils.addperms(submit_file_name, 0o770)
+        Utils.addperms(submit_file_name, 0o770)
         
         # now run the job submission command
         cmd = config['tsi.submit_cmd'] + " ./" + submit_file_name

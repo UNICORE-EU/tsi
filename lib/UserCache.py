@@ -63,8 +63,7 @@ class UserCache(object):
         else:
             return gid
 
-            # returns all members of a given group name
-
+    # returns all members of a given group name
     def get_members_4group(self, group):
         self.prepare_groups(group)
         members = self.members.get(group)
