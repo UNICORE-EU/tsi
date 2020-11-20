@@ -185,7 +185,7 @@ class BSSBase(object):
         """ Converts the raw job info into a dictionary """
         result = {}
         try:
-            tokens = re.compile("\s*").split(raw_info.strip())
+            tokens = re.compile("\s+").split(raw_info.strip())
             for t in tokens:
                 try:
                     kv = t.split("=",1)

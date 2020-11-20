@@ -5,9 +5,9 @@
 #  - creating and deploying documentation  
 #
 
-VERSION=8.0.4
+VERSION=8.0.5
 RELEASE=1
-DOCVERSION=8.0.4
+DOCVERSION=8.0.5
 MVN=mvn
 
 VERSION ?= ${DEFAULT_VERSION}
@@ -76,7 +76,7 @@ rm -rf build/*
 mkdir -p build/lib
 cp -R docs build-tools/* build/
 cp lib/* build/lib
-cp CHANGES LICENCE build/docs/
+cp CHANGES LICENSE build/docs/
 cp build-tools/conf.properties.bssspecific build/src/main/package/conf.properties
 sed -i "s/name=tsi/name=$1/" build/src/main/package/conf.properties
 sed -i "s/VERSION/${VERSION}/" build/pom.xml
@@ -178,7 +178,7 @@ tgz:
 	@mkdir -p build
 	@rm -rf build/*
 	@cp -R build-tools docs lib loadleveler lsf slurm build/
-	@cp README CHANGES LICENCE Install.sh build/
+	@cp README.md CHANGES LICENSE Install.sh build/
 	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
 
