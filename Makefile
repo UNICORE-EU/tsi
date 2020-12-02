@@ -5,9 +5,9 @@
 #  - creating and deploying documentation  
 #
 
-VERSION=8.0.5
+VERSION=8.1.0
 RELEASE=1
-DOCVERSION=8.0.5
+DOCVERSION=8.1.0
 MVN=mvn
 
 VERSION ?= ${DEFAULT_VERSION}
@@ -19,10 +19,7 @@ TESTS = $(wildcard tests/*.py)
 
 export PYTHONPATH := lib:.:tests
 
-# if you do not want Python2 tests, set the following to "/bin/true"
-PYTHON=python
-# if you do not want Python3 tests, set the following to "/bin/true"
-PYTHON3=python3
+PYTHON=python3
 
 # by default, test and build everything
 default: test packages
@@ -40,7 +37,6 @@ runtest: $(TESTS)
 $(TESTS):
 	@echo "\n** Running test $@"
 	@${PYTHON} $@
-	@${PYTHON3} $@
 
 #
 # documentation

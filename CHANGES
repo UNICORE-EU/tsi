@@ -3,6 +3,10 @@ Changelog for the UNICORE TSI
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
 
+Version 8.1.0
+-------------
+ - drop Python2 support
+
 Version 8.0.5
 -------------
  - fix: typos in Makefile

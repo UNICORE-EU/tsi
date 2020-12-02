@@ -37,18 +37,20 @@ security and hardening the system.
 Prerequisites
 -------------
 
-The TSI requires Python Version 2.7.5 or later, both Python 2 and 3
-are supported. It works only on Unix-style operating systems
-(e.g. Linux or Mac OS/X), Windows is not (yet) directly supported.
+The TSI requires Python Version 3.4 or later. It works only on
+Unix-style operating systems (e.g. Linux or Mac OS/X), Windows is not
+directly supported.
 
-Batch system status checks ('qstat') will be executed under a system
-account (usually 'unicore') which is configured in the UNICORE/X
-server configuration. Note that this system account cannot be 'root',
-as the TSI will never execute anything as root.
+Batch system status checks (e.g. via 'squeue' for Slurm) will be
+executed under a system account (usually 'unicore') which is
+configured in the UNICORE/X server configuration. Note that this
+system account cannot be 'root', as the TSI will never execute
+anything as root.
 
-The system account MUST be able to see the batch jobs from all users!
-If necessary, configure your batch system accordingly. For details on 
-this procedure we refer to the documentation of your batch system.
+The system account MUST be able to list batch job status from all
+users! If necessary, configure your batch system accordingly. For
+details on this procedure we refer to the documentation of your batch
+system.
 
 Installation
 ------------
@@ -558,7 +560,7 @@ include::api.txt[]
 Contact
 -------
 
-UNICORE Homepage:        http://www.unicore.eu
+UNICORE Homepage:        https://www.unicore.eu
 
 Support mailing list:    unicore-support@lists.sourceforge.net
 
@@ -566,3 +568,4 @@ Developers mailing list: unicore-devel@lists.sourceforge.net (needs registration
 
 TSI issues management:   https://sourceforge.net/p/unicore/issues
 
+Source code:             https://github.com/UNICORE-EU/tsi

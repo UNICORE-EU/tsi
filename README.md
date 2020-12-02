@@ -8,7 +8,7 @@ This server will run as "root" on the cluster login node(s).
 
 ## Prerequisites
 
-The TSI requires Python (3.x or 2.7.5+). 
+The TSI requires Python 3.4 or later
 
 It requires an open port (default: 4433) where it receives connections
 from the UNICORE/X server(s). The TSI will make outgoing connections

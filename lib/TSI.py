@@ -19,20 +19,14 @@ import ACL, BecomeUser, BSS, Connector, Local, Reservation, Server, SSL, IO, Uti
 MY_VERSION = "__VERSION__"
 
 # supported Python versions
-REQUIRED_VERSION = (2, 7, 5)
-REQUIRED_VERSION_3 = (3, 4, 0)
+REQUIRED_VERSION = (3, 4, 0)
 
 
 def assert_version():
     """
-    Checks that the Python version is correct.
-    Returns True if version is 2.7.6 or later
+    Checks that the Python version is correct
     """
-    ver = sys.version_info
-    if Utils.have_p3:
-        return ver >= REQUIRED_VERSION_3
-    else:
-        return ver >= REQUIRED_VERSION
+    return sys.version_info >= REQUIRED_VERSION
 
 
 def get_startup_logger():
