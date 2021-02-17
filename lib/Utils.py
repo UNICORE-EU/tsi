@@ -8,13 +8,32 @@ import os.path
 import sys
 import subprocess
 
+have_p3 = sys.version_info >= (3, 0, 0)
+
+
 def encode(message):
+    if have_p3:
+        return encode_3(message)
+    else:
+        return encode_2(message)
+
+
+def encode_2(message):
+    if type(message) is not type(u" "):
+        message = unicode(message, "utf-8")
+    return message.encode("utf-8")
+
+
+def encode_3(message):
     if type(message) is not type(u" "):
         message = unicode(message, "utf-8")
     return message
 
 def decode(message):
-    return message.decode("utf-8")
+    if have_p3:
+        return message.decode("utf-8")
+    else:
+        return message
 
 def extract_parameter(message, parameter, default_value=None):
     """
@@ -47,9 +66,9 @@ def expand_variables(message):
     """
     Expands $HOME and $USER into the values from the current environment
     """
-    message = message.replace("$HOME", os.environ['HOME'])
-    message = message.replace("$LOGNAME", os.environ['LOGNAME'])
-    return message.replace("$USER", os.environ['USER'])
+    message = message.replace("$HOME", os.environ.get('HOME', ""))
+    message = message.replace("$LOGNAME", os.environ.get('LOGNAME', ""))
+    return message.replace("$USER", os.environ.get('USER', ""))
 
 
 def addperms(path, mode):

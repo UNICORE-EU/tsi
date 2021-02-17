@@ -12,17 +12,17 @@ def setup_ssl(config, socket, LOG, server_mode=False):
     keystore = config.get('tsi.keystore')
     keypass = config.get('tsi.keypass')
     cert = config.get('tsi.certificate')
-    truststore = config.get('tsi.truststore')
-    # TODO: probably it is better not to specify the protocol and instead
-    # rely on system defaults!
-    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    truststore = config.get('tsi.truststore', None)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS)
     context.verify_mode = ssl.CERT_REQUIRED
     context.check_hostname = False
     context.load_cert_chain(certfile=cert, keyfile=keystore,
                             password=keypass)
-    context.load_verify_locations(cafile=truststore)
+    if truststore:
+        context.load_verify_locations(cafile=truststore)
+    else:
+        context.load_default_certs(purpose=Purpose.SERVER_AUTH)
     return context.wrap_socket(socket, server_side=server_mode)
-
 
 rdn_map = {"C": "countryName",
            "CN": "commonName",
