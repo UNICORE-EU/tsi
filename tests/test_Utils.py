@@ -9,11 +9,11 @@ class TestTSI(unittest.TestCase):
         pass
 
     def test_Helper_functions(self):
+        
         msg = Utils.expand_variables(
             "home: $HOME user: $USER logname: $LOGNAME")
         self.assertTrue(os.environ['HOME'] in msg)
         self.assertTrue(os.environ['USER'] in msg)
-        self.assertTrue(os.environ['LOGNAME'] in msg)
         msg = 'blah\n#TSI_foo ham spam \nblah blah'
         param = Utils.extract_parameter(msg, "foo")
         self.assertEqual("ham spam ", param)
