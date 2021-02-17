@@ -19,10 +19,7 @@ TESTS = $(wildcard tests/*.py)
 
 export PYTHONPATH := lib:.:tests
 
-# if you do not want Python2 tests, set the following to "/bin/true"
-PYTHON=python
-# if you do not want Python3 tests, set the following to "/bin/true"
-PYTHON3=python3
+PYTHON=python3
 
 # by default, test and build everything
 default: test packages
@@ -40,7 +37,6 @@ runtest: $(TESTS)
 $(TESTS):
 	@echo "\n** Running test $@"
 	@${PYTHON} $@
-	@${PYTHON3} $@
 
 #
 # documentation
