@@ -19,7 +19,7 @@ class TestServerSSL(unittest.TestCase):
         self.config['tsi.certificate'] = 'tests/certs/tsi-cert.pem'
         self.config['tsi.truststore'] = 'tests/certs/tsi-truststore.pem'
         self.config['tsi.allowed_dns'] = [
-            SSL.convert_dn('CN=Demo TSI,O=UNICORE,C=EU')]
+            SSL.convert_dn('CN=TSI,O=UNICORE,C=EU')]
 
     def test_Connect(self):
         # fork, creating the TSI shepherd and a fake XNJS
