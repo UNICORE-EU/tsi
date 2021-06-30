@@ -40,8 +40,7 @@ class BSSBase(object):
             if config.get(key) is None:
                 value = self.defaults[key]
                 config[key] = value
-                LOG.info("Using default: '%s' = '%s'",
-                         key, value)
+                LOG.info("Using default: '%s' = '%s'" % (key, value))
         # check if BSS commands are accessible
         if config.get('tsi.testing') is not True:
             (success, output) = Utils.run_command(config['tsi.qstat_cmd'])

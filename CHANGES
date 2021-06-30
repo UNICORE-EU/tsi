@@ -2,6 +2,10 @@ Changelog for the UNICORE TSI
 =============================
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 8.2.0
+-------------
+ - re-organize logging, log to syslog by default
+ - fix: split DNs only on ","
 
 Version 8.1.0
 -------------

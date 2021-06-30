@@ -4,20 +4,12 @@ import socket
 import signal
 import logging
 import time
-from lib import TSI
+from lib import TSI, Log
 
 
 class TestTSI(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
         self.file_name = "tests/conf/tsi.properties"
 
     def test_configure(self):
@@ -25,7 +17,6 @@ class TestTSI(unittest.TestCase):
         self.assertEqual('600', config['tsi.usersCacheTtl'])
         acl = config['tsi.acl']
         self.assertEqual('NONE', acl['/'])
-        TSI.read_logging_config(config, self.LOG)
 
     def test_RunMain(self):
         config = "tests/conf/tsi.properties"

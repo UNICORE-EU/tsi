@@ -46,7 +46,6 @@ is the only UNICORE component required to run as root.
 
 %attr(744 root root) "/etc/unicore/tsi/tsi.properties"
 %attr(744 root root) "/etc/unicore/tsi/startup.properties"
-%attr(744 root root) "/etc/unicore/tsi/logging.config"
 %dir %attr(755 root root) "/var/log/unicore/tsi"
 %dir %attr(755 root root) "/var/run/unicore/tsi/"
 

@@ -47,7 +47,7 @@ def convert_dn(dn):
     """ Convert X500 DN in RFC format to a tuple """
     converted = []
     # split dn and strip leading/trailing whitespace
-    elements = [x.strip() for x in re.split(r"[,/]", dn)]
+    elements = [x.strip() for x in re.split(r"[,]", dn)]
     for element in elements:
         if element != '':
             rdn = convert_rdn(element)

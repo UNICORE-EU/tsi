@@ -35,7 +35,7 @@ fi
 #
 rm -f $PY/*.pyc
 export PYTHONPATH=${PY}
-echo "Logging to ${STARTLOG}"
+echo "Output redirected to ${STARTLOG}"
 nohup $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
 
 echo "UNICORE TSI starting"
