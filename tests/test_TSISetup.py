@@ -2,14 +2,13 @@ import unittest
 import os
 import socket
 import signal
-import logging
 import time
 from lib import TSI, Log
 
 
 class TestTSI(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog = False)
         self.file_name = "tests/conf/tsi.properties"
 
     def test_configure(self):
@@ -26,14 +25,7 @@ class TestTSI(unittest.TestCase):
             TSI.main(["TSI", config])
         else:
             # parent, this is the fake XNJS
-            LOG = logging.getLogger("fake-xnjs")
-            LOG.setLevel(logging.INFO)
-            ch = logging.StreamHandler()
-            ch.setLevel(logging.DEBUG)
-            formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            ch.setFormatter(formatter)
-            LOG.handlers = [ch]
+            LOG = Log.Logger("fake-xnjs")
             time.sleep(2)
             client_config = TSI.read_config_file(config, LOG)
 

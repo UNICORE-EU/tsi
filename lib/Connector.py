@@ -40,7 +40,6 @@ class Connector(object):
             line = self.control_in.readline()
             if len(line) == 0:
                 raise IOError("Socket closed")
-            self.LOG.debug(line)
             if line == 'ENDOFMESSAGE\n':
                 break
             message += line

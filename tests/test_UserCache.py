@@ -1,22 +1,13 @@
 import unittest
-import logging
 import os
 import pwd
 import time
-from lib import UserCache
+from lib import Log, UserCache
 
 
 class TestUserCache(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
 
     def getlogin(self):
         return pwd.getpwuid(os.getuid())[0]

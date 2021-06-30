@@ -1,23 +1,15 @@
 import unittest
-import logging
 import time
 import os
 import io
-from lib import BSS, TSI
+from lib import BSS, Log, TSI
 import MockConnector
 
 
 class TestBSSNobatch(unittest.TestCase):
     def setUp(self):
         # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
 
     def test_parse_status_listing(self):
         bss = BSS.BSS()

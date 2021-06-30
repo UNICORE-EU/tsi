@@ -110,11 +110,10 @@ class BSS(BSSBase):
 
     def convert_status(self, bss_state):
         """ converts BSS status to UNICORE status """
-        ustate = "UNKNOWN"
-        if bss_state in ["O", "R", "S"]:
-            ustate = "RUNNING"
-        elif bss_state == "T":
+        if bss_state == "T":
             ustate = "SUSPENDED"
+        else:
+            ustate = "RUNNING"
         return ustate
 
     def get_job_details(self, message, connector, config, LOG):

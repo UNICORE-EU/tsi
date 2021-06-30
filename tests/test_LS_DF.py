@@ -1,22 +1,13 @@
 import unittest
-import logging
 import io
 import os
-from lib import IO
+from lib import IO, Log
 import MockConnector
 
 
 class TestLS(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
 
     def test_stat_file(self):
         path = "/tmp/"

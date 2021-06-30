@@ -25,7 +25,7 @@ class TestTSI(unittest.TestCase):
         self.assertTrue(param is None)
         msg = 'blah\n#TSI_nope \nblah blah'
         param = Utils.extract_parameter(msg, "foo", "spam")
-        self.assertEquals("spam", param)
+        self.assertEqual("spam", param)
 
     def test_Helper_functions_2(self):
         msg = 'blah\n#TSI_foo NONE\nblah blah'

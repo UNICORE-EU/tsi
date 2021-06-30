@@ -1,22 +1,13 @@
 import unittest
-import logging
 import os
 import pwd
 import grp
-from lib import BecomeUser, TSI
+from lib import BecomeUser, Log, TSI
 
 
 class TestBecomeUser(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing", use_syslog = False)
         self.config = {'tsi.testing': True}
         TSI.setup_defaults(self.config)
         BecomeUser.initialize(self.config, self.LOG)

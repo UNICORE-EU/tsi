@@ -1,24 +1,15 @@
 import io
-import logging
 import os
 import time
 import unittest
 import loadleveler.BSS
 import MockConnector
-from lib import TSI
+from lib import Log, TSI
 
 
 class TestBSSLoadLeveler(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
         self.bss = loadleveler.BSS.BSS()
 
     def test_init(self):

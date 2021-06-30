@@ -1,20 +1,12 @@
 import unittest
-import logging
 import io, os
-from lib import TSI, BecomeUser
+from lib import Log, TSI, BecomeUser
 import MockConnector
 
 
 class TestTSI(unittest.TestCase):
     def setUp(self):
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
         self.file_name = "tests/conf/tsi.properties"
 
     def test_read_config(self):
@@ -33,7 +25,7 @@ class TestTSI(unittest.TestCase):
         self.assertFalse(SSL.match(subject, acl), msg="wrong match %s" % str(subject))
         
         # accept white space in property lines?
-        self.assertEquals("some_value", c["whitespace"])
+        self.assertEqual("some_value", c["whitespace"])
         os.chdir(cwd)
 
     def test_version_check(self):

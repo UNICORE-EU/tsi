@@ -1,23 +1,14 @@
 import unittest
-import logging
 import os
 import signal
 import socket
 import time
-from lib import Server, SSL
+from lib import Log, Server, SSL
 
 
 class TestServerSSL(unittest.TestCase):
     def setUp(self):
-        # setup logger
-        self.LOG = logging.getLogger("tsi.testing")
-        self.LOG.setLevel(logging.INFO)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.LOG.handlers = [ch]
+        self.LOG = Log.Logger("tsi.testing")
         self.config = {}
         self.config['tsi.my_addr'] = 'localhost'
         self.config['tsi.my_port'] = 14433
