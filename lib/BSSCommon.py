@@ -63,6 +63,14 @@ class BSSBase(object):
         """
         return []
 
+    def create_alloc_script(self, message, config, LOG):
+        """ For batch systems, this method is responsible for
+            creating a script that will allocate resources,
+            but not launch any tasks.
+            See the slurm/BSS.py for an example.
+        """
+        return []
+
     def submit(self, message, connector, config, LOG):
         """ Submit a script to the batch system.
            Depending on the TSI_JOB_MODE parameter, the the batch system 
@@ -82,14 +90,6 @@ class BSSBase(object):
         job_mode = Utils.extract_parameter(message, "JOB_MODE", "normal")
 
         LOG.debug("Submitting a batch job, mode=%s" % job_mode)
-        
-        # create unique name for the files used in this job submission
-        submit_id = str(int(time() * 1000))
-
-        userjob_file_name = "UNICORE_Job_%s" % submit_id
-        with open(userjob_file_name, "w") as job:
-            job.write(u"" + message)
-        Utils.addperms(userjob_file_name, 0o770)
 
         if "normal" == job_mode:
             submit_cmds = self.create_submit_script(message, config, LOG)
@@ -100,21 +100,44 @@ class BSSBase(object):
                 return
             with open(raw_cmds_file_name, "r") as f:
                 submit_cmds = [f.read()]
+        elif job_mode.startswith("alloc"):
+            try:
+                submit_cmds = self.create_alloc_script(message, config, LOG)
+            except:
+                connector.failed("Allocation mode not (yet) supported!")
+                return
         else:
             connector.failed("Illegal job mode: %s " % job_mode)
             return
         
-        submit_cmds.append(uspace_dir + "/" + userjob_file_name)
-        submit_file_name = "bss_submit_%s" % submit_id
-        with open(submit_file_name, "w") as submit:
+        # create unique name for the files used in this job submission
+        submit_id = str(int(time() * 1000))
+        userjob_file_name = "UNICORE_Job_%s" % submit_id
+            
+        if job_mode.startswith("alloc"):
+            # run allocation command in the background
+            cmd = ""
             for line in submit_cmds:
-                submit.write(line + u"\n")
-        Utils.addperms(submit_file_name, 0o770)
+                cmd += line + u"\n"
+            with open(userjob_file_name, "w") as job:
+                job.write(u"" + cmd)
         
-        # now run the job submission command
-        cmd = config['tsi.submit_cmd'] + " ./" + submit_file_name
-
-        (success, reply) = Utils.run_command(cmd)
+            children = config.get('tsi.NOBATCH.children', None)
+            (success, reply) = Utils.run_command(cmd, True, children)
+        else:
+            with open(userjob_file_name, "w") as job:
+                job.write(u"" + message)
+            Utils.addperms(userjob_file_name, 0o770)
+            submit_cmds.append(uspace_dir + "/" + userjob_file_name)
+            submit_file_name = "bss_submit_%s" % submit_id
+            with open(submit_file_name, "w") as submit:
+                for line in submit_cmds:
+                    submit.write(line + u"\n")
+            Utils.addperms(submit_file_name, 0o770)
+            # run job submission command
+            cmd = config['tsi.submit_cmd'] + " ./" + submit_file_name
+            (success, reply) = Utils.run_command(cmd)
+        
         if not success:
             connector.failed(reply)
         else:

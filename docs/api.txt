@@ -206,6 +206,19 @@ TSI will ignore any further instruction relevant for batch system submission. In
 a second instruction +#TSI_JOB_FILE <filename>+ determines a file that will be read and
 used as BSS specific information.
 
+
+Resource allocation job
++++++++++++++++++++++++
+If the instruction +#TSI_JOB_MODE allocate+ is encountered in the submit script,
+the TSI will use the requested resources as in a normal batch job submission.
+The TSI will create a script that only allocates resources from the BSS, but
+does not launch anything. The allocation identifier will be written to a file
+"BSS_ALLOCATION_ID" in the working directory.
+
+Once this job has finished, the allocation ID can be read from the 'BSS_ALLOCATION_ID",
+and can be used in subsequent jobs.
+
+
 ==== Script execution (#TSI_EXECUTESCRIPT)
 
 The function +TSI.execute_script()+ executes the script directly from

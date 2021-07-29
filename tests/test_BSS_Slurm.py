@@ -5,6 +5,7 @@ import uuid
 import slurm.BSS
 import MockConnector
 from lib import Log, TSI
+from time import sleep
 
 basedir = os.getcwd()
     
@@ -80,8 +81,7 @@ class TestBSSSlurm(unittest.TestCase):
 #TSI_JOBNAME test_job
 #TSI_SCRIPT
 echo "Hello World!"
-sleep 3
-ENDOFMESSAGE
+sleep 3 
 """ % (uspace, uspace)
         submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --partition", "fast"))
@@ -121,7 +121,6 @@ ENDOFMESSAGE
 #TSI_SCRIPT
 echo "Hello World!"
 sleep 3
-ENDOFMESSAGE
 """ % (uspace, uspace)
         submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --partition", "fast"))
@@ -154,7 +153,6 @@ ENDOFMESSAGE
 #TSI_JOB_FILE foo.sh
 #TSI_OUTCOME_DIR %s
 #TSI_USPACE_DIR %s
-ENDOFMESSAGE
 """ % (uspace, uspace)
                 
         control_out = io.StringIO()
@@ -184,8 +182,6 @@ ENDOFMESSAGE
 #TSI_USPACE_DIR %s
 #TSI_SCRIPT
 echo "Hello World!"
-
-ENDOFMESSAGE
 """ % (uspace, uspace)
                 
         control_out = io.StringIO()
@@ -197,6 +193,73 @@ ENDOFMESSAGE
         assert "1234" in result
         os.chdir(cwd)
 
+    def test_create_alloc_cmd(self):
+        os.chdir(basedir)
+        config = {'tsi.testing': True}
+        TSI.setup_defaults(config)
+        self.bss.init(config, self.LOG)
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
+        os.mkdir(uspace)
+        msg = """#!/bin/bash
+#TSI_SUBMIT
+#TSI_JOB_MODE allocate
+#TSI_USPACE_DIR %s
+#TSI_QUEUE fast
+#TSI_PROJECT myproject
+#TSI_TIME 600
+#TSI_MEMORY 32
+#TSI_NODES 4
+#TSI_PROCESSORS_PER_NODE 64
+#TSI_BSS_NODES_FILTER NONE
+#TSI_JOBNAME test_job
+#TSI_SCRIPT
+""" % (uspace)
+        submit_cmds = self.bss.create_alloc_script(msg, config, self.LOG)
+        cmd = ""
+        for line in submit_cmds:
+            cmd += line + u"\n"
+        self.assertTrue("/bin/bash" in cmd)
+        self.assertTrue("salloc" in cmd)
+        self.assertTrue("--partition=fast" in cmd)
+        self.assertTrue("--account=myproject" in cmd)
+        self.assertTrue("--nodes=4" in cmd)
+        self.assertTrue("--mem=32" in cmd)
+        self.assertTrue("--time=10" in cmd)
+        self.assertTrue("--ntasks-per-node=64" in cmd)
+        self.assertFalse("--constraint" in cmd)
+
+    def test_run_alloc_cmd(self):
+        os.chdir(basedir)
+        config = {'tsi.testing': True}
+        TSI.setup_defaults(config)
+        # mock submit cmd
+        config['tsi.alloc_cmd'] = "echo 'salloc: Granted job allocation 115463'"
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
+        os.mkdir(uspace)
+        
+        msg = """#!/bin/bash
+#TSI_SUBMIT
+#TSI_JOB_MODE allocate
+#TSI_USPACE_DIR %s
+#TSI_QUEUE fast
+#TSI_PROJECT myproject
+#TSI_NODES 4
+""" % (uspace)
+                
+        control_out = io.StringIO()
+        connector = MockConnector.MockConnector(None, control_out, None,
+                                                None, self.LOG)
+        
+        self.bss.submit(msg,connector, config, self.LOG)
+        result = control_out.getvalue()
+        sleep(10)
+        with open("%s/ALLOCATION_ID" % uspace) as f:
+            line = f.readlines()[0]
+            print("Allocation ID : %s" % line)
+            self.assertTrue("115463" in line)
+        os.chdir(cwd)
 
     def test_submit_fail(self):
         os.chdir(basedir)
@@ -212,7 +275,6 @@ ENDOFMESSAGE
 #TSI_SUBMIT
 #TSI_OUTCOME_DIR %s
 #TSI_USPACE_DIR %s
-ENDOFMESSAGE
 """ % (uspace, uspace)
                 
         control_out = io.StringIO()

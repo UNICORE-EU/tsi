@@ -19,77 +19,57 @@ class BSS(BSSBase):
 
     defaults = {
         'tsi.submit_cmd': 'sbatch',
+        'tsi.alloc_cmd': 'salloc',
         'tsi.qstat_cmd': 'squeue -h -o \"%i %T %P\"',
         'tsi.details_cmd': 'scontrol show jobid',
         'tsi.abort_cmd': 'scancel %s',
         'tsi.hold_cmd': 'scontrol hold',
         'tsi.resume_cmd': 'scontrol release',
     }
-
-    def create_submit_script(self, message, config, LOG):
-        """ parse the #TSI_" BSS parameters from the message
-        and convert them to the proper BSS instructions.
-        Returns the script to submit to the BSS (as a list of lines)
+    
+    def parse_common_options(self, message, config, LOG):
+        """ parse #TSI_" BSS parameters from the message
+            to create options common to both sbatch and salloc
         """
-        submit_cmds = []
-        email = extract_parameter(message, "EMAIL", "NONE")
-        jobname = extract_parameter(message, "JOBNAME",
-                                    config['tsi.default_job_name'])
-        outcome_dir = extract_parameter(message, "OUTCOME_DIR")
-        project = extract_parameter(message, "PROJECT", "NONE")
-        stderr = extract_parameter(message, "STDERR", "stderr")
-        stdout = extract_parameter(message, "STDOUT", "stdout")
-        umask = extract_parameter(message, "UMASK")
-        uspace_dir = extract_parameter(message, "USPACE_DIR")
+        cmds = []
 
+        email = extract_parameter(message, "EMAIL", "NONE")
+        jobname = extract_parameter(message, "JOBNAME", config['tsi.default_job_name'])
+        project = extract_parameter(message, "PROJECT", "NONE")
         memory = extract_number(message, "MEMORY")
         nodes = extract_number(message, "NODES")
         processors = extract_number(message, "PROCESSORS")
-        processors_per_node = extract_number(message,
-                                                "PROCESSORS_PER_NODE")
+        processors_per_node = extract_number(message, "PROCESSORS_PER_NODE")
         total_processors = extract_number(message, "TOTAL_PROCESSORS")
-
-        array_spec = extract_number(message, "ARRAY")
-        array_limit = extract_number(message, "ARRAY_LIMIT")
-
         queue = extract_parameter(message, "QUEUE", "NONE")
-        reservation_id = extract_parameter(message,
-                                           "RESERVATION_REFERENCE",
-                                           "NONE")
+        reservation_id = extract_parameter(message, "RESERVATION_REFERENCE", "NONE")
         req_time = extract_number(message, "TIME")
-
         nodes_filter = config.get("tsi.nodes_filter", "")
-        user_nodes_filter = extract_parameter(message,
-                                              "BSS_NODES_FILTER", "NONE")
-        
+        user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
         qos = extract_parameter(message, "QOS", "NONE")
-
-        # first line has to be the shell
-        submit_cmds.append("#!/bin/bash")
-
+        
         # jobname: check for illegal characters
         m = re.search(r"[^0-9a-zA-Z\.:.=~/]", jobname)
         if m is not None:
             jobname = "UNICORE_job"
-        submit_cmds.append("#SBATCH --job-name=%s" % jobname)
+        cmds.append("--job-name=%s" % jobname)
 
         if queue != "NONE":
-            submit_cmds.append("#SBATCH --partition=%s" % queue)
+            cmds.append("--partition=%s" % queue)
 
         if project != "NONE":
-            submit_cmds.append("#SBATCH --account=%s" % project)
+            cmds.append("--account=%s" % project)
 
         # nodes count
         if nodes >0:
             # Multiple node and/or processors
-            submit_cmds.append("#SBATCH --nodes=%s" % nodes)
+            cmds.append("--nodes=%s" % nodes)
             if processors_per_node >0:
-                submit_cmds.append(
-                    "#SBATCH --ntasks-per-node=%s" % processors_per_node)
+                cmds.append("--ntasks-per-node=%s" % processors_per_node)
         else:
             # request tasks and let Slurm figure out the nodes
             if total_processors > 0:
-                submit_cmds.append("#SBATCH --ntasks=%s" % total_processors)
+                cmds.append("--ntasks=%s" % total_processors)
             
         # nodes filter, can be both global and user defined
         if user_nodes_filter != "NONE":
@@ -98,26 +78,50 @@ class BSS(BSSBase):
             else:
                 nodes_filter =  user_nodes_filter
         if nodes_filter != "":
-            submit_cmds.append("#SBATCH --constraint=%s" % nodes_filter)
+                cmds.append("--constraint=%s" % nodes_filter)
 
         if qos != "NONE":
-            submit_cmds.append("#SBATCH --qos=%s" % qos)
+            cmds.append("--qos=%s" % qos)
         
         if memory >= 0:
             # memory per node, '0' means that the job requests all of the memory on each node
-            submit_cmds.append("#SBATCH --mem=%s" % memory)
+            cmds.append("--mem=%s" % memory)
 
         if req_time > 0:
             # wall time. Convert to minutes, as accepted by SLURM
             time_in_minutes = req_time / 60
-            submit_cmds.append("#SBATCH --time=%d" % time_in_minutes)
+            cmds.append("--time=%d" % time_in_minutes)
 
         if email != "NONE":
-            submit_cmds.append("#SBATCH --mail-user=%s" % email)
-            submit_cmds.append("#SBATCH --mail-type=ALL")
+            cmds.append("--mail-user=%s" % email)
+            cmds.append("--mail-type=ALL")
 
         if reservation_id != "NONE":
-            submit_cmds.append("#SBATCH --reservation=%s" % reservation_id)
+            cmds.append("--reservation=%s" % reservation_id)
+
+        return cmds
+
+
+    def create_submit_script(self, message, config, LOG):
+        """ parse the #TSI_" BSS parameters from the message
+        and convert them to the proper BSS instructions.
+        Returns the script to submit to the BSS (as a list of lines)
+        """
+        submit_cmds = []
+        outcome_dir = extract_parameter(message, "OUTCOME_DIR")
+        stderr = extract_parameter(message, "STDERR", "stderr")
+        stdout = extract_parameter(message, "STDOUT", "stdout")
+        umask = extract_parameter(message, "UMASK")
+        uspace_dir = extract_parameter(message, "USPACE_DIR")
+        array_spec = extract_number(message, "ARRAY")
+        array_limit = extract_number(message, "ARRAY_LIMIT")
+
+        # first line has to be the shell
+        submit_cmds.append("#!/bin/bash")
+        
+        # append common options as"#SBATCH" directives
+        for option in self.parse_common_options(message, config, LOG):
+            submit_cmds.append("#SBATCH %s" % option)
 
         if array_spec > 0:
             if array_limit > 0:
@@ -136,6 +140,29 @@ class BSS(BSSBase):
             submit_cmds.append("umask %s" % umask)
 
         return submit_cmds
+
+    def create_alloc_script(self, message, config, LOG):
+        """ parse the #TSI_" BSS parameters from the message
+        and convert them to the proper 'salloc' command, adding code to parse
+        the allocation ID from the reply 
+        Returns the script to be run (as a list of lines).
+        """
+        uspace_dir = extract_parameter(message, "USPACE_DIR")
+        stdout = extract_parameter(message, "STDOUT", "stdout")
+        alloc_id_file = extract_parameter(message, "ALLOCATION_ID", "ALLOCATION_ID")
+        
+        alloc_options = self.parse_common_options(message, config, LOG)
+        alloc_cmd = config['tsi.alloc_cmd']
+        for opt in alloc_options:
+            alloc_cmd+=" "+opt
+        alloc_cmd += " > %s/%s 2>&1 \n" % (uspace_dir, stdout)
+        cmds = [message,
+                "cd %s \n" % uspace_dir, 
+                alloc_cmd,
+                # extract allocation id from stdout and write it to a file
+                "grep -o '[[:digit:]]*' %s/%s | head -1 > %s \n" % (uspace_dir, stdout, alloc_id_file)
+                ]
+        return cmds
 
     def get_extract_id_expr(self):
         """ regular expression for extracting the job ID after batch submit """
