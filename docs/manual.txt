@@ -261,7 +261,7 @@ The following configuration options must be set in +tsi.properties+ :
  * +tsi.certificate+    : file containing the TSI certificate in PEM format
  * +tsi.truststore+     : file containing the certificate of the accepted CA(s) 
     in PEM format
- * +tsi.allowed_dn.NNN+ : allowed DNs of UNICORE/X servers in RFC or OpenSSL format
+ * +tsi.allowed_dn.NNN+ : allowed DNs of UNICORE/X servers in RFC format
 
 SSL is activated if the keystore file is specified in tsi.properties.
 
@@ -439,31 +439,44 @@ The TSI must have access to the "filespace" directory specified in the
 UNICORE/X configuration (usually the property 'XNJS.filespace' in
 'xnjs_legacy.xml') to hold job directories. These directories are
 written with the TSI's uid set to the xlogin for which the work is
-being performed and so must be world writable. The Unix access mode
-is '1777'.
+being performed. If you use a shared directory for all users, 
+this directory world writable. The required Unix access mode is '1777'.
 
 
 Running the TSI
 ---------------
 
+For the Linux pacckages, the TSI is pre-configured for systemd, and
+if you want to run it as a a system service, you can use 'systemctl':
+
+------
+sudo systemctl add-wants multi-user.target unicore-tsi-variant
+-------
+
+(where "variant" stands for the concrete TSI implementation, such as 
+"nobatch" or "slurm")
+
+
 Starting 
 ~~~~~~~~
 
-If installed from an Linux package, the TSI can be started using the init script
+If installed from an Linux package, the TSI can be started via systemd
 
-  /etc/init.d/unicore-tsi start
+-------------------
+sudo systemctl start unicore-tsi-variant
+-------------------
 
 The TSI can also be started using the script "BIN/start.sh".
-
-Depending on the shell used to start the TSI it may be necessary to execute
-these commands through nohup if you want to log out afterwards.
 
 Stopping the TSI
 ~~~~~~~~~~~~~~~~
 
-If installed from an Linux package, the TSI can be stopped using the init script
+If installed from an Linux package, the TSI can be stopped via systemd
 
-  /etc/init.d/unicore-tsi stop
+--------------
+sudo systemctl stop unicore-tsi-variant
+--------------
+
 
 The main TSI process (shepherd) can be killed (preferably using
 SIGTERM). Since this results in the killing of all TSI processes this
@@ -485,7 +498,16 @@ new TSI processes).
 TSI logging
 ~~~~~~~~~~~
 
-TBD
+By default, the TSI logs to the system journal (syslog), and you can read
+the logs via 'journalctl', for example
+
+------------
+sudo journalctl -u unicore-tsi-variant
+------------
+
+To print logging output to stdout instead, set "tsi.use_syslog=false" in 
+the +tsi.properties+ file.
+
 
 
 Porting the TSI to other batch systems
@@ -536,8 +558,9 @@ We recommed the following measures to make operating the TSI secure.
 
  * If SSL cannot be used, the UNICORE/X should run on a separate machine.
 
- * On the UNICORE/X machine, user login should be impossible. This will prevent bypassing 
-   the IP check (in non-SSL mode) and/or accessing the UNICORE/X private key (in SSL mode).
+ * On the UNICORE/X machine, user login should be impossible. This will 
+   prevent bypassing the IP check (in non-SSL mode) and/or accessing 
+   the UNICORE/X private key (in SSL mode).
 
  * If you for some reason HAVE to run UNICORE/X and TSI on the same
    machine, and user login or execution of user commands is possible
@@ -552,7 +575,7 @@ We recommed the following measures to make operating the TSI secure.
 
 Summarizing, it is critical to protect config files and executable
 files. We strongly recommend to configure SSL. Using SSL is a MUST
-when users can login to the UNICORE/X machine.
+in deployments where users can login to the UNICORE/X machine.
 
 include::api.txt[]
 

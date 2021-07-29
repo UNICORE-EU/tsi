@@ -5,7 +5,7 @@
 #  - creating and deploying documentation  
 #
 
-VERSION=8.2.0
+VERSION=8.2.1
 RELEASE=1
 DOCVERSION=8.2.0
 MVN=mvn
