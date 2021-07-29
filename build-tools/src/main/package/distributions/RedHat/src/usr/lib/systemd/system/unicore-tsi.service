@@ -8,4 +8,4 @@ ExecStop=/usr/share/unicore/tsi/bin/stop.sh
 PIDFile=/var/run/unicore/tsi.pid
 
 [Install]
-WantedBy=multi-user.target
+#WantedBy=multi-user.target

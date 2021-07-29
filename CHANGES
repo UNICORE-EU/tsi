@@ -6,6 +6,7 @@ Version 8.2.0
 -------------
  - re-organize logging, log to syslog by default
  - fix: split DNs only on ","
+ - remove duplicate code in BecomeUser.py
 
 Version 8.1.0
 -------------

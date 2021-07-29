@@ -21,10 +21,8 @@ set -e
 case "$1" in
     configure)
 	
-   chmod +x /usr/share/unicore/tsi/bin/*
-   chmod 700 /var/log/unicore/tsi
-
-	;;
+    chmod +x /usr/share/unicore/tsi/bin/*
+    ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
