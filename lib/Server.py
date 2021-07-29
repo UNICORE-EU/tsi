@@ -17,7 +17,6 @@ import time
 import Utils
 from SSL import setup_ssl, verify_peer
 
-
 def configure_socket(sock, LOG):
     """
     Setup socket options (keepalive).
@@ -120,23 +119,30 @@ def connect(configuration, LOG):
         configure_socket(xnjs, LOG)
         try:
             msg = xnjs.recv(buffer_size)
+            msg = str(msg, "UTF-8").strip()
+            LOG.info("message : %s" % msg)
         except EnvironmentError as e:
             LOG.info("Error reading from XNJS: %s " % str(e))
             close_quietly(xnjs)
             continue
         
-        LOG.info("message : %s" % msg)
-        if msg == "shutdown\n":
+        cmd, params = msg.split(" ",1)
+        if cmd == "shutdown":
             LOG.info("Received shutdown message, exiting.")
             server.close()
             exit(0)
-
+        elif cmd == "newtsiprocess":
+            pass
+        else:
+            LOG.info("Command from XNJS not understood: %s " % msg)
+            close_quietly(xnjs)
+            continue
         LOG.info("Accepted connection from %s" % xnjs_host)
         try:
             # write to the XNJS to tell it everything is OK
             xnjs.sendall(b'OK\n')
             # callback to the XNJS
-            xnjs_port = get_xnjs_port(configuration, Utils.decode(msg), LOG)
+            xnjs_port = get_xnjs_port(configuration, params, LOG)
             if xnjs_port is None:
                 raise EnvironmentError("Received invalid message")
             address = (xnjs_host, xnjs_port)
@@ -189,14 +195,14 @@ def setup_streams(command, data):
     return control_in, control_out, data_in, data_out
 
 
-def get_xnjs_port(configuration, message, LOG):
+def get_xnjs_port(configuration, params, LOG):
     """ Get the XNJS port. If not set in config, extract it
-        from the message sent by the XNJS
+        from the params sent by the XNJS
     """
     port = configuration.get('tsi.njs_port', None)
     if port is None:
         try:
-            port = re.match(r"\w+ (\w+)", message).group(1)
+            port = params
         except:
             pass
     return port

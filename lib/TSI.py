@@ -297,7 +297,7 @@ def main(argv=None):
     verbose = config['tsi.debug']
     LOG.reinit("TSI-main", verbose)
     bss = BSS.BSS()
-    LOG.info("Starting TSI for " + bss.get_variant())
+    LOG.info("Starting TSI %s for %s" % (MY_VERSION, bss.get_variant()))
     BecomeUser.initialize(config, LOG)
     os.chdir(config.get('tsi.safe_dir','/tmp'))
     bss.init(config, LOG)
