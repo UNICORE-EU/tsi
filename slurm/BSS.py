@@ -145,7 +145,7 @@ class BSS(BSSBase):
         """ parse the #TSI_" BSS parameters from the message
         and convert them to the proper 'salloc' command, adding code to parse
         the allocation ID from the reply 
-        Returns the script to be run (as a list of lines).
+        Returns the command(s) to be run (as a list of lines).
         """
         uspace_dir = extract_parameter(message, "USPACE_DIR")
         stdout = extract_parameter(message, "STDOUT", "stdout")
@@ -154,13 +154,11 @@ class BSS(BSSBase):
         alloc_options = self.parse_common_options(message, config, LOG)
         alloc_cmd = config['tsi.alloc_cmd']
         for opt in alloc_options:
-            alloc_cmd+=" "+opt
-        alloc_cmd += " > %s/%s 2>&1 \n" % (uspace_dir, stdout)
-        cmds = [message,
-                "cd %s \n" % uspace_dir, 
-                alloc_cmd,
+            alloc_cmd += " " + opt
+        alloc_cmd += " > %s/%s 2>&1 " % (uspace_dir, stdout)
+        cmds = [alloc_cmd,
                 # extract allocation id from stdout and write it to a file
-                "grep -o '[[:digit:]]*' %s/%s | head -1 > %s \n" % (uspace_dir, stdout, alloc_id_file)
+                "grep -o '[[:digit:]]*' %s/%s | head -1 > %s" % (uspace_dir, stdout, alloc_id_file)
                 ]
         return cmds
 

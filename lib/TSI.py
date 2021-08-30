@@ -262,8 +262,7 @@ def process(connector, config, LOG):
                     function(Utils.encode(message), connector, config, LOG)
                 except:
                     connector.failed(str(sys.exc_info()[1]))
-                    # log exception info and stacktrace
-                    LOG.exception("Error executing %s" % cmd)
+                    LOG.error("Error executing %s" % cmd)
                 break
 
         if not legal_cmd:

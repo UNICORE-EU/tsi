@@ -219,7 +219,6 @@ echo "Hello World!"
         cmd = ""
         for line in submit_cmds:
             cmd += line + u"\n"
-        self.assertTrue("/bin/bash" in cmd)
         self.assertTrue("salloc" in cmd)
         self.assertTrue("--partition=fast" in cmd)
         self.assertTrue("--account=myproject" in cmd)

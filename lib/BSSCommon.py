@@ -116,12 +116,13 @@ class BSSBase(object):
             
         if job_mode.startswith("alloc"):
             # run allocation command in the background
-            cmd = ""
+            cmd = message + u"\n"
+            cmd += u"{ "
             for line in submit_cmds:
-                cmd += line + u"\n"
+                cmd += line + u" ; "
+            cmd += u"} & echo $! > UNICORE_SCRIPT_PID \n"
             with open(userjob_file_name, "w") as job:
                 job.write(u"" + cmd)
-        
             children = config.get('tsi.NOBATCH.children', None)
             (success, reply) = Utils.run_command(cmd, True, children)
         else:
