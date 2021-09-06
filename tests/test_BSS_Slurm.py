@@ -227,6 +227,7 @@ echo "Hello World!"
         self.assertTrue("--time=10" in cmd)
         self.assertTrue("--ntasks-per-node=64" in cmd)
         self.assertFalse("--constraint" in cmd)
+        print(cmd)
 
     def test_run_alloc_cmd(self):
         os.chdir(basedir)

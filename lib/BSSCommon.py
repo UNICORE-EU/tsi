@@ -120,7 +120,8 @@ class BSSBase(object):
             cmd += u"{ "
             for line in submit_cmds:
                 cmd += line + u" ; "
-            cmd += u"} & echo $! > UNICORE_SCRIPT_PID \n"
+            pid_file_name = Utils.extract_parameter(message, "PID_FILE", "UNICORE_SCRIPT_PID")
+            cmd += u"} & echo $! > %s \n" % pid_file_name
             with open(userjob_file_name, "w") as job:
                 job.write(u"" + cmd)
             children = config.get('tsi.NOBATCH.children', None)

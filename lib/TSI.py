@@ -5,13 +5,11 @@ methods.
 It handles the TSI_PING and TSI_EXECUTESCRIPT commands
 """
 
-import logging
-import logging.config
 import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, Local, Log, Reservation, Server, SSL, IO, Utils
+import ACL, BecomeUser, BSS, Connector, Local, Log, Reservation, Server, SSL, IO, UFTP, Utils
 
 #
 # the TSI version
@@ -189,6 +187,7 @@ def init_functions(bss):
         "TSI_PUTFILECHUNK": IO.put_file_chunk,
         "TSI_LS": IO.ls,
         "TSI_DF": IO.df,
+        "TSI_UFTP": UFTP.uftp,
         "TSI_SUBMIT": bss.submit,
         "TSI_GETSTATUSLISTING": bss.get_status_listing,
         "TSI_GETJOBDETAILS": bss.get_job_details,
