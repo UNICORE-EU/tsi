@@ -10,6 +10,8 @@ Version 8.3.0
    Currently implemented only for Slurm via 'salloc'
  - new feature: UFTP support (get/put of remote files 
    via builtin uftp client)
+ - fix: Slurm: rounding error for small runtimes leads
+   to "#SBATCH --time 0"
 
 Version 8.2.0
 -------------

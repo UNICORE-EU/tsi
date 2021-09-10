@@ -88,8 +88,8 @@ class BSS(BSSBase):
             cmds.append("--mem=%s" % memory)
 
         if req_time > 0:
-            # wall time. Convert to minutes, as accepted by SLURM
-            time_in_minutes = req_time / 60
+            # wall time. Convert to minutes, as accepted by SLURM (minimum 1 min)
+            time_in_minutes = req_time / 60 + 1
             cmds.append("--time=%d" % time_in_minutes)
 
         if email != "NONE":
