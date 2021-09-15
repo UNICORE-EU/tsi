@@ -12,6 +12,7 @@ Version 8.3.0
    via builtin uftp client)
  - fix: Slurm: rounding error for small runtimes leads
    to "#SBATCH --time 0"
+ - fix: handle invalid messages from UNICORE/X gracefully
 
 Version 8.2.0
 -------------

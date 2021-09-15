@@ -126,7 +126,11 @@ def connect(configuration, LOG):
             close_quietly(xnjs)
             continue
         
-        cmd, params = msg.split(" ",1)
+        try:
+            cmd, params = msg.split(" ",1)
+        except:
+            cmd = ""
+
         if cmd == "shutdown":
             LOG.info("Received shutdown message, exiting.")
             server.close()
