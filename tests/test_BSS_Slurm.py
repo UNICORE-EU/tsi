@@ -81,7 +81,7 @@ class TestBSSSlurm(unittest.TestCase):
 #TSI_JOBNAME test_job
 #TSI_SCRIPT
 echo "Hello World!"
-sleep 3 
+sleep 3
 """ % (uspace, uspace)
         submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --partition", "fast"))
@@ -238,7 +238,7 @@ echo "Hello World!"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
-        
+
         msg = """#!/bin/bash
 #TSI_SUBMIT
 #TSI_JOB_MODE allocate
@@ -247,11 +247,11 @@ echo "Hello World!"
 #TSI_PROJECT myproject
 #TSI_NODES 4
 """ % (uspace)
-                
+
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
-        
+
         self.bss.submit(msg,connector, config, self.LOG)
         result = control_out.getvalue()
         sleep(10)

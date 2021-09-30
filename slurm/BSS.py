@@ -26,7 +26,7 @@ class BSS(BSSBase):
         'tsi.hold_cmd': 'scontrol hold',
         'tsi.resume_cmd': 'scontrol release',
     }
-    
+
     def parse_common_options(self, message, config, LOG):
         """ parse #TSI_" BSS parameters from the message
             to create options common to both sbatch and salloc
@@ -47,7 +47,7 @@ class BSS(BSSBase):
         nodes_filter = config.get("tsi.nodes_filter", "")
         user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
         qos = extract_parameter(message, "QOS", "NONE")
-        
+
         # jobname: check for illegal characters
         m = re.search(r"[^0-9a-zA-Z\.:.=~/]", jobname)
         if m is not None:
@@ -116,10 +116,8 @@ class BSS(BSSBase):
         array_spec = extract_number(message, "ARRAY")
         array_limit = extract_number(message, "ARRAY_LIMIT")
 
-        # first line has to be the shell
         submit_cmds.append("#!/bin/bash")
-        
-        # append common options as"#SBATCH" directives
+
         for option in self.parse_common_options(message, config, LOG):
             submit_cmds.append("#SBATCH %s" % option)
 
@@ -144,14 +142,14 @@ class BSS(BSSBase):
     def create_alloc_script(self, message, config, LOG):
         """ parse the #TSI_" BSS parameters from the message
         and convert them to the proper 'salloc' command, adding code to parse
-        the allocation ID from the reply 
+        the allocation ID from the reply
         Returns the command(s) to be run (as a list of lines).
         """
         uspace_dir = extract_parameter(message, "USPACE_DIR")
         stdout = extract_parameter(message, "STDOUT", "stdout")
         alloc_id_file = extract_parameter(message, "ALLOCATION_ID", "ALLOCATION_ID")
         exit_code_file = extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
-        
+
         alloc_options = self.parse_common_options(message, config, LOG)
         alloc_cmd = config['tsi.alloc_cmd']
         for opt in alloc_options:

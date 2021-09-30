@@ -416,7 +416,7 @@ requests from the defined UNICORE/X machine(s).
 The callback port can be pre-defined in +tsi.properties+ as well. If it is
 undefined, the TSI will attempt to read it from the UNICORE/X connect message.
 
-Note that it is possible to enable SSL on the TSI listen port, see below. 
+Note that it is possible to enable SSL on the TSI listen port, see below.
 In SSL mode, there is no check of the UNICORE/X address.
 
 If the UNICORE/X process shuts down, any TSI workers that are connected to
@@ -437,7 +437,7 @@ The TSI must have access to the "filespace" directory specified in the
 UNICORE/X configuration (usually the property 'XNJS.filespace' in
 'xnjs.properties') to hold job directories. These directories are
 written with the TSI's uid set to the Unix user for which the work is
-being performed. If you use a shared directory for all users, 
+being performed. If you use a shared directory for all users,
 this directory must be world writable. The required Unix access mode is '1777'.
 
 
@@ -451,7 +451,7 @@ if you want to run it as a a system service, you can use 'systemctl':
 sudo systemctl add-wants multi-user.target unicore-tsi-variant
 -------
 
-(where "variant" stands for the concrete TSI implementation, such as 
+(where "variant" stands for the concrete TSI implementation, such as
 "nobatch" or "slurm")
 
 
@@ -496,7 +496,7 @@ the logs via 'journalctl', for example
 sudo journalctl -u unicore-tsi-variant
 ------------
 
-To print logging output to stdout instead, set "tsi.use_syslog=false" in 
+To print logging output to stdout instead, set "tsi.use_syslog=false" in
 the +tsi.properties+ file.
 
 
@@ -549,8 +549,8 @@ We recommed the following measures to make operating the TSI secure.
 
  * If SSL cannot be used, the UNICORE/X should run on a separate machine.
 
- * On the UNICORE/X machine, user login should be impossible. This will 
-   prevent bypassing the IP check (in non-SSL mode) and/or accessing 
+ * On the UNICORE/X machine, user login should be impossible. This will
+   prevent bypassing the IP check (in non-SSL mode) and/or accessing
    the UNICORE/X private key (in SSL mode).
 
  * If you for some reason HAVE to run UNICORE/X and TSI on the same

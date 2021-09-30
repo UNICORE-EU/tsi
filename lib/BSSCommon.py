@@ -113,7 +113,7 @@ class BSSBase(object):
         # create unique name for the files used in this job submission
         submit_id = str(int(time() * 1000))
         userjob_file_name = "UNICORE_Job_%s" % submit_id
-            
+
         if job_mode.startswith("alloc"):
             # run allocation command in the background
             cmd = message + u"\n"
