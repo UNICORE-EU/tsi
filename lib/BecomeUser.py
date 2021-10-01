@@ -11,13 +11,12 @@ def initialize(config, LOG):
     # store effective uid/gid, we'll switch back to these after every action
     config['tsi.effective_uid'] = euid
     config['tsi.effective_gid'] = egid
-
-    if euid == 0:
-        LOG.info("Running privileged [%s : %s], will execute "
-                 "commands as the Xlogin" % (euid, egid))
+    switch_uid = config.get("tsi.switch_uid", True)
+    if switch_uid or euid==0:
+        LOG.info("Running privileged, will perform all operations as the requested user.")
         config['tsi.switch_uid'] = True
     else:
-        LOG.info("Running unprivileged")
+        LOG.info("Running unprivileged.")
         config['tsi.switch_uid'] = False
 
     if config['tsi.enforce_os_gids']:

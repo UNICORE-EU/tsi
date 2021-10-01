@@ -54,6 +54,12 @@ is the only UNICORE component required to run as root.
 %dir %attr(755 root root)  "/usr/share/unicore/tsi"
 %attr(644 root root) "/usr/share/unicore/tsi/*"
 
+%pre
+/usr/sbin/groupadd -r unicore 2>/dev/null || :
+/usr/sbin/useradd -c "UNICORE" -g unicore \
+    -s /sbin/nologin -r -d /usr/share/unicore unicore 2>/dev/null || :
+
+
 %post
 /usr/bin/systemctl enable unicore-@component-name@.service
 

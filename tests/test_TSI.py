@@ -35,7 +35,7 @@ class TestTSI(unittest.TestCase):
     def test_PING(self):
         cwd = os.getcwd()
         version = TSI.MY_VERSION
-        config = {'tsi.testing': True}
+        config = {'tsi.testing': True, 'tsi.switch_uid': False}
         msg = "#TSI_PING\nENDOFMESSAGE\n"
         control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
         control_in = io.TextIOWrapper(control_source)
@@ -53,7 +53,7 @@ class TestTSI(unittest.TestCase):
     def test_PING2(self):
         cwd = os.getcwd()
         version = TSI.MY_VERSION
-        config = {'tsi.testing': True, 'tsi.enforce_os_gids': False}
+        config = {'tsi.testing': True, 'tsi.enforce_os_gids': False, 'tsi.switch_uid': False}
         config['tsi.use_id_to_resolve_gids'] = False
         msg = """#TSI_PING_UID
 #TSI_IDENTITY nobody NONE

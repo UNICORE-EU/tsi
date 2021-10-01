@@ -30,12 +30,21 @@ then
   PARAM=${CONF}/tsi.properties
 fi
 
-#
-# go
-#
 rm -f $PY/*.pyc
 export PYTHONPATH=${PY}
 echo "Output redirected to ${STARTLOG}"
-nohup $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
+
+#
+# go
+#
+
+if [ -e "$SETPRIV" ]
+ then
+  echo "Starting as $USER ($UID:$GID) with capabilites: $CAPS"
+  $SETPRIV --ambient-caps="$CAPS" --inh-caps="$CAPS" --reuid $UID --regid $GID --clear-groups $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
+ else
+  $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
+fi
+
 
 echo "UNICORE TSI starting"

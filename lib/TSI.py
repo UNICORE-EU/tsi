@@ -38,6 +38,7 @@ def setup_defaults(config):
     config['tsi.logfacility'] = 'LOG_USER'
     config['tsi.loghost'] = ''
     config['tsi.userCacheTtl'] = 600
+    config['tsi.switch_uid'] = True
     config['tsi.enforce_os_gids'] = True
     config['tsi.fail_on_invalid_gids'] = False
     config['tsi.use_id_to_resolve_gids'] = False

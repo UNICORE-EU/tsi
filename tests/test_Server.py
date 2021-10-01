@@ -19,14 +19,14 @@ class TestServer(unittest.TestCase):
     def test_Extract_Port(self):
         p = self.config['tsi.njs_port']
         self.config['tsi.njs_port'] = '12345'
-        msg = "newtsi xxx\n"
+        msg = "newtsi 5678"
+        params = msg.split(" ", 1)[1]
         # use port from config
-        port = Server.get_xnjs_port(self.config, msg, self.LOG)
+        port = Server.get_xnjs_port(self.config, params, self.LOG)
         self.assertEqual("12345", port)
         # read port from message
-        msg = Utils.decode(b"newtsi 5678\n")
         self.config['tsi.njs_port'] = None
-        port = Server.get_xnjs_port(self.config, msg, self.LOG)
+        port = Server.get_xnjs_port(self.config, params, self.LOG)
         self.assertEqual("5678", port)
         self.config['tsi.njs_port'] = p
 
