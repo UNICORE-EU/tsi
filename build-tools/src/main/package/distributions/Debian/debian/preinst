@@ -16,7 +16,9 @@ set -e
 
 case "$1" in
     install|upgrade)
-
+     /usr/sbin/groupadd -r unicore 2>/dev/null || :
+     /usr/sbin/useradd -c "UNICORE" -g unicore \
+    -s /bin/false -r -d /usr/share/unicore unicore 2>/dev/null || :
     ;;
 
     abort-upgrade)

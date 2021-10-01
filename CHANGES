@@ -14,10 +14,11 @@ Version 8.3.0
    to "#SBATCH --time 0"
  - fix: handle invalid messages from UNICORE/X gracefully
 
-Version 8.2.0-p1
-----------------
+Version 8.2.1
+-------------
  - improvment: allow to run as unprivileged user with added
    setuid/setgid capabilities via 'setpriv' or similar tool
+ - fix: wrong pid in systemd service file
 
 Version 8.2.0
 -------------
