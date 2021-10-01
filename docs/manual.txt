@@ -415,12 +415,13 @@ The TSI workers connect back to the UNICORE/X server.
 
 It is possible to use the same TSI from multiple UNICORE/X servers.
 
-Since the main TSI process runs with root privileges, it must authenticate the source of
-commands as legitimate. To do this, the TSI is initialised with the address(es)
-of the machine(s) that runs the UNICORE/X. The TSI will only accept
-requests from the defined UNICORE/X machine(s). 
-The callback port can be pre-defined in +tsi.properties+ as well. If it is
-undefined, the TSI will attempt to read it from the UNICORE/X connect message.
+Since the main TSI process runs with elevated privileges, it must
+authenticate the source of commands as legitimate. To do this, the TSI
+is initialised with the address(es) of the machine(s) that runs the
+UNICORE/X. The TSI will only accept requests from the defined
+UNICORE/X machine(s).  The callback port can be pre-defined in
++tsi.properties+ as well. If it is undefined, the TSI will attempt to
+read it from the UNICORE/X connect message.
 
 Note that it is possible to enable SSL on the TSI listen port, see below.
 In SSL mode, there is no check of the UNICORE/X address.
