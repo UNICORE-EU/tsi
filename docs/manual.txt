@@ -29,7 +29,7 @@ system. This is described in Section xref:tsi_localization[]
 
 [NOTE]
 =============== 
-In production environments, the TSI will run with root privileges.
+In production environments, the TSI will run with elevated privileges.
 Make sure to read and understand section xref:tsi_security[] on
 security and hardening the system.
 ===============
@@ -40,6 +40,12 @@ Prerequisites
 The TSI requires Python Version 3.4 or later. It works only on
 Unix-style operating systems (e.g. Linux or Mac OS/X), Windows is not
 directly supported.
+
+The TSI uses the 'setpriv' tool to run as a non-root user ("unicore")
+with the capability to switch uid/gid to the requested values, in
+order to perform tasks on behalf of the requesting user.
+If this is not available on the system, the TSI will run
+as "root" (but never perform any actions as root).
 
 Batch system status checks (e.g. via 'squeue' for Slurm) will be
 executed under a system account (usually 'unicore') which is
@@ -110,10 +116,10 @@ TSI. This has the following sub-directories
 File permissions
 ----------------
 
-The permissions on the TSI files should be set to read only for the owner.
-The default installation procedure will initially take care of this.
-As the TSI is executed as root you should never leave any TSI files (or
-directories) writable after any update.
+The permissions on the TSI files should be set to read only for the
+owner. The default installation procedure will initially take care of
+this. As the TSI is executed with elevated privileges, you should
+never leave any TSI files (or directories) writable after any update.
 
 Configuring the TSI
 -------------------
@@ -409,12 +415,13 @@ The TSI workers connect back to the UNICORE/X server.
 
 It is possible to use the same TSI from multiple UNICORE/X servers.
 
-Since the TSI runs with root privileges, it must authenticate the source of
-commands as legitimate. To do this, the TSI is initialised with the address(es)
-of the machine(s) that runs the UNICORE/X. The TSI will only accept
-requests from the defined UNICORE/X machine(s). 
-The callback port can be pre-defined in +tsi.properties+ as well. If it is
-undefined, the TSI will attempt to read it from the UNICORE/X connect message.
+Since the main TSI process runs with elevated privileges, it must
+authenticate the source of commands as legitimate. To do this, the TSI
+is initialised with the address(es) of the machine(s) that runs the
+UNICORE/X. The TSI will only accept requests from the defined
+UNICORE/X machine(s).  The callback port can be pre-defined in
++tsi.properties+ as well. If it is undefined, the TSI will attempt to
+read it from the UNICORE/X connect message.
 
 Note that it is possible to enable SSL on the TSI listen port, see below.
 In SSL mode, there is no check of the UNICORE/X address.
@@ -475,15 +482,15 @@ If installed from an Linux package, the TSI can be stopped via systemd
 sudo systemctl stop unicore-tsi-variant
 --------------
 
-The TSI can also be killed using the script "BIN/stop.sh"
-(cf. section Scripts). This will kill the main TSI process and the tree
+The TSI can also be stopped using the script "BIN/stop.sh"
+(cf. section Scripts). This will stop the main TSI process and the tree
 of all spawned processes including the TSI workers.
 
 TSI worker processes (but not the main process) will stop executing when
 the UNICORE/X server it connects to stops executing.
 
-It is possible to kill a TSI worker process but this could result in
-the failure of a job (but the UNICORE/X server will recover and create
+It is possible to stop a TSI worker process, but this could result in
+the failure of a job (the UNICORE/X server will recover and create
 new TSI processes).
 
 TSI logging
@@ -520,7 +527,7 @@ or unicore-devel@lists.sf.net mailing lists.
 Securing and hardening the system
 ---------------------------------
 
-In a normal multi-user production setting, the TSI runs with root
+In a normal multi-user production setting, the TSI runs with elevated
 privileges, and thus it is critical to prevent illicit access to the
 TSI, which would allow accessing or destroying arbitrary user data, as
 well as impersonating users and generally wreaking havoc.
