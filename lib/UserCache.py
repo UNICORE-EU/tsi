@@ -10,6 +10,7 @@ import grp
 import Utils
 
 class UserCache(object):
+
     def __init__(self, cache_ttl, LOG, use_id_to_resolve_groups = False):
         self.cache_ttl = cache_ttl
         self.LOG = LOG

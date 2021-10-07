@@ -8,11 +8,14 @@ Version 8.3.0
  - new feature: new job type: 'allocate' which will
    allocate resources without launching anything
    Currently implemented only for Slurm via 'salloc'
+ - new feature: PAM support for optionally registering 
+   user tasks with a user session (#292)
  - new feature: UFTP support (get/put of remote files
    via builtin uftp client)
  - fix: Slurm: rounding error for small runtimes leads
    to "#SBATCH --time 0"
  - fix: handle invalid messages from UNICORE/X gracefully
+ - code cleanup
 
 Version 8.2.1
 -------------

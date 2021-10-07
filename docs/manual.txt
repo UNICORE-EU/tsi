@@ -58,6 +58,12 @@ users! If necessary, configure your batch system accordingly. For
 details on this procedure we refer to the documentation of your batch
 system.
 
+If you want to run user scripts in the proper user slice, you can
+enable PAM, which requires an appropriate PAM module file, by 
+default this is.called "unicore-tsi".
+
+
+
 Installation
 ------------
 
@@ -436,6 +442,33 @@ If a TSI worker stops execution, UNICORE/X will request a new one to replace it.
 
 If the main TSI process stops execution, then all TSI processes will also be killed.
 The TSI must then be restarted, this does not happen automatically.
+
+PAM, systemd and user slices
+----------------------------
+By default, user tasks (such as user scripts on the TSI node) will run in the same
+slice as the TSI itself.
+
+You can enable PAM, which will open a user session before running the user's tasks,
+so the tasks will be run in the correct user slice, and thus the system's resource
+management will properly apply also to tasks started via UNICORE.
+
+To do this, set in tsi.properties
+
+------------
+tsi.open_user_sessions=1
+------------
+
+By default a PAM module "unicore-tsi" is expected (/etc/pam.d/unicore-tsi).
+For example this could contain
+
+------------
+#%PAM-1.0
+auth		sufficient	pam_rootok.so
+session		required	pam_limits.so
+session		required	pam_unix.so
+session     required    pam_systemd.so
+-------------
+
 
 Directories used by the TSI
 ---------------------------

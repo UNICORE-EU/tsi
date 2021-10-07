@@ -9,12 +9,12 @@ import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, Local, Log, Reservation, Server, SSL, IO, UFTP, Utils
+import ACL, BecomeUser, BSS, Connector, Local, Log, PAM, Reservation, Server, SSL, IO, UFTP, Utils
 
 #
 # the TSI version
 #
-MY_VERSION = "__VERSION__"
+MY_VERSION = "8.3.0"
 
 # supported Python versions
 REQUIRED_VERSION = (3, 4, 0)
@@ -33,12 +33,11 @@ def setup_defaults(config):
     """
     config['tsi.default_job_name'] = 'UnicoreJob'
     config['tsi.nodes_filter'] = ''
-    config['tsi.logfacility'] = 'LOG_USER'
-    config['tsi.loghost'] = ''
     config['tsi.userCacheTtl'] = 600
     config['tsi.enforce_os_gids'] = True
     config['tsi.fail_on_invalid_gids'] = False
     config['tsi.use_id_to_resolve_gids'] = False
+    config['tsi.open_user_sessions'] = False
     config['tsi.debug'] = 0
     config['tsi.use_syslog'] = False
     config['tsi.worker.id'] = 1
@@ -51,7 +50,8 @@ def process_config_value(key, value, config, LOG):
     Handles configuration values, checking for correctness
     and storing the appropriate settings in the config dictionary
     """
-    boolean_keys = ['tsi.enforce_os_gids',
+    boolean_keys = ['tsi.open_user_sessions',
+            'tsi.enforce_os_gids',
             'tsi.fail_on_invalid_gids',
             'tsi.use_id_to_resolve_gids',
             'tsi.use_syslog',
@@ -153,8 +153,7 @@ def ping(message, connector, config, LOG):
 def ping_uid(message, connector, config, LOG):
     """ Returns TSI version and process' UID. Used for unit testing."""
     connector.write_message(MY_VERSION)
-    connector.write_message(
-        " running as UID [%s]" % config.get('tsi.effective_uid', "n/a"))
+    connector.write_message(" running as UID [%s]" % config.get('tsi.effective_uid', "n/a"))
 
 
 # invoked for TSI_EXECUTESCRIPT
@@ -190,6 +189,7 @@ def init_functions(bss):
         "TSI_UFTP": UFTP.uftp,
         "TSI_SUBMIT": bss.submit,
         "TSI_GETSTATUSLISTING": bss.get_status_listing,
+        "TSI_GETPROCESSLISTING": bss.get_process_listing,
         "TSI_GETJOBDETAILS": bss.get_job_details,
         "TSI_ABORTJOB": bss.abort_job,
         "TSI_HOLDJOB": bss.hold_job,
@@ -201,6 +201,39 @@ def init_functions(bss):
         "TSI_FILE_ACL": ACL.process_acl,
     }
 
+def handle_function(function, command, message, connector, config, LOG):
+    switch_uid = config.get('tsi.switch_uid', True)
+    open_user_session = config.get('tsi.open_user_sessions', False)
+    do_fork = open_user_session and (command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ])
+    if do_fork:
+        pid = os.fork()
+        if pid != 0:
+            os.waitpid(pid, 0)
+            return
+    try:
+        if switch_uid:
+            id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", message, re.M)
+            if id_info is None:
+                raise RuntimeError("No user/group info given")
+            user = id_info.group(1)
+            groups = id_info.group(2).split(":")
+            if open_user_session:
+                pam_session = PAM.PAM(LOG)
+                pam_session.open_session(user)
+            user_switch_status = BecomeUser.become_user(user, groups, config, LOG)
+            if user_switch_status is not True:
+                raise RuntimeError(user_switch_status)
+            function(message, connector, config, LOG)
+    except:
+        connector.failed(str(sys.exc_info()[1]))
+        LOG.error("Error executing %s" % command)
+    # reset user ID
+    if switch_uid:
+        BecomeUser.restore_id(config, LOG)
+        if open_user_session:
+            pam_session.close_session()
+    if do_fork:
+        os._exit(0)
 
 def process(connector, config, LOG):
     """
@@ -213,7 +246,6 @@ def process(connector, config, LOG):
           LOG: logger object
     """
 
-    setting_uids = config.get('tsi.switch_uid', True)
     my_umask = os.umask(0o22)
     os.umask(my_umask)
     bss = config.get('tsi.bss', BSS.BSS())
@@ -234,48 +266,26 @@ def process(connector, config, LOG):
             return
 
         os.chdir(config.get('tsi.safe_dir','/tmp'))
-        do_set_uid = setting_uids
         # check for command and invoke appropriate function
-        legal_cmd = False
+        command = None
+        function = None
         session_info = None
         for cmd in functions:
             have_cmd = re.search(r".*#%s\n" % cmd, message, re.M)
             if have_cmd:
+                command = cmd
                 function = functions.get(cmd)
-                legal_cmd = True
-                if "TSI_PING" == cmd:
-                    do_set_uid = False
-                try:
-                    if do_set_uid:
-                        id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*",
-                                            message, re.M)
-                        if id_info is None:
-                            raise RuntimeError("No user/group info given")
-                        user = id_info.group(1)
-                        groups = id_info.group(2).split(":")
-                        session_info = Local.pre_become_user(user, config, LOG)
-                        user_switch_status = BecomeUser.become_user(user, groups, config, LOG)
-                        if user_switch_status is not True:
-                            raise RuntimeError(user_switch_status)
-                        Local.post_become_user(session_info, config, LOG)
-                    function(Utils.encode(message), connector, config, LOG)
-                except:
-                    connector.failed(str(sys.exc_info()[1]))
-                    LOG.error("Error executing %s" % cmd)
                 break
-
-        if not legal_cmd:
-            LOG.info("Unknown command!")
-            connector.failed("Unknown command")
-
-        # finally reset user ID
-        if do_set_uid:
-            Local.cleanup(session_info, config, LOG)
-            BecomeUser.restore_id(config, LOG)
-
-        # and terminate the current "transaction" with the XNJS
+        
+        if function is None:
+            connector.failed("Unknown command %s" % command)
+        elif "TSI_PING" == command:
+            connector.write_message(MY_VERSION)
+        else:
+            handle_function(function, command, message, connector, config, LOG)
+        # terminate the current "transaction" with the XNJS
         connector.write_message("ENDOFMESSAGE")
-    
+
 
 def main(argv=None):
     """
@@ -293,7 +303,11 @@ def main(argv=None):
     config_file = argv[1]
     config = read_config_file(config_file, LOG)
     verbose = config['tsi.debug']
-    LOG.reinit("TSI-main", verbose)
+    use_syslog = config['tsi.use_syslog']
+    LOG.info("Debug logging: %s" % verbose)
+    LOG.info("Logging to syslog: %s" % use_syslog)
+    LOG.info("Opening PAM sessions for user tasks: %s" % config['tsi.open_user_sessions'])
+    LOG.reinit("TSI-main", verbose, use_syslog)
     bss = BSS.BSS()
     LOG.info("Starting TSI %s for %s" % (MY_VERSION, bss.get_variant()))
     BecomeUser.initialize(config, LOG)

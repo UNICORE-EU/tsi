@@ -6,9 +6,10 @@ from syslog import closelog, openlog, syslog, LOG_DEBUG, LOG_ERR, LOG_INFO, LOG_
 
 class Logger(object):
 
-    def __init__(self, name="TSI",verbose=False, use_syslog=True):
+    def __init__(self, name="TSI", verbose=False, use_syslog=True):
         self.verbose = verbose
         self.use_syslog = use_syslog
+        self.name = name
         if use_syslog:
             try:
                 openlog(name)
@@ -19,8 +20,10 @@ class Logger(object):
         print(message)
         stdout.flush()
 
-    def reinit(self, name="TSI-worker", verbose=False):
+    def reinit(self, name="TSI-worker", verbose=False, use_syslog=True):
         self.verbose = verbose
+        self.use_syslog = use_syslog
+        self.name = name
         if self.use_syslog:
             closelog()
             try:
@@ -32,19 +35,19 @@ class Logger(object):
         if self.use_syslog:
             syslog(LOG_ERR, str(message))
         else:
-            self.out("[ERROR] %s" % str(message))
+            self.out("[ERROR][%s] %s" % (self.name, str(message)))
 
     def warning(self, message):
         if self.use_syslog:
             syslog(LOG_WARNING, str(message))
         else:
-            self.out("[WARN] %s" % str(message))
+            self.out("[WARN][%s] %s" % (self.name, str(message)))
 
     def info(self, message):
         if self.use_syslog:
             syslog(LOG_INFO, str(message))
         else:
-            self.out("[INFO] %s" % str(message))
+            self.out("[INFO][%s] %s" % (self.name, str(message)))
 
     def debug(self, message):
         if not self.verbose:
@@ -52,4 +55,4 @@ class Logger(object):
         if self.use_syslog:
             syslog(LOG_DEBUG, str(message))
         else:
-            self.out("[DEBUG] %s" % str(message))
+            self.out("[DEBUG][%s] %s" % (self.name, str(message)))

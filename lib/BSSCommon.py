@@ -12,6 +12,7 @@ class BSSBase(object):
         - get status listing
         - parse the status listing
         - job control (abort, hold, resume, get details, ...)
+        - get a process list (via 'ps -e')
 
     Check the manual for advice on how to create a custom version.
     """
@@ -32,6 +33,7 @@ class BSSBase(object):
     defaults = {
         'tsi.qstat_cmd': 'ps -e -os,args',
         'tsi.abort_cmd': 'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
+        'tsi.get_processes_cmd': 'ps -e',
     }
 
     def init(self, config, LOG):
@@ -204,6 +206,12 @@ class BSSBase(object):
             return
         result = self.parse_status_listing(qstat_output)
         connector.write_message(result)
+
+    def get_process_listing(self, message, connector, config, LOG):
+        """ Get list of the processes on this machine.
+        """
+        ps_cmd = Utils.extract_parameter(message, "PS", config["tsi.get_processes_cmd"])
+        Utils.run_and_report(ps_cmd, connector)
 
     def parse_job_details(self, raw_info):
         """ Converts the raw job info into a dictionary """

@@ -21,11 +21,10 @@ def initialize(config, LOG):
 
     if config['tsi.enforce_os_gids']:
         LOG.info(
-            "Groups of the user will be limited to those available for the "
-            "Xlogin in the operating system.")
+            "Groups of the user will be limited to those available in the OS.")
     else:
-        LOG.info("XNJS will be free to assign any groups for the Xlogin "
-                 "regardless of the operating system settings.")
+        LOG.info("UNICORE will be free to assign any groups to the user "
+                 "regardless of the OS settings.")
 
     cache_ttl = config.get('tsi.userCacheTtl', 600)
     use_id = config['tsi.use_id_to_resolve_gids']
@@ -135,7 +134,7 @@ def become_user(user, requested_groups, config, LOG):
       config - configuration
       LOG - logger
 
-    Returns: True if successful, an error string otherwise
+    Returns: True if successful, raises an error otherwise
 
     Side effects: modifies the ENV array, setting values for USER, LOGNAME and
     HOME
@@ -149,19 +148,18 @@ def become_user(user, requested_groups, config, LOG):
 
     if not setting_uids:
         if euid == 0:
-            # make sure to prevent running things as root
-            return "Running as root and not setting uids --- this is not " \
-                   "allowed. Please check your TSI installation!"
+            raise RuntimeError("Running as root and not setting uids --- this is not " \
+                   "allowed. Please check your TSI installation!")
         else:
             return True
 
     new_uid = user_cache.get_uid_4user(user)
 
     if new_uid == -1:
-        return "Attempted to run a task for an unknown user %s" % user
+        raise RuntimeError("Attempted to run a task for an unknown user %s" % user)
 
     if new_uid == 0:
-        return "Attempted to run a command as root %s" % user
+        raise RuntimeError("Attempted to run a command as root %s" % user)
 
     # Do project (group) mapping, new_gid stores a new primary gid,
     # new_gids stores the new_gid and all supplementary gids (numbers)
@@ -171,13 +169,8 @@ def become_user(user, requested_groups, config, LOG):
         new_gid = user_cache.get_gid_4user(user)
         new_gids = user_cache.get_gids_4user(user)
     else:
-        try:
-            new_gid = get_primary_group(primary, user, user_cache,
-                                        fail_on_invalid_gids, config, LOG)
-            new_gids = get_supplementary_groups(requested_groups, new_gid,
-                                                user, config, LOG)
-        except RuntimeError as err:
-            return str(err)
+        new_gid = get_primary_group(primary, user, user_cache, fail_on_invalid_gids, config, LOG)
+        new_gids = get_supplementary_groups(requested_groups, new_gid, user, config, LOG)
 
     # Change identity
     #
@@ -191,30 +184,15 @@ def become_user(user, requested_groups, config, LOG):
     os.setegid(new_gid)
     os.setresuid(new_uid, new_uid, euid)
 
-    # TODO: potential refactoring here
-    if os.getuid() != new_uid:
-        return "Could not set TSI identity (real) to %s %s" % (user, new_uid)
-
-    if os.geteuid() != new_uid:
-        return "Could not set TSI identity (effective) to %s %s" % (
-            user, new_uid)
-
-    if os.getgid() != new_gid:
-        return "Could not set TSI identity (group real) to %s %s" % (
-            user, new_gid)
-
-    if os.getgid() != new_gid:
-        return "Could not set TSI identity (group real) to %s %s" % (
-            user, new_gid)
-
-    if os.getegid() != new_gid:
-        return "Could not set TSI identity (group effective) to %s %s" % (
-            user, new_gid)
-
+    if (os.getuid(), os.geteuid()) != (new_uid, new_uid):
+        raise RuntimeError("Could not set TSI uid (real,effective) for %s to %s"% (user, new_uid))
+    if (os.getgid(),os.getegid()) != (new_gid, new_gid):
+        raise RuntimeError("Could not set TSI gid (real, effective) for %s to %s" % (user, new_gid))
+    
     set_groups = set(os.getgroups())
     if set_groups != set(new_gids):
-        return "Could not set TSI identity (supplementary groups) to %s %s, " \
-               "got %s" % (user, new_gids, set_groups)
+        raise RuntimeError("Could not set TSI identity (supplementary groups) for %s to %s, " \
+               "got %s" % (user, new_gids, set_groups))
 
     # set environment
     os.environ['HOME'] = user_cache.get_home_4user(user)
