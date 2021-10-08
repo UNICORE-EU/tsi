@@ -1,13 +1,13 @@
 import unittest
 import io
 import os
-from lib import Log, TSI, UFTP
+from lib import Log, TSI
 import MockConnector
 
 
 class TestIO(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", verbose=True, use_syslog=False)
 
     def readlines(self, path):
         f = io.open(path, "r")
@@ -36,7 +36,6 @@ ENDOFMESSAGE
         TSI.process(connector, config, self.LOG)
         result = control_out.getvalue()
         data = str(data_out.getvalue())
-        print(result)
         self.assertTrue("TSI_OK" in result)
         self.assertTrue("this is a test file" in data)
         control_source.close()
@@ -64,7 +63,6 @@ ENDOFMESSAGE
                                                 data_in, None, self.LOG)
         TSI.process(connector, config, self.LOG)
         result = control_out.getvalue()
-        print(result)
         self.assertTrue("TSI_OK" in result)
         control_source.close()
 
@@ -89,7 +87,6 @@ ENDOFMESSAGE
                                                 data_in, None, self.LOG)
         TSI.process(connector, config, self.LOG)
         result = control_out.getvalue()
-        print(result)
         self.assertTrue("TSI_OK" in result)
         lines = self.readlines(path)
         self.assertEqual(2, len(lines))

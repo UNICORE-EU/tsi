@@ -123,16 +123,11 @@ if __name__ == "__main__":
     else:
         # child process - open session and then switch UID
         pam.open_session(USER)
-        res = BecomeUser.become_user(USER, ["NONE"], config, LOG)
-        if res is not True:
-            raise Exception(res)
-
+        BecomeUser.become_user(USER, ["NONE"], config, LOG)
         # launch task in the background
         Utils.run_command("sleep 120", discard=True)
-
         # switch back to privileged
         BecomeUser.restore_id(config, LOG)
-
         # close session
         pam.close_session()
         os._exit(0)

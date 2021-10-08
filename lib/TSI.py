@@ -223,7 +223,7 @@ def handle_function(function, command, message, connector, config, LOG):
             user_switch_status = BecomeUser.become_user(user, groups, config, LOG)
             if user_switch_status is not True:
                 raise RuntimeError(user_switch_status)
-            function(message, connector, config, LOG)
+        function(message, connector, config, LOG)
     except:
         connector.failed(str(sys.exc_info()[1]))
         LOG.error("Error executing %s" % command)
