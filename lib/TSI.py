@@ -9,7 +9,7 @@ import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, Local, Log, PAM, Reservation, Server, SSL, IO, UFTP, Utils
+import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, SSL, IO, UFTP, Utils
 
 #
 # the TSI version
