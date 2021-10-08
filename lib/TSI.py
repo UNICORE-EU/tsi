@@ -14,7 +14,7 @@ import ACL, BecomeUser, BSS, Connector, Local, Log, PAM, Reservation, Server, SS
 #
 # the TSI version
 #
-MY_VERSION = "8.3.0"
+MY_VERSION = "__VERSION__"
 
 # supported Python versions
 REQUIRED_VERSION = (3, 4, 0)
