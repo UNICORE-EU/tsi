@@ -16,21 +16,18 @@ Packager: UNICORE unicore-support@lists.sourceforge.net
 @preamble@
 
 %description
-UNICORE (Uniform Interface to Computing Resources) offers a
-ready-to-run Grid system including client and server software.
-UNICORE makes distributed computing and data resources available
-in a seamless and secure way in intranets and the internet.
+UNICORE (UNiform Interface to COmputing REsources) provides tools and
+services for building federated systems, making high-performance
+computing and data resources accessible in a seamless and secure way
+for a wide variety of applications in intranets and the internet.
 
-This package contains the UNICORE Target System Interface (TSI),
-wrapping LRMS specific details behind an abstract interface. The TSI
-is the only UNICORE component required to run as root.
+This package contains the UNICORE Target System Interface (TSI), which
+provides an interface to the local resource manager (e.g. Slurm) and
+the local file system. It is installed on the cluster frontend.
 
 %changelog
-* Thu May 27 2014 Bernd Schuller <unicore-support@lists.sourceforge.net> 
--BSS-specific TSI packages
-
-* Thu Feb 2 2012 Bernd Schuller <unicore-support@lists.sourceforge.net> 
--Restructured to use the packman tool
+* Tue Oct 26 2021 Bernd Schuller <unicore-support@lists.sourceforge.net>
+-Latest
 
 * Fri Feb 11 2011 Bjoern Hagemeier <unicore-support@lists.sourceforge.net> 
 -Initial rpm package
@@ -53,6 +50,10 @@ is the only UNICORE component required to run as root.
 %attr(644 root root) /usr/share/doc/unicore/tsi
 %dir %attr(755 root root)  "/usr/share/unicore/tsi"
 %attr(644 root root) "/usr/share/unicore/tsi/*"
+
+%attr(755 root root) "/usr/share/unicore/tsi/bin/start.sh"
+%attr(755 root root) "/usr/share/unicore/tsi/bin/stop.sh"
+%attr(755 root root) "/usr/share/unicore/tsi/bin/status.sh"
 
 %pre
 /usr/sbin/groupadd -r unicore 2>/dev/null || :

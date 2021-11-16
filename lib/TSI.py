@@ -36,13 +36,14 @@ def setup_defaults(config):
     config['tsi.userCacheTtl'] = 600
     config['tsi.enforce_os_gids'] = True
     config['tsi.fail_on_invalid_gids'] = False
-    config['tsi.use_id_to_resolve_gids'] = False
+    config['tsi.use_id_to_resolve_gids'] = True
     config['tsi.open_user_sessions'] = False
     config['tsi.debug'] = 0
     config['tsi.use_syslog'] = False
     config['tsi.worker.id'] = 1
     config['tsi.njs_machine'] = 'localhost'
     config['tsi.safe_dir'] = '/tmp'
+    config['tsi.get_processes_cmd'] = 'ps -e'
 
 
 def process_config_value(key, value, config, LOG):
@@ -51,6 +52,7 @@ def process_config_value(key, value, config, LOG):
     and storing the appropriate settings in the config dictionary
     """
     boolean_keys = ['tsi.open_user_sessions',
+            'tsi.switch_uid',
             'tsi.enforce_os_gids',
             'tsi.fail_on_invalid_gids',
             'tsi.use_id_to_resolve_gids',
@@ -203,9 +205,11 @@ def init_functions(bss):
 
 def handle_function(function, command, message, connector, config, LOG):
     switch_uid = config.get('tsi.switch_uid', True)
-    open_user_session = config.get('tsi.open_user_sessions', False)
-    do_fork = open_user_session and (command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ])
-    if do_fork:
+    pam_enabled = config.get('tsi.open_user_sessions', False)
+    cmd_spawns = command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ]
+    open_user_session = pam_enabled and cmd_spawns and switch_uid
+    if open_user_session:
+        # fork to avoid TSI process getting put into user slice
         pid = os.fork()
         if pid != 0:
             os.waitpid(pid, 0)
@@ -218,7 +222,8 @@ def handle_function(function, command, message, connector, config, LOG):
             user = id_info.group(1)
             groups = id_info.group(2).split(":")
             if open_user_session:
-                pam_session = PAM.PAM(LOG)
+                pam_module = config.get('tsi.pam_module', "unicore-tsi")
+                pam_session = PAM.PAM(LOG, module_name=pam_module)
                 pam_session.open_session(user)
             user_switch_status = BecomeUser.become_user(user, groups, config, LOG)
             if user_switch_status is not True:
@@ -227,12 +232,11 @@ def handle_function(function, command, message, connector, config, LOG):
     except:
         connector.failed(str(sys.exc_info()[1]))
         LOG.error("Error executing %s" % command)
-    # reset user ID
     if switch_uid:
         BecomeUser.restore_id(config, LOG)
         if open_user_session:
             pam_session.close_session()
-    if do_fork:
+    if open_user_session:
         os._exit(0)
 
 def process(connector, config, LOG):

@@ -35,7 +35,7 @@ class pam_conv(ctypes.Structure):
 class PAM(object):
     def __init__(self, LOG, module_name=PAM_MODULE):
         self.LOG = LOG
-        self.MODULE = ctypes.c_char_p(bytes(PAM_MODULE, encoding="ascii"))
+        self.MODULE = ctypes.c_char_p(bytes(module_name, encoding="ascii"))
         libc = ctypes.CDLL(LIBC)
         libc.malloc.restype  = ctypes.c_void_p
         libc.malloc.argtypes = [ctypes.c_size_t]

@@ -70,7 +70,27 @@ echo "Hello World!"
             print("Submitted with ID %s" % result)
             print (uspace)
         control_source.close()
-        
+
+        def test_get_process_listing(self):
+        config = {'tsi.testing': True}
+        TSI.setup_defaults(config)
+        # mock submit cmd
+        config['tsi.submit_cmd'] = "echo 1234.server"
+        cwd = os.getcwd()
+        msg = "#TSI_GET_PROCESS_LISTING\n"
+        control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
+        control_in = io.TextIOWrapper(control_source)
+        control_out = io.StringIO()
+        connector = MockConnector.MockConnector(control_in, control_out, None,
+                                                None, self.LOG)
+        self.bss.get_process_listing(msg, connector, config, self.LOG)
+        result = control_out.getvalue()
+        if "TSI_FAILED" in result:
+            print(result)
+        else:
+            print("Process listing\n%s" % result)
+        control_source.close()
+        os.chdir(cwd)
 
 if __name__ == '__main__':
     unittest.main()

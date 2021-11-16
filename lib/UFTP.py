@@ -26,7 +26,7 @@ def uftp(message, connector, config, LOG):
     """
     Launches a child process that reads/writes a file via UFTP
 
-    The message sent by the XNJS is scanned for:
+    The message sent by the UNICORE/X is scanned for:
         TSI_UFTP_HOST        - UFTP server to connect to
         TSI_UFTP_PORT        - UFTP listen port
         TSI_UFTP_SECRET      - one-time password to use for logging in

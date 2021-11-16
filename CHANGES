@@ -15,7 +15,10 @@ Version 8.3.0
  - fix: Slurm: rounding error for small runtimes leads
    to "#SBATCH --time 0"
  - fix: handle invalid messages from UNICORE/X gracefully
+ - new feature: add TSI API call to get the process listing
+   (via 'ps -e' by default)
  - code cleanup
+ - fix minor issues in deb/rpm packaging
 
 Version 8.2.1
 -------------

@@ -18,6 +18,8 @@ class TestBSSSlurm(unittest.TestCase):
         config = {'tsi.testing': True}
         self.bss.init(config, self.LOG)
         self.assertTrue(config['tsi.submit_cmd'] is not None)
+        self.assertTrue(config['tsi.get_processes_cmd'] is not None)
+
 
     def test_parse_qstat(self):
         os.chdir(basedir)
