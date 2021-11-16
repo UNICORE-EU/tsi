@@ -13,13 +13,17 @@ class TestBSSSlurm(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing")
         self.bss = slurm.BSS.BSS()
-
+        self.config = {'tsi.testing': True,
+                # mock submit/alloc cmds
+                'tsi.submit_cmd': "echo 'Submitted batch job 1234'",
+                'tsi.alloc_cmd':  "echo 'salloc: Granted job allocation 115463'"
+        }
+        TSI.setup_defaults(self.config)
+        self.bss.init(self.config, self.LOG)
+        
     def test_init(self):
-        config = {'tsi.testing': True}
-        self.bss.init(config, self.LOG)
-        self.assertTrue(config['tsi.submit_cmd'] is not None)
-        self.assertTrue(config['tsi.get_processes_cmd'] is not None)
-
+        self.assertTrue(self.config['tsi.submit_cmd'] is not None)
+        self.assertTrue(self.config['tsi.get_processes_cmd'] is not None)
 
     def test_parse_qstat(self):
         os.chdir(basedir)
@@ -57,10 +61,6 @@ class TestBSSSlurm(unittest.TestCase):
 
     def test_create_submit_script(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 'Submitted batch job 1234'"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -85,7 +85,7 @@ class TestBSSSlurm(unittest.TestCase):
 echo "Hello World!"
 sleep 3
 """ % (uspace, uspace)
-        submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --partition", "fast"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --nodes", "1"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --ntasks-per-node", "64"))
@@ -98,10 +98,6 @@ sleep 3
 
     def test_submit_nodes_filter(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 'Submitted batch job 1234'"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -124,7 +120,7 @@ sleep 3
 echo "Hello World!"
 sleep 3
 """ % (uspace, uspace)
-        submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --partition", "fast"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --nodes", "1"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --ntasks-per-node", "64"))
@@ -137,10 +133,6 @@ sleep 3
 
     def test_submit_raw(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 'Submitted batch job 1234'"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -161,7 +153,7 @@ sleep 3
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
         
-        self.bss.submit(msg,connector, config, self.LOG)
+        self.bss.submit(msg, connector, self.config, self.LOG)
         result = control_out.getvalue()
         assert "1234" in result
         os.chdir(cwd)
@@ -169,10 +161,6 @@ sleep 3
         
     def test_submit_normal(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 'Submitted batch job 1234'"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -190,16 +178,13 @@ echo "Hello World!"
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
         
-        self.bss.submit(msg,connector, config, self.LOG)
+        self.bss.submit(msg,connector, self.config, self.LOG)
         result = control_out.getvalue()
         assert "1234" in result
         os.chdir(cwd)
 
     def test_create_alloc_cmd(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        self.bss.init(config, self.LOG)
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -217,7 +202,7 @@ echo "Hello World!"
 #TSI_JOBNAME test_job
 #TSI_SCRIPT
 """ % (uspace)
-        submit_cmds = self.bss.create_alloc_script(msg, config, self.LOG)
+        submit_cmds = self.bss.create_alloc_script(msg, self.config, self.LOG)
         cmd = ""
         for line in submit_cmds:
             cmd += line + u"\n"

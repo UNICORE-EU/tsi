@@ -10,12 +10,15 @@ from lib import Log, TSI
 class TestBSSTorque(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing")
+        self.config = {'tsi.testing': True,
+            # mock submit cmd
+            'tsi.submit_cmd': "echo 1234.server" }
+        TSI.setup_defaults(self.config)
         self.bss = torque.BSS.BSS()
+        self.bss.init(self.config, self.LOG)
 
     def test_init(self):
-        config = {'tsi.testing': True}
-        self.bss.init(config, self.LOG)
-        self.assertTrue(config['tsi.submit_cmd'] is not None)
+        self.assertTrue(self.config['tsi.submit_cmd'] is not None)
 
     def test_parse_qstat1(self):
         with open("tests/input/qstat_torque1.txt", "r") as sample:
@@ -50,10 +53,6 @@ class TestBSSTorque(unittest.TestCase):
         return result
 
     def test_submit(self):
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 1234.server"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % int(100 * time.time())
         os.mkdir(uspace)
@@ -77,7 +76,7 @@ class TestBSSTorque(unittest.TestCase):
 echo "Hello World!"
 sleep 3
 """ % (uspace, uspace)
-        submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
         print(submit_cmds)
         self.assertTrue(self.has_directive(submit_cmds, "#PBS -q", "fast"))
         self.assertTrue(self.has_directive(submit_cmds, "#PBS -l", "nodes=1:ppn=64"))

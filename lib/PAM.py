@@ -126,6 +126,7 @@ if __name__ == "__main__":
         BecomeUser.become_user(USER, ["NONE"], config, LOG)
         # launch task in the background
         Utils.run_command("sleep 120", discard=True)
+        LOG.info("Successfully launched 'sleep 120' for user %s" % USER)
         # switch back to privileged
         BecomeUser.restore_id(config, LOG)
         # close session

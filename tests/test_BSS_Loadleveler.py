@@ -11,11 +11,12 @@ class TestBSSLoadLeveler(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing")
         self.bss = loadleveler.BSS.BSS()
-
+        self.config = {'tsi.testing': True}
+        TSI.setup_defaults(self.config)
+        self.bss.init(self.config, self.LOG)
+        
     def test_init(self):
-        config = {'tsi.testing': True}
-        self.bss.init(config, self.LOG)
-        self.assertTrue(config['tsi.submit_cmd'] is not None)
+        self.assertTrue(self.config['tsi.submit_cmd'] is not None)
 
     def test_parse_qstat(self):
         with open("tests/input/qstat_ll.txt", "r") as sample:
@@ -43,12 +44,6 @@ class TestBSSLoadLeveler(unittest.TestCase):
         return result
 
     def test_submit(self):
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        self.bss.init(config, self.LOG)
-
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 1234.server"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % int(100 * time.time())
         os.mkdir(uspace)
@@ -72,7 +67,7 @@ class TestBSSLoadLeveler(unittest.TestCase):
 echo "Hello World!"
 sleep 3
 """ % (uspace, uspace)
-        submit_cmds = self.bss.create_submit_script(msg, config, self.LOG)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
         print(submit_cmds)
         self.assertTrue(self.has_directive(submit_cmds, "# @ account_no = ", "myproject"))
         self.assertTrue(self.has_directive(submit_cmds, "# @ class = ", "fast"))

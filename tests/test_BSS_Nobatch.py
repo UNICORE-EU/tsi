@@ -10,14 +10,15 @@ class TestBSSNobatch(unittest.TestCase):
     def setUp(self):
         # setup logger
         self.LOG = Log.Logger("tsi.testing")
-
+        self.config = {'tsi.testing': True, 'tsi.switch_uid': False}
+        TSI.setup_defaults(self.config)
+        self.bss = BSS.BSS()
+        self.bss.init(self.config, self.LOG)
+        
     def test_parse_status_listing(self):
-        bss = BSS.BSS()
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
-        bss.init(config, self.LOG)
         with open("tests/input/qstat_nobatch.txt", "r") as sample:
             qstat_output = sample.read()
-        result = bss.parse_status_listing(qstat_output)
+        result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
 
     
@@ -25,9 +26,6 @@ class TestBSSNobatch(unittest.TestCase):
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % int(time.time())
         os.mkdir(uspace)
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
-        bss = BSS.BSS()
-        bss.init(config, self.LOG)
         msg = """#!/bin/bash
 #TSI_SUBMIT
 #TSI_OUTCOME_DIR %s
@@ -50,7 +48,7 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         if "TSI_FAILED" in result:
             print(result)
@@ -58,19 +56,19 @@ ENDOFMESSAGE
             result = result.splitlines()[0]
             print("Submitted with ID %s" % result)
         control_source.close()
-        children = config.get('tsi.NOBATCH.children')
+        children = self.config.get('tsi.NOBATCH.children')
         print("Children: " + str(children))
         self.assertEqual(1, len(children))
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        bss.get_status_listing(None, connector, config, self.LOG)
+        self.bss.get_status_listing(None, connector, self.config, self.LOG)
         qstat = control_out.getvalue()
         print (qstat+"\n")
         self.assertTrue(result in qstat)
         # test cleanup
         time.sleep(2)
-        bss.cleanup(config)
+        self.bss.cleanup(self.config)
         print("Children after cleanup: " + str(children))
         self.assertEqual(0, len(children))
 
