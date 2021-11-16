@@ -33,13 +33,16 @@ class BSSBase(object):
     defaults = {
         'tsi.qstat_cmd': 'ps -e -os,args',
         'tsi.abort_cmd': 'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
+        'tsi.get_processes_cmd': 'ps -e'
     }
 
     def init(self, config, LOG):
         """ setup default commands if necessary """
-        for key in self.defaults:
+        defs = BSSBase.defaults
+        defs.update(self.defaults)
+        for key in defs:
             if config.get(key) is None:
-                value = self.defaults[key]
+                value = defs[key]
                 config[key] = value
                 LOG.info("Using default: '%s' = '%s'" % (key, value))
         # check if BSS commands are accessible
@@ -77,11 +80,16 @@ class BSSBase(object):
            Depending on the TSI_JOB_MODE parameter, the the batch system 
            parameters will be generated in different ways.
 
-           "normal" : parameters will be generated from the resource settings sent 
-                      by the UNICORE/X server
+           "normal"  : parameters will be generated from the resource settings sent 
+                       by the UNICORE/X server
 
-           "raw"    :  the file given by the TSI_JOB_FILE parameter will be submitted 
+           "raw"     : the file given by the TSI_JOB_FILE parameter will be submitted 
                        without further intervention by UNICORE.
+                       
+           "allocate": the TSI will only create an allocation without launching 
+                       anything. This will run the allocation command (e.g. "salloc" on Slurm)
+                       in the background, and UNICORE/X can get the allocation ID from a file
+                       once this task has finished.
         """
         message = Utils.expand_variables(message)
 

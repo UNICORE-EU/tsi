@@ -31,13 +31,13 @@ class TestUserCache(unittest.TestCase):
         print(" - home %s" % home)
         self.assertFalse(uc.expired(uc.users_timestamps[user]))
 
-        print("All members of the 'root' group: %s" % uc.get_members_4group(
-            'root'))
+        print("All GIDs of the 'root' user: %s" % uc.get_gids_4user('root'))
+        print("GID of the 'root' group: %s" % uc.get_gid_4group('root'))
         self.assertFalse(uc.expired(uc.groups_timestamps['root']))
 
         # how to deal with non-existing group
-        print("All members of the non-existing 'foobarspam' group: %s" %
-              uc.get_members_4group('foobarspam'))
+        print("GID of the non-existing 'foobarspam' group: %s" %
+              uc.get_gid_4group('foobarspam'))
 
         # how to deal with non-existing user
         print("Home for non-existing 'foobarspam' user: %s" %

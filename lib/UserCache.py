@@ -11,16 +11,14 @@ import Utils
 
 class UserCache(object):
 
-    def __init__(self, cache_ttl, LOG, use_id_to_resolve_groups = False):
+    def __init__(self, cache_ttl, LOG, use_id_to_resolve_groups = True):
         self.cache_ttl = cache_ttl
         self.LOG = LOG
         self.all_groups = {}
-        self.groups_cache = {}
         self.uids = {}
         self.gids = {}
         self.homes = {}
         self.groups = {}
-        self.members = {}
         self.users_timestamps = {}
         self.groups_timestamps = {}
         self.use_id_to_resolve_groups = use_id_to_resolve_groups
@@ -63,15 +61,6 @@ class UserCache(object):
             return -1
         else:
             return gid
-
-    # returns all members of a given group name
-    def get_members_4group(self, group):
-        self.prepare_groups(group)
-        members = self.members.get(group)
-        if members is None:
-            return []
-        else:
-            return members
 
     # returns primary gid for a username
     def get_gid_4user(self, user):
@@ -130,19 +119,14 @@ class UserCache(object):
     # Argument: group name
     def update_group_info(self, group):
         self.groups[group] = None
-        self.members[group] = None
         self.groups_timestamps[group] = None
         try:
             g = grp.getgrnam(group)
         except KeyError:
-            self.LOG.debug("Unknown group requested: %s" % group)
-            return []  # TODO is this the correct behaviour?
+            return
 
         self.groups[group] = g.gr_gid
-        self.members[group] = g.gr_mem
         self.groups_timestamps[group] = time.time()
-        self.LOG.debug("New group information obtained for %s (%s %s)" % (
-            group, g.gr_gid, g.gr_mem))
 
     # Fills up all per user caches with freshly obtained information
     # Argument: user name
@@ -157,9 +141,6 @@ class UserCache(object):
         except KeyError:
             self.LOG.debug("No such user: %s" % user)
             return
-
-        self.LOG.debug(
-            "New user information obtained for %s (%s %s)" % (user, uid, gid))
         self.uids[user] = uid
         self.gids[user] = gid
         self.homes[user] = home

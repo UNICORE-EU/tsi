@@ -43,7 +43,6 @@ def setup_defaults(config):
     config['tsi.worker.id'] = 1
     config['tsi.njs_machine'] = 'localhost'
     config['tsi.safe_dir'] = '/tmp'
-    config['tsi.get_processes_cmd'] = 'ps -e'
 
 
 def process_config_value(key, value, config, LOG):
