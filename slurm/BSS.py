@@ -47,6 +47,7 @@ class BSS(BSSBase):
         nodes_filter = config.get("tsi.nodes_filter", "")
         user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
         qos = extract_parameter(message, "QOS", "NONE")
+        exclusive = extract_parameter(message, "SSR_EXCLUSIVE", "NONE")
 
         # jobname: check for illegal characters
         m = re.search(r"[^0-9a-zA-Z\.:.=~/]", jobname)
@@ -56,6 +57,9 @@ class BSS(BSSBase):
 
         if queue != "NONE":
             cmds.append("--partition=%s" % queue)
+
+        if exclusive == "true":
+            cmds.append("--exclusive")
 
         if project != "NONE":
             cmds.append("--account=%s" % project)
@@ -70,7 +74,7 @@ class BSS(BSSBase):
             # request tasks and let Slurm figure out the nodes
             if total_processors > 0:
                 cmds.append("--ntasks=%s" % total_processors)
-            
+
         # nodes filter, can be both global and user defined
         if user_nodes_filter != "NONE":
             if nodes_filter != "":
@@ -82,7 +86,7 @@ class BSS(BSSBase):
 
         if qos != "NONE":
             cmds.append("--qos=%s" % qos)
-        
+
         if memory >= 0:
             # memory per node, '0' means that the job requests all of the memory on each node
             cmds.append("--mem=%s" % memory)
@@ -169,7 +173,7 @@ class BSS(BSSBase):
         """ extracts the bssid, queue status and queue name
         Using the default command 'squeue -h -o "%i %T %P", we expect the
         output to be: <jobID> <state> <partition>", e.g
-        
+
         182027 PENDING large
         182197 PENDING normal
         182580 RUNNING large
@@ -184,7 +188,7 @@ class BSS(BSSBase):
         state = match.group(2)
         queue_name = match.group(3)
         return (bssid, state, queue_name)
-    
+
     # Map Slurm job states to UNICORE states
     decoder = {
         'CANCELLED': 'COMPLETED',
