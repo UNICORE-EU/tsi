@@ -89,7 +89,7 @@ class BSS(BSSBase):
 
         if req_time > 0:
             # wall time. Convert to minutes, as accepted by SLURM (minimum 1 min)
-            time_in_minutes = max(int(req_time / 60),1)
+            time_in_minutes = max(int(req_time / 60), 1)
             cmds.append("--time=%d" % time_in_minutes)
 
         if email != "NONE":

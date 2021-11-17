@@ -93,8 +93,8 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --time", "1"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --array", "10%2"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --account", "myproject"))
-        self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --constraint"))
-
+        self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --chdir", uspace))
+        self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --gres"))
 
     def test_submit_nodes_filter(self):
         os.chdir(basedir)
