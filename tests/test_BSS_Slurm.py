@@ -8,7 +8,7 @@ from lib import Log, TSI
 from time import sleep
 
 basedir = os.getcwd()
-    
+
 class TestBSSSlurm(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing")
@@ -20,7 +20,7 @@ class TestBSSSlurm(unittest.TestCase):
         }
         TSI.setup_defaults(self.config)
         self.bss.init(self.config, self.LOG)
-        
+
     def test_init(self):
         self.assertTrue(self.config['tsi.submit_cmd'] is not None)
         self.assertTrue(self.config['tsi.get_processes_cmd'] is not None)
@@ -94,6 +94,26 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --array", "10%2"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --account", "myproject"))
         self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --constraint"))
+        self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
+
+    def test_submit_exclusive(self):
+        os.chdir(basedir)
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
+        os.mkdir(uspace)
+        msg = """#!/bin/bash
+#TSI_SUBMIT
+#TSI_OUTCOME_DIR %s
+#TSI_USPACE_DIR %s
+#TSI_MEMORY 0
+#TSI_SSR_EXCLUSIVE true
+#TSI_SCRIPT
+echo "Hello World!"
+sleep 3
+""" % (uspace, uspace)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
+        self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --mem", "0"))
+        self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
 
 
     def test_submit_nodes_filter(self):
@@ -140,7 +160,7 @@ sleep 3
             f.write("""#!/bin/bash
 #SLURM --myopts
             """)
-        
+
         msg = """#!/bin/bash
 #TSI_SUBMIT
 #TSI_JOB_MODE raw
@@ -148,23 +168,23 @@ sleep 3
 #TSI_OUTCOME_DIR %s
 #TSI_USPACE_DIR %s
 """ % (uspace, uspace)
-                
+
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
-        
+
         self.bss.submit(msg, connector, self.config, self.LOG)
         result = control_out.getvalue()
         assert "1234" in result
         os.chdir(cwd)
 
-        
+
     def test_submit_normal(self):
         os.chdir(basedir)
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
-        
+
         msg = """#!/bin/bash
 #TSI_SUBMIT
 #TSI_JOB_MODE normal
@@ -173,12 +193,12 @@ sleep 3
 #TSI_SCRIPT
 echo "Hello World!"
 """ % (uspace, uspace)
-                
+
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
-        
         self.bss.submit(msg,connector, self.config, self.LOG)
+
         result = control_out.getvalue()
         assert "1234" in result
         os.chdir(cwd)
@@ -257,17 +277,17 @@ echo "Hello World!"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
-        
+
         msg = """#!/bin/bash
 #TSI_SUBMIT
 #TSI_OUTCOME_DIR %s
 #TSI_USPACE_DIR %s
 """ % (uspace, uspace)
-                
+
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
-        
+
         self.bss.submit(msg,connector, config, self.LOG)
         result = control_out.getvalue()
         print(result)
@@ -286,7 +306,7 @@ echo "Hello World!"
     def test_report_details(self):
         os.chdir(basedir)
         config = {'tsi.testing': True}
-        config['tsi.details_cmd'] = "cat "    
+        config['tsi.details_cmd'] = "cat "
         TSI.setup_defaults(config)
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
