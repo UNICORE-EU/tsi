@@ -19,7 +19,7 @@ class BSS(BSSBase):
 
     defaults = {
         'tsi.submit_cmd': 'sbatch',
-        'tsi.alloc_cmd': 'salloc',
+        'tsi.alloc_cmd': 'salloc --no-shell',
         'tsi.qstat_cmd': 'squeue -h -o \"%i %T %P\"',
         'tsi.details_cmd': 'scontrol show jobid',
         'tsi.abort_cmd': 'scancel %s',

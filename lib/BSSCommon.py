@@ -59,7 +59,6 @@ class BSSBase(object):
         if children is None:
             config['tsi.NOBATCH.children'] = []
 
-            
     def create_submit_script(self, message, config, LOG):
         """ For batch systems, this method is responsible for 
             creating the script that is sent to the batch system.
@@ -85,7 +84,7 @@ class BSSBase(object):
 
            "raw"     : the file given by the TSI_JOB_FILE parameter will be submitted 
                        without further intervention by UNICORE.
-                       
+
            "allocate": the TSI will only create an allocation without launching 
                        anything. This will run the allocation command (e.g. "salloc" on Slurm)
                        in the background, and UNICORE/X can get the allocation ID from a file
@@ -97,6 +96,7 @@ class BSSBase(object):
         os.chdir(uspace_dir)
 
         job_mode = Utils.extract_parameter(message, "JOB_MODE", "normal")
+        is_alloc = job_mode.startswith("alloc")
 
         LOG.debug("Submitting a batch job, mode=%s" % job_mode)
 
@@ -109,7 +109,7 @@ class BSSBase(object):
                 return
             with open(raw_cmds_file_name, "r") as f:
                 submit_cmds = [f.read()]
-        elif job_mode.startswith("alloc"):
+        elif is_alloc:
             try:
                 submit_cmds = self.create_alloc_script(message, config, LOG)
             except:
@@ -151,6 +151,8 @@ class BSSBase(object):
         
         if not success:
             connector.failed(reply)
+        elif is_alloc:
+            connector.ok()
         else:
             LOG.info("Job submission result: %s" % reply)
             job_id = self.extract_job_id(reply)
