@@ -22,6 +22,7 @@ class TestUFTP(unittest.TestCase):
         msg = """#!/bin/bash
 #TSI_UFTP
 #TSI_USPACE_DIR %s
+#TSI_OUTCOME_DIR %s
 #TSI_UFTP_HOST localhost
 #TSI_UFTP_PORT 54434
 #TSI_UFTP_SECRET test123
@@ -29,7 +30,7 @@ class TestUFTP(unittest.TestCase):
 #TSI_UFTP_REMOTE_FILE foo
 #TSI_UFTP_LOCAL_FILE bar
 
-""" % (uspace)
+""" % (uspace, uspace)
         control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
         control_in = io.TextIOWrapper(control_source)
         control_out = io.StringIO()
