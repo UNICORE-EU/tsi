@@ -36,6 +36,9 @@ def uftp(message, connector, config, LOG):
         TSI_UFTP_LOCAL_FILE  - local file to read from / write to
         TSI_UFTP_OFFSET      - start byte (defaults to '0')
         TSI_UFTP_LENGTH      - how many bytes to transfer (defaults to -1 i.e. the whole file)
+        TSI_USPACE_DIR       - working directory for the child process
+        TSI_OUTCOME_DIR      - directory for the PID, stdout, stderr, exit code
+        TSI_STDOUT           - file to write standard out and standard error to
     """
 
     host = extract_parameter(message, 'UFTP_HOST')
@@ -49,9 +52,10 @@ def uftp(message, connector, config, LOG):
     length = int(extract_parameter(message, 'UFTP_LENGTH', "-1"))
 
     uspace_dir = extract_parameter(message, "USPACE_DIR")
-    stdout = extract_parameter(message, "STDOUT", "stdout")
-    pid_file = extract_parameter(message, "PID_FILE", "UNICORE_SCRIPT_PID")
-    exit_code_file = extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
+    outcome_dir = extract_parameter(message, "OUTCOME_DIR")
+    stdout = outcome_dir + "/" + extract_parameter(message, "STDOUT", "stdout")
+    pid_file = outcome_dir + "/" + extract_parameter(message, "PID_FILE", "UNICORE_SCRIPT_PID")
+    exit_code_file = outcome_dir + "/" + extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
 
     uftp_client = __file__
 
