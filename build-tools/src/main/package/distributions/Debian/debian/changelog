@@ -1,4 +1,4 @@
 @component-prefix@@component-name@@component-suffix@ (@component-version@-@component-release@@component-disttag@) unstable; urgency=low
 
-  * v8.2.1
- -- Bernd Schuller <unicore-support@lists.sourceforge.net>  Fri, 01 Oct 2021 11:00:00 +0100
+  * v@component-version@
+ -- Bernd Schuller <unicore-support@lists.sourceforge.net>  TIME_STAMP

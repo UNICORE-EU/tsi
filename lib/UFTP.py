@@ -38,7 +38,8 @@ def uftp(message, connector, config, LOG):
         TSI_UFTP_LENGTH      - how many bytes to transfer (defaults to -1 i.e. the whole file)
         TSI_USPACE_DIR       - working directory for the child process
         TSI_OUTCOME_DIR      - directory for the PID, stdout, stderr, exit code
-        TSI_STDOUT           - file to write standard out and standard error to
+        TSI_STDOUT           - file to write standard output to
+        TSI_STDERR           - file to write standard error to
     """
 
     host = extract_parameter(message, 'UFTP_HOST')
@@ -54,6 +55,7 @@ def uftp(message, connector, config, LOG):
     uspace_dir = extract_parameter(message, "USPACE_DIR")
     outcome_dir = extract_parameter(message, "OUTCOME_DIR")
     stdout = outcome_dir + "/" + extract_parameter(message, "STDOUT", "stdout")
+    stderr = outcome_dir + "/" + extract_parameter(message, "STDERR", "stderr")
     pid_file = outcome_dir + "/" + extract_parameter(message, "PID_FILE", "UNICORE_SCRIPT_PID")
     exit_code_file = outcome_dir + "/" + extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
 
@@ -72,7 +74,7 @@ def uftp(message, connector, config, LOG):
             "export UFTP_LOCAL_FILE=%s" % local_path,
             "export PYTHONPATH=%s" % environ["PYTHONPATH"],
             "cd %s" % uspace_dir,
-            "{ python3 %s >> %s 2>&1 ; echo $? > %s ; } & echo $! > %s " % (uftp_client, stdout, exit_code_file, pid_file)
+            "{ python3 %s >> %s 2 > %s ; echo $? > %s ; } & echo $! > %s " % (uftp_client, stdout, stderr, exit_code_file, pid_file)
             ]
 
     cmd = ""
