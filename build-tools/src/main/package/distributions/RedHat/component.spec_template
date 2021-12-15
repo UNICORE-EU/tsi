@@ -8,7 +8,7 @@ Summary: UNICORE TSI
 License: BSD
 Distribution: RedHat
 Group: System Environment/Daemons
-URL: http://www.unicore.eu
+URL: https://www.unicore.eu
 #Requires: 
 BuildArch: @component-architecture@
 Packager: UNICORE unicore-support@lists.sourceforge.net
@@ -26,7 +26,7 @@ provides an interface to the local resource manager (e.g. Slurm) and
 the local file system. It is installed on the cluster frontend.
 
 %changelog
-* TIME_STAMP Bernd Schuller <unicore-support@lists.sourceforge.net>
+* @release-timestamp@ Bernd Schuller <unicore-support@lists.sourceforge.net>
 -Latest
 
 * Fri Feb 11 2011 Bjoern Hagemeier <unicore-support@lists.sourceforge.net> 

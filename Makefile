@@ -15,7 +15,7 @@ DOCVERSION ?= ${DEFAULT_DOCVERSION}
 RELEASE ?= ${DEFAULT_RELEASE}
 
 
-TESTS = $(wildcard tests/*.py)
+TESTS = $(wildcard tests/test_*.py)
 
 export PYTHONPATH := lib:.:tests
 
@@ -77,8 +77,6 @@ cp build-tools/conf.properties.bssspecific build/src/main/package/conf.propertie
 sed -i "s/name=tsi/name=$1/" build/src/main/package/conf.properties
 sed -i "s/VERSION/${VERSION}/" build/pom.xml
 sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
-sed -i "s/TIME_STAMP/$(shell date -R)/" build/src/main/package/distributions/Debian/debian/changelog
-sed -i "s/TIME_STAMP/$(shell LC_ALL=en_EN.utf8 date '+%a %b %d %Y')/" build/src/main/package/distributions/RedHat/component.spec_template
 mv build/src/main/package/distributions/Debian/debian/unicore-tsi.service build/src/main/package/distributions/Debian/debian/unicore-$1.service
 mv build/src/main/package/distributions/RedHat/src/usr/lib/systemd/system/unicore-tsi.service build/src/main/package/distributions/RedHat/src/usr/lib/systemd/system/unicore-$1.service
 find build | grep .svn | xargs rm -rf
