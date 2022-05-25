@@ -4,7 +4,7 @@ import unittest
 import uuid
 import slurm.BSS
 import MockConnector
-from lib import Log, TSI
+import Log, TSI
 from time import sleep
 
 basedir = os.getcwd()
@@ -261,7 +261,6 @@ echo "Hello World!"
                                                 None, self.LOG)
 
         self.bss.submit(msg,connector, config, self.LOG)
-        result = control_out.getvalue()
         sleep(10)
         with open("%s/ALLOCATION_ID" % uspace) as f:
             line = f.readlines()[0]

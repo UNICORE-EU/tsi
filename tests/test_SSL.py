@@ -1,6 +1,5 @@
 import unittest
-from lib import Log, SSL
-
+import Log, SSL
 
 class TestSSL(unittest.TestCase):
     def setUp(self):

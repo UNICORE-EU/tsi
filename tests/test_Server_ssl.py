@@ -3,7 +3,7 @@ import os
 import signal
 import socket
 import time
-from lib import Log, Server, SSL
+import Log, Server, SSL
 
 
 class TestServerSSL(unittest.TestCase):

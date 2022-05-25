@@ -1,6 +1,6 @@
 import unittest
 import io, os
-from lib import Log, TSI, BecomeUser
+import BecomeUser, Log, SSL, TSI, UserCache
 import MockConnector
 
 
@@ -11,12 +11,12 @@ class TestTSI(unittest.TestCase):
 
     def test_read_config(self):
         cwd = os.getcwd()
+        print(cwd)
         file = "tests/input/test_config.properties"
         c = TSI.read_config_file(file, self.LOG)
         
         # parse allowed DNs correctly?
         acl = c["tsi.allowed_dns"]
-        from lib import SSL
         subject = ((('commonName', 'Some Guy'),),
                    (('countryName','EU',),))
         self.assertTrue(SSL.match(subject, acl), msg="should match %s" % str(subject))
@@ -71,7 +71,26 @@ ENDOFMESSAGE
         self.assertTrue(version in result)
         control_source.close()
         os.chdir(cwd)
-                 
+
+    def test_get_user_info(self):
+        cwd = os.getcwd()
+        uc = UserCache.UserCache(2, self.LOG)
+        config = {'tsi.user_cache': uc, 'tsi.testing': True, 'tsi.switch_uid': False,
+                  'tsi.keyfiles': ['.ssh/authorized_keys']}
+        msg = """#TSI_GET_USER_INFO
+        #TSI_IDENTITY %s NONE
+ENDOFMESSAGE
+""" % os.environ["USER"]
+        control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
+        control_in = io.TextIOWrapper(control_source)
+        control_out = io.StringIO()
+        connector = MockConnector.MockConnector(control_in, control_out, None,
+                                                None, self.LOG)
+        TSI.process(connector, config, self.LOG)
+        result = control_out.getvalue()
+        print(result)
+        os.chdir(cwd)
+           
     def test_Exec(self):
         cwd = os.getcwd()
         config = {'tsi.testing': True, 'tsi.switch_uid': False}

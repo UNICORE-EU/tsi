@@ -1,7 +1,7 @@
 import unittest
 import io
 import os
-from lib import IO, Log
+import IO, Log
 import MockConnector
 
 

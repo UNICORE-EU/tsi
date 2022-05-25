@@ -5,15 +5,12 @@
 #  - creating and deploying documentation  
 #
 
-VERSION=8.3.1
+VERSION=9.0.0
 RELEASE=1
-DOCVERSION=8.3.1
 MVN=mvn
 
 VERSION ?= ${DEFAULT_VERSION}
-DOCVERSION ?= ${DEFAULT_DOCVERSION}
 RELEASE ?= ${DEFAULT_RELEASE}
-
 
 TESTS = $(wildcard tests/test_*.py)
 
@@ -37,26 +34,6 @@ runtest: $(TESTS)
 $(TESTS):
 	@echo "\n** Running test $@"
 	@${PYTHON} $@
-
-#
-# documentation
-#
-DOCOPTS=-Ddocman.enabled -Ddoc.relversion=${DOCVERSION} -Ddoc.compversion=${DOCVERSION} -Ddoc.src=docs/manual.txt -Ddoc.target=tsi-manual
-
-doc-generate:
-	mkdir -p target
-	if [ ! -d target/tools ] ; then git clone --depth 1 https://github.com/UNICORE-EU/tools.git target/tools ; fi
-	ant -f target/tools/docman/doc-build.xml ${DOCOPTS} doc-all
-
-doc-deploy:
-	ssh bschuller@unicore-dev.zam.kfa-juelich.de sudo rm -rf /var/www/documentation/tsi-${DOCVERSION}
-	ssh bschuller@unicore-dev.zam.kfa-juelich.de sudo mkdir /var/www/documentation/tsi-${DOCVERSION}
-	ssh bschuller@unicore-dev.zam.kfa-juelich.de mkdir -p tsidoc-${DOCVERSION}
-	scp target/site/* bschuller@unicore-dev.zam.kfa-juelich.de:tsidoc-${DOCVERSION}
-	ssh bschuller@unicore-dev.zam.kfa-juelich.de sudo mv tsidoc-${DOCVERSION}/* /var/www/documentation/tsi-${DOCVERSION}
-
-doc: doc-generate doc-deploy
-
 
 #
 # packaging

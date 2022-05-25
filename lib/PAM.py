@@ -66,16 +66,12 @@ class PAM(object):
 
     def check_pam_error(self, method, err, msg):
         if PAM_SUCCESS != err:
-            self.LOG.error("Error %d invoking '%s': %s" % (err, method, msg))
+            self.LOG.debug("Error %d invoking '%s': %s" % (err, method, msg))
 
     def open_session(self, username):
         USER = ctypes.c_char_p(bytes(username, encoding="ascii"))
         err = self.libpam.pam_start(self.MODULE, USER, ctypes.byref(self.conv), ctypes.byref(self.pamh))
         self.check_pam_error("pam_start", err, self.libpam.pam_strerror(self.pamh, err))
-        err = self.libpam.pam_acct_mgmt(self.pamh, 0)
-        self.check_pam_error("pam_acct_mgmt", err, self.libpam.pam_strerror(self.pamh, err))
-        err = self.libpam.pam_setcred(self.pamh, PAM_ESTABLISH_CRED)
-        self.check_pam_error("pam_setcred", err, self.libpam.pam_strerror(self.pamh, err))
         err = self.libpam.pam_open_session(self.pamh, 0)
         self.check_pam_error("pam_open_session", err, self.libpam.pam_strerror(self.pamh, err))
 

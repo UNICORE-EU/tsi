@@ -2,7 +2,7 @@ import unittest
 import os
 import pwd
 import grp
-from lib import BecomeUser, Log, TSI
+import BecomeUser, Log, TSI
 
 
 class TestBecomeUser(unittest.TestCase):

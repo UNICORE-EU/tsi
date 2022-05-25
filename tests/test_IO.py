@@ -1,7 +1,7 @@
 import unittest
 import io
 import os
-from lib import Log, TSI
+import Log, TSI
 import MockConnector
 
 

@@ -1,7 +1,7 @@
 import unittest
 import io
 import os
-from lib import ACL, Log, TSI
+import ACL, Log, TSI
 import MockConnector
 
 
@@ -85,7 +85,6 @@ ENDOFMESSAGE
         acl_support = self.config['tsi.acl']
         acl_support['/tmp/test_TSI_ACL'] = "POSIX"
         self.config['tsi.setfacl'] = "setfacl"
-        user = "schuller"
         msg = """#TSI_FILE_ACL
 #TSI_ACL_OPERATION SETFACL
 #TSI_ACL_COMMAND MODIFY RECURSIVE

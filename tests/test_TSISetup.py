@@ -3,7 +3,7 @@ import os
 import socket
 import signal
 import time
-from lib import TSI, Log
+import TSI, Log
 
 
 class TestTSI(unittest.TestCase):

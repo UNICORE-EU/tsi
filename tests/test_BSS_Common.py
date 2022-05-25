@@ -4,7 +4,7 @@ import time
 import unittest
 import MockBSS
 import MockConnector
-from lib import Log, TSI
+import Log, TSI
 
 
 class TestBSSCommon(unittest.TestCase):

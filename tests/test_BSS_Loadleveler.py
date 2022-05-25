@@ -1,10 +1,8 @@
-import io
 import os
 import time
 import unittest
 import loadleveler.BSS
-import MockConnector
-from lib import Log, TSI
+import Log, TSI
 
 
 class TestBSSLoadLeveler(unittest.TestCase):

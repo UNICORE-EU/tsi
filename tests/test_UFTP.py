@@ -3,7 +3,7 @@ import os
 import time
 import unittest
 import MockConnector
-from lib import Log, TSI, UFTP
+import Log, TSI, UFTP
 
 
 class TestUFTP(unittest.TestCase):

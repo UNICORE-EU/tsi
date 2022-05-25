@@ -2,7 +2,7 @@ import unittest
 import time
 import os
 import io
-from lib import BSS, Log, TSI
+import BSS, Log, TSI
 import MockConnector
 
 

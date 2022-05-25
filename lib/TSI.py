@@ -43,6 +43,7 @@ def setup_defaults(config):
     config['tsi.worker.id'] = 1
     config['tsi.njs_machine'] = 'localhost'
     config['tsi.safe_dir'] = '/tmp'
+    config['tsi.keyfiles'] = ['.ssh/authorized_keys']
 
 
 def process_config_value(key, value, config, LOG):
@@ -77,6 +78,8 @@ def process_config_value(key, value, config, LOG):
         LOG.info("Allowing SSL connections for %s" % value)
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
+    elif key == "tsi.keyfiles":
+        config["tsi.keyfiles"] = value.split(":")    
     else:
         config[key] = value
 
@@ -144,20 +147,46 @@ def read_config_file(file_name, LOG):
     return config
 
 
-# invoked for TSI_PING
 def ping(message, connector, config, LOG):
     """ Returns TSI version."""
     connector.write_message(MY_VERSION)
 
 
-# invoked for TSI_PING_UID (useful mainly for unit testing)
 def ping_uid(message, connector, config, LOG):
     """ Returns TSI version and process' UID. Used for unit testing."""
     connector.write_message(MY_VERSION)
     connector.write_message(" running as UID [%s]" % config.get('tsi.effective_uid', "n/a"))
 
 
-# invoked for TSI_EXECUTESCRIPT
+def get_user_info(message, connector, config, LOG):
+    id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", message, re.M)
+    if id_info is None:
+        connector.failed("No user/group info given")
+        return
+    user = id_info.group(1)
+    user_cache = config['tsi.user_cache']
+    home = user_cache.get_home_4user(user)
+    if home is None:
+        connector.failed("No home directory found for user %s", user)
+        return
+    status = ""
+    response = "home: %s\n" % home
+    i = 0
+    for keyfile in config['tsi.keyfiles']:
+        _file = os.path.join(home, keyfile)
+        try:
+            with open(_file, "r") as f:
+                status += " keyfile %s : OK" % _file
+                for line in f.readlines():
+                    if line.startswith("#"):
+                        continue
+                    response+="Accepted key %d: %s\n" % (i, line.strip())
+                    i+=1
+        except Exception as e:
+            status += " keyfile %s : %s" % (_file, str(e))
+    response += "status: %s\n" % status
+    connector.write_message(response)
+
 def execute_script(message, connector, config, LOG):
     """ Executes a script. If the script contains a line
     #TSI_DISCARD_OUTPUT true
@@ -172,8 +201,6 @@ def execute_script(message, connector, config, LOG):
         connector.failed(output)
 
 
-# setup the table of supported TSI commands.
-# The commands must have a specific signature, see e.g. execute_script()
 def init_functions(bss):
     """
     Creates the function lookup table used to map XNJS commands '#TSI_...' to
@@ -182,6 +209,7 @@ def init_functions(bss):
     return {
         "TSI_PING": ping,
         "TSI_PING_UID": ping_uid,
+        "TSI_GET_USER_INFO": get_user_info,
         "TSI_EXECUTESCRIPT": execute_script,
         "TSI_GETFILECHUNK": IO.get_file_chunk,
         "TSI_PUTFILECHUNK": IO.put_file_chunk,
@@ -272,7 +300,6 @@ def process(connector, config, LOG):
         # check for command and invoke appropriate function
         command = None
         function = None
-        session_info = None
         for cmd in functions:
             have_cmd = re.search(r".*#%s\n" % cmd, message, re.M)
             if have_cmd:

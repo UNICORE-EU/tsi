@@ -2,7 +2,7 @@ import unittest
 import os
 import pwd
 import time
-from lib import Log, UserCache
+import Log, UserCache
 
 
 class TestUserCache(unittest.TestCase):

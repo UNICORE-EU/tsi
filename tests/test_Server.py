@@ -4,9 +4,7 @@ import signal
 import socket
 import sys
 import time
-from lib import Log, Server, Utils
-from lib.Connector import Connector
-
+import Connector, Log, Server
 
 class TestServer(unittest.TestCase):
     def setUp(self):

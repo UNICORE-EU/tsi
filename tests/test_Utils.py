@@ -1,7 +1,7 @@
 import io
 import os
 import unittest
-from lib import Utils
+import Utils
 
 
 class TestTSI(unittest.TestCase):
