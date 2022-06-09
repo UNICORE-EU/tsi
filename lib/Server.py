@@ -1,20 +1,18 @@
 #
-# Initialise connection to the XNJS
+# Initialise connection to UNICORE/X
 #  - waits for a connection
-#  - validates that it is from the XNJS
+#  - validates that it is from UNICORE/X
 #  - if validated, command and data connections are opened
-#    via callback to the XNJS
+#    via callback to UNICORE/X
 #  - a child process is forked which further communicates
-#    with the XNJS via the command/data sockets
+#    with UNICORE/Xvia the command/data sockets
 
 import errno
 import os
-import re
 import signal
 import socket
 import sys
 import time
-import Utils
 from SSL import setup_ssl, verify_peer
 
 def configure_socket(sock, LOG):
@@ -39,21 +37,21 @@ def configure_socket(sock, LOG):
 def worker_completed(signal, frame):
     try:
         while True:
-            (pid,state,ru) = os.wait3(os.WNOHANG)
+            (pid,_,_) = os.wait3(os.WNOHANG)
             if pid == 0:
                 break
     except:
         pass
 
 
-def verify_ip(configuration, xnjs_host, LOG):
+def verify_ip(configuration, unicorex_host, LOG):
     if 'tsi.allowed_ips' not in configuration:
         LOG.warning('No list of allowed IPs set. Not production ready')
         return True
 
     allowed_ips = configuration['tsi.allowed_ips']
     for ip in allowed_ips:
-        if xnjs_host == ip:
+        if unicorex_host == ip:
             return True
     raise EnvironmentError("Connecting IP not in list of allowed IPs")
 
@@ -65,10 +63,10 @@ def close_quietly(closeable):
 
 def connect(configuration, LOG):
     """
-    Accept connection from the XNJS.
+    Accept connection from UNICORE/X.
 
     Return a pair (command,data) of sockets for communicating
-    with the XNJS.
+    with UNICORE/X.
 
     Parameters: dictionary of config settings, logger
     """
@@ -93,7 +91,7 @@ def connect(configuration, LOG):
 
     while True:
         try:
-            (xnjs, (xnjs_host, _)) = server.accept()
+            (unicorex, (unicorex_host, _)) = server.accept()
         except EnvironmentError as e:
             if e.errno != errno.EINTR:
                 LOG.info("Error waiting for new connection: " + str(e))
@@ -101,29 +99,29 @@ def connect(configuration, LOG):
 
         if ssl_mode:
             try:
-                verify_peer(configuration, xnjs, LOG)
+                verify_peer(configuration, unicorex, LOG)
             except EnvironmentError as e:
                 LOG.info("Error verifying connection from %s : %s" % (
-                    xnjs_host, str(e)))
-                close_quietly(xnjs)
+                    unicorex_host, str(e)))
+                close_quietly(unicorex)
                 continue
 
         try:
-            verify_ip(configuration, xnjs_host, LOG)
+            verify_ip(configuration, unicorex_host, LOG)
         except EnvironmentError as e:
             LOG.info("Error verifying connection from %s : %s" % (
-                xnjs_host, str(e)))
-            close_quietly(xnjs)
+                unicorex_host, str(e)))
+            close_quietly(unicorex)
             continue
 
-        configure_socket(xnjs, LOG)
+        configure_socket(unicorex, LOG)
         try:
-            msg = xnjs.recv(buffer_size)
+            msg = unicorex.recv(buffer_size)
             msg = str(msg, "UTF-8").strip()
             LOG.info("message : %s" % msg)
         except EnvironmentError as e:
-            LOG.info("Error reading from XNJS: %s " % str(e))
-            close_quietly(xnjs)
+            LOG.info("Error reading from UNICORE/X: %s " % str(e))
+            close_quietly(unicorex)
             continue
         
         try:
@@ -138,26 +136,26 @@ def connect(configuration, LOG):
         elif cmd == "newtsiprocess":
             pass
         else:
-            LOG.info("Command from XNJS not understood: %s " % msg)
-            close_quietly(xnjs)
+            LOG.info("Command from UNICORE/X not understood: %s " % msg)
+            close_quietly(unicorex)
             continue
-        LOG.info("Accepted connection from %s" % xnjs_host)
+        LOG.info("Accepted connection from %s" % unicorex_host)
         try:
-            # write to the XNJS to tell it everything is OK
-            xnjs.sendall(b'OK\n')
-            # callback to the XNJS
-            xnjs_port = get_xnjs_port(configuration, params, LOG)
-            if xnjs_port is None:
+            # write to UNICORE/X to tell it everything is OK
+            unicorex.sendall(b'OK\n')
+            # callback to UNICORE/X
+            unicorex_port = get_unicorex_port(configuration, params, LOG)
+            if unicorex_port is None:
                 raise EnvironmentError("Received invalid message")
-            address = (xnjs_host, xnjs_port)
-            LOG.info("Contacting XNJS on %s port %s" % address)
-            # allow some time for XNJS to start listening
+            address = (unicorex_host, unicorex_port)
+            LOG.info("Contacting UNICORE/X on %s port %s" % address)
+            # allow some time for U/X to start listening
             time.sleep(1)
             command = socket.create_connection(address, 10)
             data = socket.create_connection(address, 10)
         except EnvironmentError as e:
-            LOG.info("Error communicating with XNJS : %s" % str(e))
-            close_quietly(xnjs)
+            LOG.info("Error communicating with UNICORE/X : %s" % str(e))
+            close_quietly(unicorex)
             continue
 
         if ssl_mode:
@@ -165,11 +163,11 @@ def connect(configuration, LOG):
                 command = setup_ssl(configuration, command, LOG)
                 data = setup_ssl(configuration, data, LOG)
             except EnvironmentError as e:
-                LOG.info("Error setting up SSL connections to XNJS : %s" % str(e))
-                close_quietly(xnjs)
+                LOG.info("Error setting up SSL connections to UNICORE/X: %s" % str(e))
+                close_quietly(unicorex)
                 continue
 
-        LOG.info("Connection to XNJS at %s:%s established." % address)
+        LOG.info("Connection to UNICORE/X at %s:%s established." % address)
         worker_id = configuration.get('tsi.worker.id', 1)
         LOG.info("Starting tsi-worker-%d" % worker_id)
         # fork, cleanup and return sockets to the caller (main loop)
@@ -199,11 +197,13 @@ def setup_streams(command, data):
     return control_in, control_out, data_in, data_out
 
 
-def get_xnjs_port(configuration, params, LOG):
-    """ Get the XNJS port. If not set in config, extract it
-        from the params sent by the XNJS
+def get_unicorex_port(configuration, params, LOG):
+    """ Get the UNICORE/X port. If not set in config, extract it
+        from the params sent by UNICORE/X
     """
-    port = configuration.get('tsi.njs_port', None)
+    port = configuration.get('tsi.unicorex_port', None)
+    if port is None:
+        port = configuration.get('tsi.njs_port', None)
     if port is None:
         try:
             port = params

@@ -22,7 +22,7 @@ class TestServerSSL(unittest.TestCase):
             SSL.convert_dn('CN=TSI,O=UNICORE,C=EU')]
 
     def test_Connect(self):
-        # fork, creating the TSI shepherd and a fake XNJS
+        # fork, creating the TSI shepherd and a fake U/X
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
@@ -31,7 +31,7 @@ class TestServerSSL(unittest.TestCase):
             test_msg = command.recv(1024)
             self.LOG.info("TESTING: got test message: %s" % test_msg)
         else:
-            # parent, this is the fake XNJS
+            # parent, this is the fake U/X
             # wait a bit to allow for setup of server socket at TSI
             time.sleep(2)
             # connect to the server

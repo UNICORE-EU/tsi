@@ -20,16 +20,16 @@ class TestServer(unittest.TestCase):
         msg = "newtsi 5678"
         params = msg.split(" ", 1)[1]
         # use port from config
-        port = Server.get_xnjs_port(self.config, params, self.LOG)
+        port = Server.get_unicorex_port(self.config, params, self.LOG)
         self.assertEqual("12345", port)
         # read port from message
         self.config['tsi.njs_port'] = None
-        port = Server.get_xnjs_port(self.config, params, self.LOG)
+        port = Server.get_unicorex_port(self.config, params, self.LOG)
         self.assertEqual("5678", port)
         self.config['tsi.njs_port'] = p
 
     def test_Connect(self):
-        # fork, creating the TSI shepherd and a fake XNJS
+        # fork, creating the TSI shepherd and a fake U/X
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
@@ -38,7 +38,7 @@ class TestServer(unittest.TestCase):
             testmsg = command.recv(1024)
             self.LOG.info("TESTING: got test message: %s" % testmsg)
         else:
-            # parent, this is the fake XNJS
+            # parent, this is the fake U/X
             # wait a bit to allow for setup of server socket at TSI
             time.sleep(2)
             # connect to the server
@@ -70,9 +70,9 @@ class TestServer(unittest.TestCase):
             server.close()
             os.kill(pid, signal.SIGKILL)
 
-    def test_XNJSShutDown(self):
-        """ Test behaviour when the XNJS side goes away """
-        # fork, creating the TSI shepherd and a fake XNJS
+    def test_UNICOREXShutDown(self):
+        """ Test behaviour when the U/X side goes away """
+        # fork, creating the TSI shepherd and a fake U/X
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
@@ -90,7 +90,7 @@ class TestServer(unittest.TestCase):
                 print("Got: " + str(sys.exc_info()[1]))
                 connector.close()
         else:
-            # parent, this is the fake XNJS
+            # parent, this is the fake U/X
             # wait a bit to allow for setup of server socket at TSI
             time.sleep(2)
             # connect to the server

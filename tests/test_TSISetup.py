@@ -24,8 +24,8 @@ class TestTSI(unittest.TestCase):
             # child, this is the TSI shepherd process
             TSI.main(["TSI", config])
         else:
-            # parent, this is the fake XNJS
-            LOG = Log.Logger("fake-xnjs")
+            # parent, this is the fake U/X
+            LOG = Log.Logger("fake-unicorex")
             time.sleep(2)
             client_config = TSI.read_config_file(config, LOG)
 

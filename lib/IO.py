@@ -13,8 +13,8 @@ from Utils import expand_variables, extract_parameter, run_command
 
 
 def get_file_chunk(message, connector, config, LOG):
-    """Return part of a file to the XNJS via the data_out stream.
-       The message sent by the XNJS is scanned for:
+    """Return part of a file to UNICORE/X via the data_out stream.
+       The message sent by UNICORE/X is scanned for:
            TSI_FILE   - name of file to return
            TSI_START  - start byte
            TSI_LENGTH - how many bytes to return
@@ -56,8 +56,8 @@ def get_file_chunk(message, connector, config, LOG):
 
 
 def put_file_chunk(message, connector, config, LOG):
-    """Write part of a file, reading data from the XNJS via the data_in stream.
-       The message sent by the XNJS is scanned for:
+    """Write part of a file, reading data from UNICORE/X via the data_in stream.
+       The message sent by UNICORE/X is scanned for:
            TSI_FILE   - name of file to write and mode
            TSI_FILESACTION  - what to do (overwrite = 1 , append = 3)
            TSI_LENGTH - how many bytes to return
@@ -82,7 +82,7 @@ def put_file_chunk(message, connector, config, LOG):
         open_mode = "wb"
 
     with io.FileIO(path, open_mode) as f:
-        # the next message tells the XNJS to start sending data
+        # the next message tells UNICORE/X to start sending data
         connector.ok("ENDOFMESSAGE")
         remaining = length
 
@@ -224,7 +224,7 @@ def list_directory(connector, path, recursive):
 
 def ls(message, connector, config, LOG):
     """List directory or get information about a file
-       The message sent by the XNJS is scanned for:
+       The message sent by UNICORE/X is scanned for:
            TSI_FILE     - name of file/path to list
            TSI_LS_MODE     - "A" : just the file,
                              "R" : directory recursive
@@ -280,8 +280,8 @@ def ls(message, connector, config, LOG):
 
 
 def df(message, connector, config, LOG):
-    """ determines the free space on a given partition
-    and reports results on stdout in the format that the XNJS expects.
+    """ determines the free space on a given partition and
+    reports results on stdout in the format expected by UNICORE/X.
     The format of the output is as follows:
 
     Output starts with the line:

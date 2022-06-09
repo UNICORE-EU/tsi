@@ -85,6 +85,6 @@ def verify_peer(config, socket, LOG):
     """ check that the peer is OK by comparing the DN to our ACL """
     acl = config.get('tsi.allowed_dns', [])
     subject = socket.getpeercert()['subject']
-    LOG.debug("Verify XNJS certificate with subject %s" % str(subject))
+    LOG.debug("Verify UNICORE/X certificate with subject %s" % str(subject))
     if not match(subject, acl):
         raise EnvironmentError("Connection not allowed by ACL")

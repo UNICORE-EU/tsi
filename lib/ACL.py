@@ -9,7 +9,8 @@
     it is assumed that setfacl automatically creates the mandatory default ACL
     entries when needed, -R option is used to achieve recursive behavior.
 
- The process_acl function expects the following argument in the XNJS message:
+ The process_acl function expects the following arguments
+ in the UNICORE/X message:
  #TSI_ACL_OPERATION <CHECK_SUPPORT|GETFACL|SETFACL>
  #TSI_ACL_PATH /some/path
  #TSI_ACL_COMMAND <RM_ALL|MODIFY|RM> [RECURSIVE]

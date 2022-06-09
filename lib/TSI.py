@@ -190,7 +190,7 @@ def get_user_info(message, connector, config, LOG):
 def execute_script(message, connector, config, LOG):
     """ Executes a script. If the script contains a line
     #TSI_DISCARD_OUTPUT true
-    the output is discarded, otherwise it is returned to the XNJS.
+    the output is discarded, otherwise it is returned to UNICORE/X.
     """
     discard = "#TSI_DISCARD_OUTPUT true\n" in message
     children = config.get('tsi.NOBATCH.children', None)
@@ -203,8 +203,8 @@ def execute_script(message, connector, config, LOG):
 
 def init_functions(bss):
     """
-    Creates the function lookup table used to map XNJS commands '#TSI_...' to
-    the appropriate TSI function.
+    Creates the function lookup table used to map UNICORE/X commands
+    ('#TSI_...') to the appropriate TSI function.
     """
     return {
         "TSI_PING": ping,
@@ -313,13 +313,13 @@ def process(connector, config, LOG):
             connector.write_message(MY_VERSION)
         else:
             handle_function(function, command, message, connector, config, LOG)
-        # terminate the current "transaction" with the XNJS
+        # terminate the current "transaction" with UNICORE/X
         connector.write_message("ENDOFMESSAGE")
 
 
 def main(argv=None):
     """
-    Start the TSI. Read config, init XNJS connection
+    Start the TSI. Read config, init UNICORE/X connection
     and start processing
     """
     if not assert_version():
