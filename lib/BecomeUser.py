@@ -206,9 +206,7 @@ def restore_id(config, LOG):
     """
     Restore the process' UID and GID to the stored values (usually root)
     """
-
     euid, egid = (config['tsi.effective_uid'], config['tsi.effective_gid'])
-    LOG.debug("Resetting ID to (%s %s)" % (euid, egid))
     setting_uids = config['tsi.switch_uid']
 
     if setting_uids:

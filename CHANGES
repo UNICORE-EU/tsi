@@ -2,6 +2,9 @@ Changelog for the UNICORE TSI
 =============================
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 8.3.1
+-------------
+ - fix: logging to file was not working correctly
 
 Version 8.3.0
 -------------
