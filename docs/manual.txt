@@ -533,12 +533,36 @@ By default, the TSI logs to the system journal (syslog), and you can read
 the logs via 'journalctl', for example
 
 ------------
-sudo journalctl -u unicore-tsi-variant
+journalctl -u unicore-tsi-variant
 ------------
 
-To print logging output to stdout instead, set "tsi.use_syslog=false" in
-the +tsi.properties+ file.
+If you are not using systemd, you can filter the system log using the
+"-t" option,
 
+------------
+journalctl -t TSI
+journalctl -t TSI-worker
+------------
+
+
+To print logging output to stdout instead, set
+
+---------
+tsi.use_syslog=false
+---------
+
+in the +CONF/tsi.properties+ file. Since stdout is redirected to a file
+(see the STARTLOG definition in +CONF/startup.properties+) the logging
+output will be in that file.
+
+
+For more verbose logging, set
+
+---------
+tsi.debug=true
+---------
+
+in +CONF/tsi.properties+
 
 
 Porting the TSI to other batch systems
