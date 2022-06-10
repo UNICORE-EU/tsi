@@ -19,7 +19,7 @@ class Logger(object):
                 self.use_syslog = False
 
     def out(self, level, message):
-        tstamp = datetime.now().isoformat()
+        tstamp = datetime.now().isoformat()[:19]
         print ("%s [%s][%s][%s] %s" % (tstamp, level, self.name, getpid(), message))
         stdout.flush()
 

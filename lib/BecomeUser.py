@@ -78,8 +78,6 @@ def get_primary_group(primary, user, user_cache, fail_on_invalid_gids, config,
 
 
 def get_supplementary_groups(requested_groups, primary, user, config, LOG):
-    LOG.debug("Supplementary groups for: request = %s primary = %s "
-              "user = %s" % (requested_groups, primary, user))
     user_cache = config['tsi.user_cache']
     fail_on_invalid_gids = config['tsi.fail_on_invalid_gids']
     sup_gids = {}
@@ -94,7 +92,6 @@ def get_supplementary_groups(requested_groups, primary, user, config, LOG):
                 for d in default_gids:
                     sup_gids[d] = True
         else:
-            LOG.debug("Checking group %s" % g)
             tmp = user_cache.get_gid_4group(g)
             if tmp == -1:
                 if fail_on_invalid_gids:
