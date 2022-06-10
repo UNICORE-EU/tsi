@@ -12,7 +12,7 @@ class TestTSI(unittest.TestCase):
     def test_read_config(self):
         cwd = os.getcwd()
         file = "tests/input/test_config.properties"
-        c = TSI.read_config_file(file, self.LOG)
+        c = TSI.read_config_file(file)
         
         # parse allowed DNs correctly?
         acl = c["tsi.allowed_dns"]

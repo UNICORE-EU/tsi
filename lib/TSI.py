@@ -116,7 +116,7 @@ def setup_allowed_ips(config, LOG):
     config['tsi.allowed_ips'] = ips
 
 
-def read_config_file(file_name, LOG):
+def read_config_file(file_name):
     """
     Read config properties file, check values, and return
     a dictionary with the configuration.

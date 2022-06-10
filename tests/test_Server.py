@@ -79,7 +79,7 @@ class TestServer(unittest.TestCase):
         if pid == 0:
             # child, this is the TSI shepherd process
             command, data = Server.connect(self.config, self.LOG)
-            connector = Connector(command, data, self.LOG)
+            connector = Connector.Connector(command, data, self.LOG)
             # read a message
             try:
                 self.LOG.info("SERVER: Reading from command socket")
