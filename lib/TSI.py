@@ -46,7 +46,7 @@ def setup_defaults(config):
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
 
 
-def process_config_value(key, value, config, LOG):
+def process_config_value(key, value, config):
     """
     Handles configuration values, checking for correctness
     and storing the appropriate settings in the config dictionary
@@ -75,7 +75,6 @@ def process_config_value(key, value, config, LOG):
     elif key.startswith('tsi.allowed_dn.'):
         allowed_dns = config.get('tsi.allowed_dns', [])
         dn = SSL.convert_dn(value)
-        LOG.info("Allowing SSL connections for %s" % value)
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
     elif key == "tsi.keyfiles":
@@ -127,7 +126,6 @@ def read_config_file(file_name, LOG):
     Parameters: file_name, LOG logger object
     Returns: a dictionary with config values
     """
-    LOG.info("Reading config from %s" % file_name)
     with open(file_name, "r") as f:
         lines = f.readlines()
 
@@ -140,12 +138,12 @@ def read_config_file(file_name, LOG):
         if match:
             key = match.group(1)
             value = match.group(2).strip()
-            process_config_value(key, value, config, LOG)
-
-    setup_acl(config, LOG)
-    setup_allowed_ips(config, LOG)
+            process_config_value(key, value, config)
     return config
 
+def finish_setup(config, LOG):
+    setup_acl(config, LOG)
+    setup_allowed_ips(config, LOG)
 
 def ping(message, connector, config, LOG):
     """ Returns TSI version."""
@@ -325,19 +323,18 @@ def main(argv=None):
     if not assert_version():
         raise RuntimeError("Unsupported version of Python! "
                            "Must be %s or later." % str(REQUIRED_VERSION))
-    LOG = Log.Logger("TSI-startup")
     if argv is None:
         argv = sys.argv
     if len(argv) < 2:
         raise RuntimeError("Please specify the config file!")
     config_file = argv[1]
-    config = read_config_file(config_file, LOG)
+    config = read_config_file(config_file)
     verbose = config['tsi.debug']
     use_syslog = config['tsi.use_syslog']
+    LOG = Log.Logger("TSI-main", verbose, use_syslog)
     LOG.info("Debug logging: %s" % verbose)
-    LOG.info("Logging to syslog: %s" % use_syslog)
     LOG.info("Opening PAM sessions for user tasks: %s" % config['tsi.open_user_sessions'])
-    LOG.reinit("TSI-main", verbose, use_syslog)
+    finish_setup(config, LOG)
     bss = BSS.BSS()
     LOG.info("Starting TSI %s for %s" % (MY_VERSION, bss.get_variant()))
     BecomeUser.initialize(config, LOG)
@@ -346,8 +343,8 @@ def main(argv=None):
     config['tsi.bss'] = bss
     (command, data) = Server.connect(config, LOG)
     number = config.get('tsi.worker.id', 1)
-    LOG.reinit("TSI-worker-%s" % str(number), verbose)
-    LOG.info("Worker started.")
+    LOG.reinit("TSI-worker", verbose, use_syslog)
+    LOG.info("Worker %s started." % str(number))
     connector = Connector.Connector(command, data, LOG)
     process(connector, config, LOG)
     return 0

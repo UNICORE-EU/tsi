@@ -8,6 +8,7 @@ Version 9.0.0
  - new feature: add TSI API call to get user information including
    public keys from a configurable list of sources
  - simplified PAM.py module
+ - fix: logging to file was not working correctly
  - code cleanup
 
 Version 8.3.0
