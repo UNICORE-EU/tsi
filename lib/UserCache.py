@@ -88,14 +88,15 @@ class UserCache(object):
     # Establish the list of all (including supplementary) groups the user
     # is member of.
     # Arguments: user name and primary group id.
-    def get_gids_4user_nc(self, user, gid):
+    def get_gids_4user_nc(self, user, gid, old_info = None):
         if self.use_id_to_resolve_groups:
             all_groups = self.get_gids_4user_via_id(user, gid)
         else:
             all_groups = self.get_gids_4user_via_getgrall(user, gid)
         
-        self.LOG.debug("Established groups list for the user %s : %s" % (
-            user, str(all_groups)))
+        if str(all_groups)!=str(old_info):
+            self.LOG.debug("Updated groups list for the user %s : %s" % (
+                user, str(all_groups)))
         return all_groups
     
     # implementation using grp.getgrall()
@@ -134,15 +135,16 @@ class UserCache(object):
         self.uids[user] = None
         self.gids[user] = None
         self.homes[user] = None
+        old_group_info = self.all_groups.get(user, None)
         self.all_groups[user] = None
         self.users_timestamps[user] = None
         try:
-            (name, _, uid, gid, _, home, _) = pwd.getpwnam(user)
+            (_, _, uid, gid, _, home, _) = pwd.getpwnam(user)
         except KeyError:
             self.LOG.debug("No such user: %s" % user)
             return
         self.uids[user] = uid
         self.gids[user] = gid
         self.homes[user] = home
-        self.all_groups[user] = self.get_gids_4user_nc(user, gid)
+        self.all_groups[user] = self.get_gids_4user_nc(user, gid, old_group_info)
         self.users_timestamps[user] = time.time()
