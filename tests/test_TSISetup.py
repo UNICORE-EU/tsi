@@ -12,7 +12,7 @@ class TestTSI(unittest.TestCase):
         self.file_name = "tests/conf/tsi.properties"
 
     def test_configure(self):
-        config = TSI.read_config_file(self.file_name, self.LOG)
+        config = TSI.read_config_file(self.file_name)
         self.assertEqual('600', config['tsi.usersCacheTtl'])
         acl = config['tsi.acl']
         self.assertEqual('NONE', acl['/'])
@@ -27,7 +27,7 @@ class TestTSI(unittest.TestCase):
             # parent, this is the fake U/X
             LOG = Log.Logger("fake-unicorex")
             time.sleep(2)
-            client_config = TSI.read_config_file(config, LOG)
+            client_config = TSI.read_config_file(config)
 
             # connect to the server
             host = client_config['tsi.my_addr']
