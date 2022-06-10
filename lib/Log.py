@@ -1,6 +1,7 @@
 #
 # Simple logger writing to syslog (or console)
 #
+from datetime import datetime
 from os import getpid
 from sys import stdout
 from syslog import closelog, openlog, syslog, LOG_DEBUG, LOG_ERR, LOG_INFO, LOG_WARNING
@@ -18,7 +19,8 @@ class Logger(object):
                 self.use_syslog = False
 
     def out(self, level, message):
-        print ("[%s][%s][%s] %s" % (level, self.name, getpid(), message))
+        tstamp = datetime.now().isoformat()
+        print ("%s [%s][%s][%s] %s" % (tstamp, level, self.name, getpid(), message))
         stdout.flush()
 
     def reinit(self, name="TSI-worker", verbose=False, use_syslog=True):
