@@ -1,8 +1,5 @@
 """
-Main TSI module, containing the main processing loop and several utility
-methods.
-
-It handles the TSI_PING and TSI_EXECUTESCRIPT commands
+Main TSI module, containing the main processing loop
 """
 
 import os
@@ -141,9 +138,11 @@ def read_config_file(file_name):
             process_config_value(key, value, config)
     return config
 
+
 def finish_setup(config, LOG):
     setup_acl(config, LOG)
     setup_allowed_ips(config, LOG)
+
 
 def ping(message, connector, config, LOG):
     """ Returns TSI version."""
@@ -184,6 +183,7 @@ def get_user_info(message, connector, config, LOG):
             status += " keyfile %s : %s" % (_file, str(e))
     response += "status: %s\n" % status
     connector.write_message(response)
+
 
 def execute_script(message, connector, config, LOG):
     """ Executes a script. If the script contains a line
@@ -228,6 +228,7 @@ def init_functions(bss):
         "TSI_FILE_ACL": ACL.process_acl,
     }
 
+
 def handle_function(function, command, message, connector, config, LOG):
     switch_uid = config.get('tsi.switch_uid', True)
     pam_enabled = config.get('tsi.open_user_sessions', False)
@@ -263,6 +264,7 @@ def handle_function(function, command, message, connector, config, LOG):
             pam_session.close_session()
     if open_user_session:
         os._exit(0)
+
 
 def process(connector, config, LOG):
     """

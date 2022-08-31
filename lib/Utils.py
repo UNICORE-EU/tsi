@@ -4,17 +4,13 @@
 
 import re
 import os
-import os.path
-import sys
 import subprocess
 
 def encode(message):
     if type(message) is not type(u" "):
-        message = unicode(message, "utf-8")
+        message = str(message, "utf-8")
     return message
 
-def decode(message):
-    return message.decode("utf-8")
 
 def extract_parameter(message, parameter, default_value=None):
     """
