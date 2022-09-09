@@ -10,7 +10,7 @@ This server will run as "root" on the cluster login node(s).
 ## Downloads
 
 TSI code is distributed within the Core server bundle,
-and also as a separate generic tar.gz file with its own Install procedure.
+and also as a separate generic tar.gz file with an Install.sh script for installation.
 
 Check the SourceForge
 [Core server downloads](https://sourceforge.net/projects/unicore/files/Servers/Core)
@@ -40,8 +40,8 @@ Run
 
     make <bss>-<type>
 
-where <bss> is one of: nobatch, torque, slurm, lsf
-and <type> is one of: tgz, deb, rpm
+where `bss` is one of: slurm, nobatch, torque, lsf
+and `type` is one of: tgz, deb, rpm
 
 for example
 
