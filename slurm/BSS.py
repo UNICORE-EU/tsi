@@ -151,7 +151,7 @@ class BSS(BSSBase):
         """
         uspace_dir = extract_parameter(message, "USPACE_DIR")
         stdout = extract_parameter(message, "STDOUT", "stdout")
-        alloc_id_file = extract_parameter(message, "ALLOCATION_ID", "ALLOCATION_ID")
+        alloc_id_file = extract_parameter(message, "ALLOCATION_ID", "UNICORE_ALLOCATION_ID")
         exit_code_file = extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
 
         alloc_options = self.parse_common_options(message, config, LOG)
