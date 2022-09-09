@@ -2,7 +2,6 @@
 # Makefile for 
 #  - running unit tests
 #  - building RPM and other packages
-#  - creating and deploying documentation  
 #
 
 VERSION=9.0.0
@@ -138,7 +137,7 @@ ll-prepare: clean
 packages: nobatch-package torque-package slurm-package lsf-package ll-package
 
 #
-# Really everything except doc
+# Everything
 #
 all: nobatch-all torque-all slurm-all lsf-all ll-all tgz
 
@@ -147,6 +146,7 @@ all: nobatch-all torque-all slurm-all lsf-all ll-all tgz
 # using the Install.sh script
 #
 tgz:
+	@echo "Building target/unicore-tsi-${VERSION}.tgz ..."
 	@mkdir -p target
 	@mkdir -p build
 	@rm -rf build/*
@@ -154,6 +154,7 @@ tgz:
 	@cp README.md CHANGES LICENSE Install.sh build/
 	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
+
 
 #
 # clean

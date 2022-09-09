@@ -262,7 +262,7 @@ echo "Hello World!"
 
         self.bss.submit(msg,connector, config, self.LOG)
         sleep(10)
-        with open("%s/ALLOCATION_ID" % uspace) as f:
+        with open("%s/UNICORE_ALLOCATION_ID" % uspace) as f:
             line = f.readlines()[0]
             print("Allocation ID : %s" % line)
             self.assertTrue("115463" in line)
