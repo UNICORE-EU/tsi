@@ -10,7 +10,7 @@ import re
 def setup_ssl(config, socket, LOG, server_mode=False):
     """ Wraps the given socket with an SSL context """
     keystore = config.get('tsi.keystore')
-    keypass = config.get('tsi.keypass')
+    keypass = config.get('tsi.keypass', None)
     cert = config.get('tsi.certificate')
     truststore = config.get('tsi.truststore', None)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS)

@@ -7,7 +7,7 @@ import Log, TSI
 
 class TestBSSLoadLeveler(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.bss = loadleveler.BSS.BSS()
         self.config = {'tsi.testing': True}
         TSI.setup_defaults(self.config)

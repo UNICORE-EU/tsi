@@ -213,9 +213,9 @@ If the instruction +#TSI_JOB_MODE allocate+ is encountered in the submit script,
 the TSI will use the requested resources as in a normal batch job submission.
 The TSI will create a script that only allocates resources from the BSS, but
 does not launch anything. The allocation identifier will be written to a file
-"BSS_ALLOCATION_ID" in the working directory.
+"UNICORE_ALLOCATION_ID" in the working directory.
 
-Once this job has finished, the allocation ID can be read from the 'BSS_ALLOCATION_ID",
+Once this job has finished, the allocation ID can be read from the 'UNICORE_ALLOCATION_ID",
 and can be used in subsequent jobs.
 
 
@@ -374,6 +374,34 @@ where
  * PERCENTAGE : the relative amount (integer, 0-100) of compute time remaining
  * UNITS : the units used (should be one of: core-h, node-h, cpu-h)
 
+
+==== Getting user information (#TSI_GET_USER_INFO)
+
+This +TSI.get_budget_info()+ function returns the user's HOME directory,
+and a list of public keys, which is read froma list of configurable files in
+the user's HOME directory (defaulting to ~/.ssh/accepted_keys).
+
+Input
+++++
+
+None.
+
+Output
++++++
+
+ * User info (format below) is sent via +ok()+
+
+Format
+++++++
+The output is a multiline string
+
+-----
+ home: <user_home_directory
+ Accepted key 1: <public_key_1>
+ Accepted key 2: <public_key_2>
+   ...
+ status: <status message>
+------
 
 I/O functions
 ~~~~~~~~~~~~~

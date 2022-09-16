@@ -1,12 +1,9 @@
 """
 Interface to PAM functions via ctypes
 """
-
-import sys
-import os
-import resource
-import time
 import ctypes
+import os
+import sys
 
 LIBC = "libc.so.6"
 LIBPAM = "libpam.so.0"
@@ -96,7 +93,6 @@ if __name__ == "__main__":
     config = {"tsi.enforce_os_gids": False,
               "tsi.use_id_to_resolve_gids": True,
               "tsi.fail_on_invalid_gids": True }
-    import os, sys
     import BecomeUser, Log, PAM, Utils
 
     argv = sys.argv

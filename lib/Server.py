@@ -5,7 +5,7 @@
 #  - if validated, command and data connections are opened
 #    via callback to UNICORE/X
 #  - a child process is forked which further communicates
-#    with UNICORE/Xvia the command/data sockets
+#    with UNICORE/X via the command/data sockets
 
 import errno
 import os
@@ -74,7 +74,6 @@ def connect(configuration, LOG):
     # register a handler to clean up finished worker TSIs
     signal.signal(signal.SIGCHLD, worker_completed)
 
-    buffer_size = 1024
     host = configuration['tsi.my_addr']
     port = int(configuration['tsi.my_port'])
     ssl_mode = configuration.get('tsi.keystore') is not None
@@ -116,7 +115,7 @@ def connect(configuration, LOG):
 
         configure_socket(unicorex, LOG)
         try:
-            msg = unicorex.recv(buffer_size)
+            msg = unicorex.recv(1024)
             msg = str(msg, "UTF-8").strip()
             LOG.info("message : %s" % msg)
         except EnvironmentError as e:
@@ -144,15 +143,15 @@ def connect(configuration, LOG):
             # write to UNICORE/X to tell it everything is OK
             unicorex.sendall(b'OK\n')
             # callback to UNICORE/X
-            unicorex_port = get_unicorex_port(configuration, params, LOG)
+            unicorex_port = get_unicorex_port(configuration, params)
             if unicorex_port is None:
                 raise EnvironmentError("Received invalid message")
             address = (unicorex_host, unicorex_port)
             LOG.info("Contacting UNICORE/X on %s port %s" % address)
             # allow some time for U/X to start listening
             time.sleep(1)
-            command = socket.create_connection(address, 10)
-            data = socket.create_connection(address, 10)
+            command = open_callback_connection(address, 10, configuration)
+            data = open_callback_connection(address, 10, configuration)
         except EnvironmentError as e:
             LOG.info("Error communicating with UNICORE/X : %s" % str(e))
             close_quietly(unicorex)
@@ -187,6 +186,39 @@ def connect(configuration, LOG):
             data.close()
             configuration['tsi.worker.id'] = worker_id + 1
 
+def open_callback_connection(address, timeout, configuration):
+    """ Connect back to UNICORE/X at the given address """
+    port_range = configuration.get("tsi.local_portrange", (0,-1,-1))
+    local_port = port_range[0]
+    _lower = port_range[1]
+    _upper = port_range[2]
+    use_port_range = local_port > 0
+    if use_port_range:
+        max_attempts = _upper-_lower+1
+    else:
+        max_attempts = 1
+    attempts = 0
+    while attempts<max_attempts:
+        try:
+            sock = socket.create_connection(address, timeout, ('', local_port))
+            if use_port_range:
+                local_port+=1
+                if local_port>_upper:
+                    local_port = _lower
+                configuration["tsi.local_portrange"]=(local_port, _lower, _upper)
+            return sock
+        except Exception as e:
+            attempts+=1
+            if use_port_range:
+                local_port+=1
+                if local_port>_upper:
+                    local_port = _lower
+            else:
+                raise e
+    raise Exception("Cannot set up UNICORE/X callback connection - "
+                    "no free local ports in range %s:%s" % (_lower, _upper))
+
+        
 
 def setup_streams(command, data):
     """ return control_in/out text streams"""
@@ -197,13 +229,11 @@ def setup_streams(command, data):
     return control_in, control_out, data_in, data_out
 
 
-def get_unicorex_port(configuration, params, LOG):
+def get_unicorex_port(configuration, params):
     """ Get the UNICORE/X port. If not set in config, extract it
         from the params sent by UNICORE/X
     """
     port = configuration.get('tsi.unicorex_port', None)
-    if port is None:
-        port = configuration.get('tsi.njs_port', None)
     if port is None:
         try:
             port = params

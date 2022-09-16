@@ -8,14 +8,13 @@ import Log, Server, SSL
 
 class TestServerSSL(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.config = {}
         self.config['tsi.my_addr'] = 'localhost'
         self.config['tsi.my_port'] = 14433
-        self.config['tsi.njs_machine'] = 'localhost'
-        self.config['tsi.njs_port'] = 24433
+        self.config['tsi.unicorex_machine'] = 'localhost'
+        self.config['tsi.unicorex_port'] = 24433
         self.config['tsi.keystore'] = 'tests/certs/tsi-key-plain.pem'
-        self.config['tsi.keypass'] = 'the!tsi'
         self.config['tsi.certificate'] = 'tests/certs/tsi-cert.pem'
         self.config['tsi.truststore'] = 'tests/certs/tsi-truststore.pem'
         self.config['tsi.allowed_dns'] = [
@@ -40,8 +39,8 @@ class TestServerSSL(unittest.TestCase):
             tsi = socket.create_connection((host, port))
             self.LOG.info("CLIENT: Connected to %s:%s" % (host, port))
             tsi = SSL.setup_ssl(self.config, tsi, self.LOG, False)
-            host = self.config['tsi.njs_machine']
-            port = self.config['tsi.njs_port']
+            host = self.config['tsi.unicorex_machine']
+            port = self.config['tsi.unicorex_port']
             tsi.sendall(b'newtsiprocess 24433')
             self.LOG.info(
                 "CLIENT: waiting for callback on %s:%s" % (host, port))

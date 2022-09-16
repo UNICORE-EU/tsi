@@ -13,6 +13,7 @@ class TestTSI(unittest.TestCase):
 
     def test_configure(self):
         config = TSI.read_config_file(self.file_name)
+        TSI.finish_setup(config, self.LOG)
         self.assertEqual('600', config['tsi.usersCacheTtl'])
         acl = config['tsi.acl']
         self.assertEqual('NONE', acl['/'])
@@ -25,17 +26,17 @@ class TestTSI(unittest.TestCase):
             TSI.main(["TSI", config])
         else:
             # parent, this is the fake U/X
-            LOG = Log.Logger("fake-unicorex")
+            LOG = Log.Logger("fake-unicorex", use_syslog=False)
             time.sleep(2)
             client_config = TSI.read_config_file(config)
-
+            TSI.finish_setup(client_config, self.LOG)
             # connect to the server
             host = client_config['tsi.my_addr']
             port = int(client_config['tsi.my_port'])
             tsi = socket.create_connection((host, port))
             LOG.info("CLIENT: Connected to %s:%s" % (host, port))
-            host = client_config['tsi.njs_machine']
-            port = int(client_config['tsi.njs_port'])
+            host = client_config['tsi.unicorex_machine']
+            port = int(client_config['tsi.unicorex_port'])
             tsi.sendall(b'newtsiprocess 24433')
             LOG.info("CLIENT: waiting for callback on %s:%s" % (host, port))
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

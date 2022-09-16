@@ -7,7 +7,7 @@ import Log, TSI
 
 class TestBSSLSF(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.bss = lsf.BSS.BSS()
         self.config = {'tsi.testing': True,
             # mock submit cmd

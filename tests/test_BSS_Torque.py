@@ -7,7 +7,7 @@ import Log, TSI
 
 class TestBSSTorque(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.config = {'tsi.testing': True,
             # mock submit cmd
             'tsi.submit_cmd': "echo 1234.server" }

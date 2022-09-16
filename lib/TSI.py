@@ -14,7 +14,7 @@ import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, SSL, IO, 
 MY_VERSION = "__VERSION__"
 
 # supported Python versions
-REQUIRED_VERSION = (3, 4, 0)
+REQUIRED_VERSION = (3, 6, 0)
 
 
 def assert_version():
@@ -38,7 +38,7 @@ def setup_defaults(config):
     config['tsi.debug'] = 0
     config['tsi.use_syslog'] = False
     config['tsi.worker.id'] = 1
-    config['tsi.njs_machine'] = 'localhost'
+    config['tsi.unicorex_machine'] = 'localhost'
     config['tsi.safe_dir'] = '/tmp'
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
 
@@ -75,7 +75,11 @@ def process_config_value(key, value, config):
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
     elif key == "tsi.keyfiles":
-        config["tsi.keyfiles"] = value.split(":")    
+        config["tsi.keyfiles"] = value.split(":")  
+    elif key== "tsi.njs_machine":
+        key="tsi_unicorex_machine"
+    elif key== "tsi_njs_port":
+        key="tsi_unicorex_port"
     else:
         config[key] = value
 
@@ -103,10 +107,11 @@ def setup_allowed_ips(config, LOG):
     """
     Configures IP addresses of UNICORE/X servers allowed to connect
     """
-    machines = config.get('tsi.njs_machine', 'localhost').split(",")
+    machines = config.get('tsi.unicorex_machine', 'localhost').split(",")
     ips = []
     LOG.info("Allowed UNICORE/X machines: %s" % machines)
     for machine in machines:
+        machine = machine.strip()
         try:
             ip = socket.gethostbyname(machine)
             ips.append(ip)
@@ -115,6 +120,27 @@ def setup_allowed_ips(config, LOG):
             LOG.error("Could not resolve: '%s'" % machine)
     config['tsi.allowed_ips'] = ips
 
+def setup_portrange(config, LOG):
+    """
+    Configures the (optional) range of local ports the TSI should use
+    """
+    rangespec = config.get("tsi.local_portrange", None)
+    first = 0
+    lower = -1
+    upper = -1
+    if rangespec is not None:
+        try:
+            lower,upper = rangespec.strip().split(":")
+            lower = int(lower)
+            upper = int(upper)
+            if upper<=lower:
+                raise Exception()
+            first = lower
+            LOG.info("Local port range used by TSI: %s - %s" % (lower, upper))
+        except:
+            raise Exception("Invalid 'tsi.local_portrange' specified, must be 'lower:upper'")
+    config["tsi.local_portrange"] = (first, lower, upper)
+      
 
 def read_config_file(file_name):
     """
@@ -142,6 +168,7 @@ def read_config_file(file_name):
 def finish_setup(config, LOG):
     setup_acl(config, LOG)
     setup_allowed_ips(config, LOG)
+    setup_portrange(config, LOG)
 
 
 def ping(message, connector, config, LOG):

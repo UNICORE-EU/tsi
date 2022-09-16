@@ -7,7 +7,7 @@ import MockConnector
 
 class TestLS(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
 
     def test_stat_file(self):
         path = "/tmp/"

@@ -6,15 +6,12 @@ import MockConnector
 
 class TestTSI(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.file_name = "tests/conf/tsi.properties"
 
     def test_read_config(self):
-        cwd = os.getcwd()
-        print(cwd)
         file = "tests/input/test_config.properties"
         c = TSI.read_config_file(file)
-        
         # parse allowed DNs correctly?
         acl = c["tsi.allowed_dns"]
         subject = ((('commonName', 'Some Guy'),),
@@ -23,10 +20,13 @@ class TestTSI(unittest.TestCase):
         subject = ((('commonName', 'Some Guy'),),
                    (('countryName','DE',),))
         self.assertFalse(SSL.match(subject, acl), msg="wrong match %s" % str(subject))
-        
         # accept white space in property lines?
         self.assertEqual("some_value", c["whitespace"])
-        os.chdir(cwd)
+        self.assertEqual("50000:52000", c["tsi.local_portrange"])
+
+        TSI.finish_setup(c, self.LOG)
+        self.assertEqual((50000, 50000, 52000), c["tsi.local_portrange"])
+
 
     def test_version_check(self):
         version_ok = TSI.assert_version()

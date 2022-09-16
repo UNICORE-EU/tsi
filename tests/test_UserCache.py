@@ -7,7 +7,7 @@ import Log, UserCache
 
 class TestUserCache(unittest.TestCase):
     def setUp(self):
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
 
     def getlogin(self):
         return pwd.getpwuid(os.getuid())[0]

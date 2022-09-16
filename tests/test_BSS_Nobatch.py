@@ -9,7 +9,7 @@ import MockConnector
 class TestBSSNobatch(unittest.TestCase):
     def setUp(self):
         # setup logger
-        self.LOG = Log.Logger("tsi.testing")
+        self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.config = {'tsi.testing': True, 'tsi.switch_uid': False}
         TSI.setup_defaults(self.config)
         self.bss = BSS.BSS()
