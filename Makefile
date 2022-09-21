@@ -1,4 +1,4 @@
-
+#
 # Makefile for 
 #  - running unit tests
 #  - building RPM and other packages
@@ -6,10 +6,7 @@
 
 VERSION=9.0.0
 RELEASE=1
-MVN=mvn
-
-VERSION ?= ${DEFAULT_VERSION}
-RELEASE ?= ${DEFAULT_RELEASE}
+MVN=mvn -q
 
 TESTS = $(wildcard tests/test_*.py)
 
@@ -18,7 +15,7 @@ export PYTHONPATH := lib:.:tests
 PYTHON=python3
 
 # by default, test and build everything
-default: test packages
+default: test all
 
 test: init runtest
 

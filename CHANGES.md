@@ -1,5 +1,6 @@
 Changelog for the UNICORE TSI
 =============================
+
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
 
@@ -11,9 +12,10 @@ Version 9.0.0
    for the TSI to use
  - fix: logging to file was not working correctly
  - simplified PAM.py module
- - rename a few config properties to be more intuitive
+ - rename a few config properties for more clarity
    (old property names are still accepted) 
  - code cleanup
+ - fix rpm/deb build errors
 
 Version 8.3.0
 -------------
