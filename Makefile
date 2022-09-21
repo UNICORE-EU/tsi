@@ -1,4 +1,4 @@
-#
+
 # Makefile for 
 #  - running unit tests
 #  - building RPM and other packages
@@ -44,9 +44,13 @@ $(TESTS):
 #
 define prepare-specific
 mkdir -p target
+mkdir -p build
 rm -rf build/*
-mkdir -p build/lib
 cp -R docs build-tools/* build/
+mkdir -p build/lib
+mkdir -p build/src/main/package/distributions/Default/src/etc/unicore/tsi
+mkdir -p build/src/main/package/distributions/Default/src/var/log/unicore/tsi
+mkdir -p build/src/main/package/distributions/Default/src/usr/share/unicore/tsi
 cp lib/* build/lib
 cp CHANGES LICENSE build/docs/
 cp build-tools/conf.properties.bssspecific build/src/main/package/conf.properties
@@ -55,7 +59,6 @@ sed -i "s/VERSION/${VERSION}/" build/pom.xml
 sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 mv build/src/main/package/distributions/Debian/debian/unicore-tsi.service build/src/main/package/distributions/Debian/debian/unicore-$1.service
 mv build/src/main/package/distributions/RedHat/src/usr/lib/systemd/system/unicore-tsi.service build/src/main/package/distributions/RedHat/src/usr/lib/systemd/system/unicore-$1.service
-find build | grep .svn | xargs rm -rf
 endef
 
 #
@@ -63,7 +66,6 @@ endef
 #
 define copy-bssfiles
 cp -p $1/* build/lib
-find build | grep .svn | xargs rm -rf
 endef
 
 #
@@ -156,14 +158,12 @@ tgz:
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
 
 
-#
-# clean
-#
-
 clean:
 	@find -name "*~" -delete
 	@find -name "*.pyc" -delete
 	@find -name "__pycache__" -delete
 	@rm build -rf
+
+realclean: clean
 	@rm target -rf
 

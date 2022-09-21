@@ -44,7 +44,6 @@ the local file system. It is installed on the cluster frontend.
 %attr(744 root root) "/etc/unicore/tsi/tsi.properties"
 %attr(744 root root) "/etc/unicore/tsi/startup.properties"
 %dir %attr(755 root root) "/var/log/unicore/tsi"
-%dir %attr(755 root root) "/var/run/unicore/tsi/"
 
 %dir %attr(755 root root) /usr/share/doc/unicore/tsi
 %attr(644 root root) /usr/share/doc/unicore/tsi
