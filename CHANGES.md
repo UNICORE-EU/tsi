@@ -15,6 +15,8 @@ Version 9.0.0
  - rename a few config properties for more clarity
    (old property names are still accepted) 
  - code cleanup
+ - fix: Install.sh should allow read access to lib/*.py files
+   (required when using TSI for uftp data staging)
  - fix rpm/deb build errors
 
 Version 8.3.0

@@ -49,7 +49,7 @@ mkdir -p build/src/main/package/distributions/Default/src/etc/unicore/tsi
 mkdir -p build/src/main/package/distributions/Default/src/var/log/unicore/tsi
 mkdir -p build/src/main/package/distributions/Default/src/usr/share/unicore/tsi
 cp lib/* build/lib
-cp CHANGES LICENSE build/docs/
+cp CHANGES.md LICENSE build/docs/
 cp build-tools/conf.properties.bssspecific build/src/main/package/conf.properties
 sed -i "s/name=tsi/name=$1/" build/src/main/package/conf.properties
 sed -i "s/VERSION/${VERSION}/" build/pom.xml
@@ -150,7 +150,7 @@ tgz:
 	@mkdir -p build
 	@rm -rf build/*
 	@cp -R build-tools docs lib loadleveler lsf slurm build/
-	@cp README.md CHANGES LICENSE Install.sh build/
+	@cp README.md CHANGES.md LICENSE Install.sh build/
 	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
 

@@ -228,13 +228,11 @@ done
 #
 # restrict file permissions
 #
-chmod 700 $installdir
+chmod 755 $installdir
 chmod 700 $installdir/*
-chmod 700 $installdir/lib
-chmod 700 $installdir/logs
-chmod -R 700 $installdir/bin
-chmod 700 $installdir/conf
-chmod 600 $installdir/lib/*
+chmod 755 $installdir/lib
+chmod 700 $installdir/bin/*
+chmod 644 $installdir/lib/*
 chmod 600 $installdir/conf/*
 
 if [ "$interactive" = "true" ]; then
@@ -243,7 +241,4 @@ if [ "$interactive" = "true" ]; then
   echo "Finish installation by editing $installdir/conf/tsi.properties."
   echo "##########################################################"
   echo ""
-  echo "NB: When porting to new platform all specific files have to be adapted!"
-  echo ""
 fi
-
