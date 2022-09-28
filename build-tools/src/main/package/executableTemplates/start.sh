@@ -37,9 +37,8 @@ echo "Output redirected to ${STARTLOG}"
 #
 # go
 #
-
-if [ -e "$SETPRIV" ]
- then
+if [ "$SETPRIV" != "" ] && [ -e "$SETPRIV" ]
+then
   echo "Starting as $USER ($USER_ID:$GROUP_ID) with capabilites: $CAPS"
   $SETPRIV --ambient-caps="$CAPS" --inh-caps="$CAPS" --reuid $USER_ID --regid $GROUP_ID --clear-groups $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
  else
