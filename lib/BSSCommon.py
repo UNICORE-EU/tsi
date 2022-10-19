@@ -181,7 +181,7 @@ class BSSBase(object):
     def convert_status(self, bss_state):
         raise RuntimeError("Method not implemented!")
 
-    __ustates = ["COMPLETED", "QUEUED", "SUSPENDED", "RUNNING"]
+    __ustates = [ "COMPLETED", "QUEUED", "SUSPENDED", "RUNNING", "UNKNOWN" ]
 
     def parse_status_listing(self, qstat_result):
         """ Does the actual parsing of the status listing. """

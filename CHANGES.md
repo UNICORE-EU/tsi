@@ -4,6 +4,10 @@ Changelog for the UNICORE TSI
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
 
+Version 9.0.1
+-------------
+ - fix: parse_qstat_listing() could not handle UNKNOWN job state
+
 Version 9.0.0
 -------------
  - new feature: add TSI API call to get user information including
