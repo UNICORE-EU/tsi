@@ -190,20 +190,27 @@ class BSS(BSSBase):
         return (bssid, state, queue_name)
 
     # Map Slurm job states to UNICORE states
-    decoder = {
-        'CANCELLED': 'COMPLETED',
-        'COMPLETED': 'COMPLETED',
-        'CONFIGURING': 'QUEUED',
-        'COMPLETING': 'RUNNING',
-        'FAILED': 'COMPLETED',
-        'NODE_FAIL': 'UNKNOWN',
-        'PENDING': 'QUEUED',
-        'PREEMPTED': 'SUSPENDED',
-        'RUNNING': 'RUNNING',
-        'SUSPENDED': 'SUSPENDED',
-        'TIMEOUT': 'UNKNOWN',
+    # States not listed here will be mapped to "UNKNOWN"
+    # Reference: https://slurm.schedmd.com/squeue.html
+    decoders = {
+
+        "QUEUED"    : [ "CONFIGURING", "PENDING",
+                        "RESV_DEL_HOLD", "REQUEUE_FED", "REQUEUE_HOLD" ],
+
+        "RUNNING"   : [ "COMPLETING", "RUNNING", "SIGNALING", "STAGE_OUT" ],
+
+        "SUSPENDED" : [ "PREEMPTED", "STOPPED", "SUSPENDED" ],
+
+        "COMPLETED" : [ "BOOT_FAIL", "CANCELLED", "COMPLETED", "DEADLINE",
+                        "FAILED", "NODE_FAIL", "OUT_OF_MEMORY", "REVOKED",
+                        "TIMEOUT" ]
     }
 
     def convert_status(self, bss_state):
         """ converts BSS status to UNICORE status """
-        return self.decoder.get(bss_state, "UNKNOWN")
+        ustate = "UNKNOWN"
+        for _ustate, _states in self.decoders.items():
+            if bss_state in _states:
+                ustate = _ustate
+                break
+        return ustate

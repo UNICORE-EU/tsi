@@ -38,7 +38,7 @@ class TestBSSSlurm(unittest.TestCase):
         self.assertTrue("182744 QUEUED large\n" in result)
         self.assertTrue("182745 RUNNING small\n" in result)
         self.assertTrue("182800 COMPLETED small\n" in result)
-        self.assertTrue("123456 UNKNOWN small\n" in result)
+        self.assertTrue("123456 QUEUED small\n" in result)
 
     def test_extract_job_id(self):
         os.chdir(basedir)
