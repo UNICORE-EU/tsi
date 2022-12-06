@@ -3,6 +3,10 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 9.1.0
+-------------
+ - new feature: port forwarding from a service accessible
+   by the TSI to UNICORE/X
 
 Version 9.0.1
 -------------

@@ -25,10 +25,12 @@ class TestServerSSL(unittest.TestCase):
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
-            command, data = Server.connect(self.config, self.LOG)
+            command, data, _ = Server.connect(self.config, self.LOG)
             # read a message from the command socket
             test_msg = command.recv(1024)
             self.LOG.info("TESTING: got test message: %s" % test_msg)
+            command.close()
+            data.close()
         else:
             # parent, this is the fake U/X
             # wait a bit to allow for setup of server socket at TSI

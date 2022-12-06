@@ -15,7 +15,7 @@ import sys
 import time
 from SSL import setup_ssl, verify_peer
 
-def configure_socket(sock, LOG):
+def configure_socket(sock):
     """
     Setup socket options (keepalive).
     """
@@ -55,18 +55,31 @@ def verify_ip(configuration, unicorex_host, LOG):
             return True
     raise EnvironmentError("Connecting IP not in list of allowed IPs")
 
+
 def close_quietly(closeable):
     try:
         closeable.close()
     except:
         pass
 
+
 def connect(configuration, LOG):
     """
-    Accept connection from UNICORE/X.
+    Accept connection from UNICORE/X and handle the control command
 
-    Return a pair (command,data) of sockets for communicating
-    with UNICORE/X.
+    'newtsiprocess <ux-port>'
+        Callback to UNICORE/X and open a pair (command,data) of sockets
+        for communicating with UNICORE/X, fork a new process,
+        and return the socket pair to the main loop for user command processing
+    
+    'start-forwarding <ux-port> <servicehost:serviceport> <user> <group>'
+        Connect to the given service, callback to U/X to open a socket,
+        fork a new process, and return both sockets to the main loop.
+        This then starts bi-directional TCP forwarding.
+        The forwarding process will be owned by the given user/group.
+
+    'shutdown'
+        Stop the TSI server and exit
 
     Parameters: dictionary of config settings, logger
     """
@@ -94,7 +107,7 @@ def connect(configuration, LOG):
         except EnvironmentError as e:
             if e.errno != errno.EINTR:
                 LOG.info("Error waiting for new connection: " + str(e))
-            continue
+            return
 
         if ssl_mode:
             try:
@@ -113,7 +126,7 @@ def connect(configuration, LOG):
             close_quietly(unicorex)
             continue
 
-        configure_socket(unicorex, LOG)
+        configure_socket(unicorex)
         try:
             msg = unicorex.recv(1024)
             msg = str(msg, "UTF-8").strip()
@@ -132,7 +145,10 @@ def connect(configuration, LOG):
             LOG.info("Received shutdown message, exiting.")
             server.close()
             exit(0)
+        elif cmd == "start-forwarding":
+            num_conns = 1
         elif cmd == "newtsiprocess":
+            num_conns = 2
             pass
         else:
             LOG.info("Command from UNICORE/X not understood: %s " % msg)
@@ -150,44 +166,49 @@ def connect(configuration, LOG):
             LOG.info("Contacting UNICORE/X on %s port %s" % address)
             # allow some time for U/X to start listening
             time.sleep(1)
-            command = open_callback_connection(address, 10, configuration)
-            data = open_callback_connection(address, 10, configuration)
+            xnjs_sockets = []
+            for _ in range(0, num_conns):
+                new_socket = open_connection(address, 10, configuration)
+                if ssl_mode:
+                    new_socket = setup_ssl(configuration, new_socket, LOG)
+                configure_socket(new_socket)
+                xnjs_sockets.append(new_socket)
         except EnvironmentError as e:
-            LOG.info("Error communicating with UNICORE/X : %s" % str(e))
+            LOG.info("Error creating connections to UNICORE/X : %s" % str(e))
             close_quietly(unicorex)
             continue
-
-        if ssl_mode:
-            try:
-                command = setup_ssl(configuration, command, LOG)
-                data = setup_ssl(configuration, data, LOG)
-            except EnvironmentError as e:
-                LOG.info("Error setting up SSL connections to UNICORE/X: %s" % str(e))
-                close_quietly(unicorex)
-                continue
-
+        close_quietly(unicorex)
         LOG.info("Connection to UNICORE/X at %s:%s established." % address)
         worker_id = configuration.get('tsi.worker.id', 1)
         LOG.info("Starting tsi-worker-%d" % worker_id)
+
         # fork, cleanup and return sockets to the caller (main loop)
         pid = os.fork()
         if pid == 0:
             # child: close unneeded server socket and
             # return command/data sockets to caller
             server.close()
-            configure_socket(command, LOG)
-            configure_socket(data, LOG)
-            return command, data
+            if cmd == "newtsiprocess":
+                command = xnjs_sockets[0]
+                data = xnjs_sockets[1]
+                return command, data, None
+            else:
+                _, service_spec, user_spec = params.split(" ", 2)
+                service_host, service_port = service_spec.split(":")
+                LOG.info("Connecting to %s:%s" % (service_host, service_port))
+                service_connection = open_connection((service_host, service_port), 10, configuration)
+                configure_socket(service_connection)
+                return service_connection, xnjs_sockets[0], "#TSI_IDENTITY %s\n" % user_spec
         else:
             # parent, close unneeded command/data sockets and
             # continue with accept loop
-            # TODO check if SSL session is OK with this!
-            command.close()
-            data.close()
+            for i in range(0, num_conns):
+                xnjs_sockets[i].close()
             configuration['tsi.worker.id'] = worker_id + 1
 
-def open_callback_connection(address, timeout, configuration):
-    """ Connect back to UNICORE/X at the given address """
+
+def open_connection(address, timeout, configuration):
+    """ Connect to the given address """
     port_range = configuration.get("tsi.local_portrange", (0,-1,-1))
     local_port = port_range[0]
     _lower = port_range[1]
@@ -207,26 +228,15 @@ def open_callback_connection(address, timeout, configuration):
                     local_port = _lower
                 configuration["tsi.local_portrange"]=(local_port, _lower, _upper)
             return sock
-        except Exception as e:
+        except OSError as e:
             attempts+=1
-            if use_port_range:
+            if use_port_range and e.errno==errno.EADDRINUSE:
                 local_port+=1
                 if local_port>_upper:
                     local_port = _lower
             else:
                 raise e
-    raise Exception("Cannot set up UNICORE/X callback connection - "
-                    "no free local ports in range %s:%s" % (_lower, _upper))
-
-        
-
-def setup_streams(command, data):
-    """ return control_in/out text streams"""
-    control_in = command.makefile("r")
-    control_out = command.makefile("wb")
-    data_in = data.makefile("rb")
-    data_out = data.makefile("wb")
-    return control_in, control_out, data_in, data_out
+    raise Exception("Cannot connect - no free local ports in configured range %s:%s" % (_lower, _upper))
 
 
 def get_unicorex_port(configuration, params):
@@ -236,7 +246,10 @@ def get_unicorex_port(configuration, params):
     port = configuration.get('tsi.unicorex_port', None)
     if port is None:
         try:
-            port = params
+            if " " in params:
+                port, _ = params.split(" ", 1)
+            else:
+                port = params
         except:
             pass
     return port

@@ -225,6 +225,10 @@ def execute_script(message, connector, config, LOG):
     else:
         connector.failed(output)
 
+def start_forwarding(message, forwarder, config, LOG):
+    """ starts forwarding threads """
+    forwarder.start_forwarding()
+
 
 def init_functions(bss):
     """
@@ -261,7 +265,7 @@ def handle_function(function, command, message, connector, config, LOG):
     pam_enabled = config.get('tsi.open_user_sessions', False)
     cmd_spawns = command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ]
     open_user_session = pam_enabled and cmd_spawns and switch_uid
-    if open_user_session:
+    if open_user_session and command!=None:
         # fork to avoid TSI process getting put into user slice
         pid = os.fork()
         if pid != 0:
@@ -370,12 +374,18 @@ def main(argv=None):
     os.chdir(config.get('tsi.safe_dir','/tmp'))
     bss.init(config, LOG)
     config['tsi.bss'] = bss
-    (command, data) = Server.connect(config, LOG)
+    (socket1, socket2, msg) = Server.connect(config, LOG)
     number = config.get('tsi.worker.id', 1)
-    LOG.reinit("TSI-worker", verbose, use_syslog)
-    LOG.info("Worker %s started." % str(number))
-    connector = Connector.Connector(command, data, LOG)
-    process(connector, config, LOG)
+    if msg==None:
+        LOG.reinit("TSI-worker", verbose, use_syslog)
+        LOG.info("Worker %s started." % str(number))
+        connector = Connector.Connector(socket1, socket2, LOG)
+        process(connector, config, LOG)
+    else:
+        LOG.reinit("TSI-port-forwarding", verbose, use_syslog)
+        LOG.info("Port forwarder worker %s started." % str(number))
+        forwarder = Connector.Forwarder(socket1, socket2, LOG)
+        handle_function(start_forwarding, None, msg, forwarder, config, LOG)
     return 0
 
 

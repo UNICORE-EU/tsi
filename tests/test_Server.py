@@ -33,7 +33,7 @@ class TestServer(unittest.TestCase):
         # fork, creating the TSI shepherd and a fake U/X
         pid = os.fork()
         if pid == 0:
-            command, data = Server.connect(self.config, self.LOG)
+            command, data, _ = Server.connect(self.config, self.LOG)
             # read a message from the command socket
             testmsg = command.recv(1024)
             self.LOG.info("TESTING: got test message: %s" % testmsg)
@@ -79,7 +79,7 @@ class TestServer(unittest.TestCase):
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
-            command, data = Server.connect(self.config, self.LOG)
+            command, data, _ = Server.connect(self.config, self.LOG)
             connector = Connector.Connector(command, data, self.LOG)
             # read a message
             try:

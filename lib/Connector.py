@@ -3,7 +3,7 @@
 import Utils
 
 
-class Connector(object):
+class Connector():
     def __init__(self, command, data, LOG):
         self.data = data
         self.command = command
@@ -64,11 +64,42 @@ class Connector(object):
         return written
 
     def close(self):
+        for s in self.command, self.data:
+            try:
+                s.close()
+            except:
+                pass
+
+
+class Forwarder():
+    def __init__(self, socket1, socket2, LOG):
+        self.socket1 = socket1
+        self.socket2 = socket2
+        self.LOG = LOG
+
+    def failed(self, message):
+        self.LOG.error(message)
+        
+    def start_forwarding(self):
+        self.LOG.info("Starting TCP forwarding %s <-> %s" % (self.socket1.getpeername() , self.socket2.getpeername()))
+        import threading
+        threading.Thread(target=transfer, args=(self.socket1, self.socket2, self.LOG)).start()
+        threading.Thread(target=transfer, args=(self.socket2, self.socket1, self.LOG)).start()
+
+def transfer(source, destination, LOG):
+    desc = "%s --> %s" % (source.getpeername(), destination.getpeername())
+    while True:
         try:
-            self.command.close()
+            buffer = source.recv(4096)
+            if len(buffer) > 0:
+                destination.send(buffer)
+            elif len(buffer)<=0:
+                break
         except:
-            pass
+            break
+    LOG.info("Stopping TCP forwarding %s" % desc)
+    for s in source, destination:
         try:
-            self.data.close()
+            s.close()
         except:
             pass
