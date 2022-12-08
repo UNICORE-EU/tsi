@@ -7,6 +7,8 @@ Version 9.1.0
 -------------
  - new feature: port forwarding from a service accessible
    by the TSI to UNICORE/X
+ - fix: when setpriv is not available, TSI should run as root,
+   not as the system user ("unicore") configured in 'startup.properties' 
 
 Version 9.0.1
 -------------
