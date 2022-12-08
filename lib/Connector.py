@@ -1,7 +1,9 @@
 """ Wrapper class around common I/O operations """
 
+from os import _exit
+import Server
+import threading
 import Utils
-
 
 class Connector():
     def __init__(self, command, data, LOG):
@@ -72,34 +74,49 @@ class Connector():
 
 
 class Forwarder():
-    def __init__(self, socket1, socket2, LOG):
-        self.socket1 = socket1
-        self.socket2 = socket2
+    def __init__(self, client_socket, message, config, LOG):
+        self.client_socket = client_socket
+        self.service_socket = None
+        self.message = message
+        self.config = config
         self.LOG = LOG
 
     def failed(self, message):
         self.LOG.error(message)
+        self.close(1)
         
     def start_forwarding(self):
-        self.LOG.info("Starting TCP forwarding %s <-> %s" % (self.socket1.getpeername() , self.socket2.getpeername()))
-        import threading
-        threading.Thread(target=transfer, args=(self.socket1, self.socket2, self.LOG)).start()
-        threading.Thread(target=transfer, args=(self.socket2, self.socket1, self.LOG)).start()
+        service_spec = Utils.extract_parameter(self.message, "FORWARDING_SERVICE_SPEC", None)
+        if(service_spec==None):
+            self.LOG.error("No service host:port to connect to")
+            self.close(1)
+        service_host, service_port = service_spec.split(":")
+        self.LOG.info("Connecting to %s:%s" % (service_host, service_port))
+        self.service_socket = Server.open_connection((service_host, service_port), 10, self.config)
+        Server.configure_socket(self.service_socket)
+        self.LOG.info("Starting TCP forwarding %s <--> %s" % (self.client_socket.getpeername() , self.service_socket.getpeername()))
+        threading.Thread(target=self.transfer, args=(self.client_socket, self.service_socket)).start()
+        threading.Thread(target=self.transfer, args=(self.service_socket, self.client_socket)).start()
 
-def transfer(source, destination, LOG):
-    desc = "%s --> %s" % (source.getpeername(), destination.getpeername())
-    while True:
-        try:
-            buffer = source.recv(4096)
-            if len(buffer) > 0:
-                destination.send(buffer)
-            elif len(buffer)<=0:
+    def close(self, status=0):
+        for s in self.client_socket, self.service_socket:
+            try:
+                s.close()
+            except:
+                pass
+        _exit(status)
+
+    def transfer(self, source, destination):
+        desc = "%s --> %s" % (source.getpeername(), destination.getpeername())
+        while True:
+            try:
+                buffer = source.recv(4096)
+                if len(buffer) > 0:
+                    destination.send(buffer)
+                elif len(buffer)<=0:
+                    break
+            except:
                 break
-        except:
-            break
-    LOG.info("Stopping TCP forwarding %s" % desc)
-    for s in source, destination:
-        try:
-            s.close()
-        except:
-            pass
+        self.LOG.info("Stopping TCP forwarding %s" % desc)
+        self.close()
+    

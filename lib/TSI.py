@@ -265,7 +265,7 @@ def handle_function(function, command, message, connector, config, LOG):
     pam_enabled = config.get('tsi.open_user_sessions', False)
     cmd_spawns = command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ]
     open_user_session = pam_enabled and cmd_spawns and switch_uid
-    if open_user_session and command!=None:
+    if open_user_session and command!="_START_FORWARDING":
         # fork to avoid TSI process getting put into user slice
         pid = os.fork()
         if pid != 0:
@@ -289,7 +289,7 @@ def handle_function(function, command, message, connector, config, LOG):
     except:
         connector.failed(str(sys.exc_info()[1]))
         LOG.error("Error executing %s" % command)
-    if switch_uid:
+    if switch_uid and command!="_START_FORWARDING":
         BecomeUser.restore_id(config, LOG)
         if open_user_session:
             pam_session.close_session()
@@ -384,8 +384,8 @@ def main(argv=None):
     else:
         LOG.reinit("TSI-port-forwarding", verbose, use_syslog)
         LOG.info("Port forwarder worker %s started." % str(number))
-        forwarder = Connector.Forwarder(socket1, socket2, LOG)
-        handle_function(start_forwarding, None, msg, forwarder, config, LOG)
+        forwarder = Connector.Forwarder(socket1, msg, config, LOG)
+        handle_function(start_forwarding, "_START_FORWARDING", msg, forwarder, config, LOG)
     return 0
 
 

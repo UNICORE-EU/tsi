@@ -194,11 +194,8 @@ def connect(configuration, LOG):
                 return command, data, None
             else:
                 _, service_spec, user_spec = params.split(" ", 2)
-                service_host, service_port = service_spec.split(":")
-                LOG.info("Connecting to %s:%s" % (service_host, service_port))
-                service_connection = open_connection((service_host, service_port), 10, configuration)
-                configure_socket(service_connection)
-                return service_connection, xnjs_sockets[0], "#TSI_IDENTITY %s\n" % user_spec
+                msg = "#TSI_FORWARDING_SERVICE_SPEC %s\n#TSI_IDENTITY %s\n" % (service_spec, user_spec)
+                return xnjs_sockets[0], None, msg
         else:
             # parent, close unneeded command/data sockets and
             # continue with accept loop

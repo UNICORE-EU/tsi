@@ -43,8 +43,8 @@ class TestServer(unittest.TestCase):
         pid = os.fork()
         if pid == 0:
             threading.Thread(target=fake_service, args=(self.config, self.LOG), daemon=True).start()
-            socket1, socket2, msg = Server.connect(self.config, self.LOG)
-            forwarder = Connector.Forwarder(socket1, socket2, self.LOG)
+            socket1, _, msg = Server.connect(self.config, self.LOG)
+            forwarder = Connector.Forwarder(socket1, msg, self.config, self.LOG)
             TSI.handle_function(TSI.start_forwarding, None, msg, forwarder, self.config, self.LOG)
         else:
             # this is the fake U/X
