@@ -194,7 +194,9 @@ def connect(configuration, LOG):
                 return command, data, None
             else:
                 _, service_spec, user_spec = params.split(" ", 2)
-                msg = "#TSI_FORWARDING_SERVICE_SPEC %s\n#TSI_IDENTITY %s\n" % (service_spec, user_spec)
+                msg = ("#TSI_FORWARDING_CONNECT_TO %s\n"
+                       "#TSI_IDENTITY %s\n"
+                ) % (service_spec, user_spec)
                 return xnjs_sockets[0], None, msg
         else:
             # parent, close unneeded command/data sockets and

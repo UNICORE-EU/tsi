@@ -33,7 +33,8 @@ class TestServer(unittest.TestCase):
                        'tsi.my_port': 14433,
                        'tsi.unicorex_machine': 'localhost',
                        'tsi.local_portrange': (50000, 50000, 50010),
-                       'tsi.switch_uid': False
+                       'tsi.switch_uid': False,
+                       'tsi.port_forwarding.rate_limit': 1024*1024,
                        }
         TSI.setup_defaults(self.config)
 
