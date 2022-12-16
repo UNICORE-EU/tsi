@@ -3,6 +3,10 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 9.1.x
+-------------
+ - fix: async scripts are started in a new session
+
 Version 9.1.0
 -------------
  - new feature: port forwarding from a service accessible

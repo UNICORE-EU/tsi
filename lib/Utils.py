@@ -63,8 +63,7 @@ def run_command(cmd, discard=False, children=None):
     Returns a success flag and the output.
     If the command returns a non-zero exit code, the success flag is
     set to False and the error message is returned.
-    The output is returned as a string (usually UTF-8 encoded
-    if not otherwise configured)
+    The output is returned as a string (UTF-8 encoded)
     """
     output = ""
     try:
@@ -74,7 +73,7 @@ def run_command(cmd, discard=False, children=None):
             output = raw_output.decode("UTF-8")
         else:
             # run the command in the background
-            child = subprocess.Popen(cmd, shell=True)
+            child = subprocess.Popen(cmd, shell=True, start_new_session=True)
             # remember child to be able to clean up processes later
             if children is not None: 
                 children.append(child)

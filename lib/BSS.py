@@ -93,7 +93,7 @@ class BSS(BSSBase):
             stdout, outcome_dir, stderr)
         LOG.debug("Running: %s" % cmd)
         # fork a child to run the command
-        child = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
+        child = subprocess.Popen(cmd, shell=True, start_new_session=True)
         # remember child to be able to clean up processes later
         children.append(child)
         connector.write_message(job_id)
