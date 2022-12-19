@@ -3,9 +3,12 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
-Version 9.1.x
+Version 9.1.1
 -------------
  - fix: async scripts are started in a new session
+ - fix: handling deprecated property names was buggy
+   (in some cases tsi.unicorex_machine was always set
+   to "localhost")
 
 Version 9.1.0
 -------------

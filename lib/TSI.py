@@ -77,11 +77,11 @@ def process_config_value(key, value, config):
     elif key == "tsi.keyfiles":
         config["tsi.keyfiles"] = value.split(":")  
     elif key== "tsi.njs_machine":
-        key="tsi_unicorex_machine"
+        config["tsi_unicorex_machine"] = value
+        config.pop(key)
     elif key== "tsi_njs_port":
-        key="tsi_unicorex_port"
-    else:
-        config[key] = value
+        config["tsi_unicorex_port"] = value
+        config.pop(key)
 
 
 def setup_acl(config, LOG):
