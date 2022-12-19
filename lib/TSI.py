@@ -45,7 +45,7 @@ def setup_defaults(config):
 
 def process_config_value(key, value, config):
     """
-    Handles configuration values, checking for correctness
+    Handles key=value line from config file, checking for correctness
     and storing the appropriate settings in the config dictionary
     """
     boolean_keys = ['tsi.open_user_sessions',
@@ -78,10 +78,10 @@ def process_config_value(key, value, config):
         config["tsi.keyfiles"] = value.split(":")  
     elif key== "tsi.njs_machine":
         config["tsi_unicorex_machine"] = value
-        config.pop(key)
     elif key== "tsi_njs_port":
         config["tsi_unicorex_port"] = value
-        config.pop(key)
+    else:
+        config[key]=value
 
 
 def setup_acl(config, LOG):
