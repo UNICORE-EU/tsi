@@ -118,6 +118,20 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --mem", "0"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
 
+    def test_submit_comment(self):
+        os.chdir(basedir)
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
+        os.mkdir(uspace)
+        msg = """#!/bin/bash
+#TSI_SUBMIT
+#TSI_OUTCOME_DIR %s
+#TSI_USPACE_DIR %s
+#TSI_SSR_COMMENT test comment
+""" % (uspace, uspace)
+        submit_cmds = self.bss.create_submit_script(msg, self.config, self.LOG)
+        self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --comment", "test comment"))
+
     def test_submit_nodes_filter(self):
         os.chdir(basedir)
         cwd = os.getcwd()

@@ -48,6 +48,7 @@ class BSS(BSSBase):
         user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
         qos = extract_parameter(message, "QOS", "NONE")
         exclusive = extract_parameter(message, "SSR_EXCLUSIVE", "NONE")
+        comment = extract_parameter(message, "SSR_COMMENT", "NONE")
 
         # jobname: check for illegal characters
         m = re.search(r"[^0-9a-zA-Z\.:.=~/]", jobname)
@@ -60,6 +61,9 @@ class BSS(BSSBase):
 
         if exclusive.lower() == "true":
             cmds.append("--exclusive")
+
+        if comment != "NONE":
+            cmds.append('--comment="%s"' % comment)
 
         if project != "NONE":
             cmds.append("--account=%s" % project)
