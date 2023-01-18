@@ -14,8 +14,8 @@
 #
 # check whether the server might be already running
 #
-if [ -e $PID ] 
- then 
+if [ -e $PID ]
+ then
   if [ -d /proc/$(cat $PID) ]
    then
      echo "A UNICORE TSI instance may be already running with process id "$(cat $PID)
@@ -40,7 +40,7 @@ echo "Output redirected to ${STARTLOG}"
 if [ "$SETPRIV" != "" ] && [ -e "$SETPRIV" ]
 then
   echo "Starting as $USER_NAME ($USER_ID:$GROUP_ID) with capabilites: $CAPS"
-  $SETPRIV --ambient-caps="$CAPS" --inh-caps="$CAPS" --reuid $USER_ID --regid $GROUP_ID --clear-groups $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
+  $SETPRIV $SETPRIV_OPTIONS $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
  else
   $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
 fi
