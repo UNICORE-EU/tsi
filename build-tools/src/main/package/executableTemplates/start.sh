@@ -40,7 +40,7 @@ echo "Output redirected to ${STARTLOG}"
 if [ "$SETPRIV" != "" ] && [ -e "$SETPRIV" ]
 then
   echo "Starting as $USER_NAME ($USER_ID:$GROUP_ID) with capabilites: $CAPS"
-  $SETPRIV $SETPRIV_OPTIONS $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
+  $SETPRIV $SETPRIV_OPTIONS $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
  else
   $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
 fi
