@@ -23,8 +23,8 @@ class TestBSSLSF(unittest.TestCase):
             qstat_output = sample.read()
         result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
-        self.assertTrue("1002 RUNNING large\n" in result)
-        self.assertTrue("1003 QUEUED batch\n" in result)
+        self.assertTrue("1002 RUNNING large" in result)
+        self.assertTrue("1003 QUEUED batch" in result)
 
     def has_directive(self, cmds, name, value=None):
         result = False

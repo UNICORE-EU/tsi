@@ -3,6 +3,20 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 9.1.3
+-------------
+ - improvement: also pass original BSS status to UNICORE/X
+   (e.g. "CONFIGURING" on Slurm)
+
+Version 9.1.2
+-------------
+ - fix: RPM package file permissions
+   (thanks to Daniel Fernandez)
+ - new feature: add support for Slurm "--comment" option
+   (thanks to Daniel Fernandez)
+ - improvement: configure setpriv via SETPRIV_OPTIONS variable
+   in startup.properties (thanks to Daniel Fernandez)
+
 Version 9.1.1
 -------------
  - fix: async scripts are started in a new session

@@ -21,9 +21,9 @@ class TestBSSLoadLeveler(unittest.TestCase):
             qstat_output = sample.read()
         result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
-        self.assertTrue("266540 RUNNING m001\n" in result)
-        self.assertTrue("266560 RUNNING m002\n" in result)
-        self.assertTrue("266530 COMPLETED m001\n" in result)
+        self.assertTrue("266540 RUNNING m001" in result)
+        self.assertTrue("266560 RUNNING m002" in result)
+        self.assertTrue("266530 COMPLETED m001" in result)
 
     def test_extract_job_id(self):
         submit_result = 'llsubmit: The job "login3.cluster.com.12345" has been submitted.'

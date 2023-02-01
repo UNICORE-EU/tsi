@@ -23,16 +23,16 @@ class TestBSSTorque(unittest.TestCase):
             qstat_output = sample.read()
         result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
-        self.assertTrue("83 COMPLETED batch\n" in result)
-        self.assertTrue("84 RUNNING fast\n" in result)
-        self.assertTrue("85 QUEUED slow\n" in result)
+        self.assertTrue("83 COMPLETED batch" in result)
+        self.assertTrue("84 RUNNING fast" in result)
+        self.assertTrue("85 QUEUED slow" in result)
 
     def test_parse_qstat2(self):
         with open("tests/input/qstat_torque2.txt", "r") as sample:
             qstat_output = sample.read()
         result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
-        self.assertTrue("11203 QUEUED large\n" in result)
+        self.assertTrue("11203 QUEUED large" in result)
 
     def test_extract_job_id(self):
         submit_result = '12345.torqueserver.cluster.com'

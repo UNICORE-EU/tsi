@@ -192,17 +192,17 @@ class BSSBase(object):
                 continue
             ustate = self.convert_status(state)
             if states.get(bssid, None) is None:
-                states[bssid]=(ustate,queue_name)
+                states[bssid]=(ustate,queue_name,state)
             else:
-                have_state,_ = states[bssid]
+                have_state,_,_ = states[bssid]
                 if self.__ustates.index(ustate)>self.__ustates.index(have_state):
-                    states[bssid]=(ustate,queue_name)
+                    states[bssid]=(ustate,queue_name,state)
  
         # generate reply to UNICORE/X
         result = "QSTAT\n"
         for bssid in states:
-            ustate, queue_name = states[bssid]
-            result += " %s %s %s\n" % (bssid, ustate, queue_name)
+            ustate, queue_name, original_state = states[bssid]
+            result += " %s %s %s %s\n" % (bssid, ustate, queue_name, original_state)
         return result
 
     def get_status_listing(self, message, connector, config, LOG):
