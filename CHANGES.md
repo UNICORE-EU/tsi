@@ -3,11 +3,6 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
-Version 9.1.3
--------------
- - improvement: also pass original BSS status to UNICORE/X
-   (e.g. "CONFIGURING" on Slurm)
-
 Version 9.1.2
 -------------
  - fix: RPM package file permissions
@@ -16,6 +11,8 @@ Version 9.1.2
    (thanks to Daniel Fernandez)
  - improvement: configure setpriv via SETPRIV_OPTIONS variable
    in startup.properties (thanks to Daniel Fernandez)
+ - improvement: also pass original BSS status to UNICORE/X
+   (e.g. "CONFIGURING" on Slurm)
 
 Version 9.1.1
 -------------
