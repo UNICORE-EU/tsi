@@ -86,7 +86,7 @@ class Forwarder():
     def failed(self, message):
         self.LOG.error(message)
         self.close(1)
-        
+
     def start_forwarding(self):
         service = Utils.extract_parameter(self.message, "FORWARDING_CONNECT_TO", None)
         if(service==None):

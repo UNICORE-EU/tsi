@@ -8,7 +8,6 @@ from pathlib import Path
 import sys
 
 from Utils import expand_variables, extract_parameter, run_command
-from asyncore import write
 
 def open_session(host, port, secret):
     ''' open an FTP session at the given UFTP server

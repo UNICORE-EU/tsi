@@ -75,7 +75,7 @@ def process_config_value(key, value, config):
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
     elif key == "tsi.keyfiles":
-        config["tsi.keyfiles"] = value.split(":")  
+        config["tsi.keyfiles"] = value.split(":")
     elif key== "tsi.njs_machine":
         config["tsi_unicorex_machine"] = value
     elif key== "tsi_njs_port":

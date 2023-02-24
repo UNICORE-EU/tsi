@@ -71,7 +71,7 @@ def connect(configuration, LOG):
         Callback to UNICORE/X and open a pair (command,data) of sockets
         for communicating with UNICORE/X, fork a new process,
         and return the socket pair to the main loop for user command processing
-    
+
     'start-forwarding <ux-port> <servicehost:serviceport> <user> <group>'
         Connect to the given service, callback to U/X to open a socket,
         fork a new process, and return both sockets to the main loop.
