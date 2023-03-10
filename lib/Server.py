@@ -185,9 +185,10 @@ def connect(configuration, LOG):
         # fork, cleanup and return sockets to the caller (main loop)
         pid = os.fork()
         if pid == 0:
-            # child: close unneeded server socket and
-            # return command/data sockets to caller
+            # child
             server.close()
+            # reset signal handler
+            signal.signal(signal.SIGCHLD, signal.SIG_DFL)
             if cmd == "newtsiprocess":
                 command = xnjs_sockets[0]
                 data = xnjs_sockets[1]
@@ -199,8 +200,7 @@ def connect(configuration, LOG):
                 ) % (service_spec, user_spec)
                 return xnjs_sockets[0], None, msg
         else:
-            # parent, close unneeded command/data sockets and
-            # continue with accept loop
+            # parent
             for i in range(0, num_conns):
                 xnjs_sockets[i].close()
             configuration['tsi.worker.id'] = worker_id + 1

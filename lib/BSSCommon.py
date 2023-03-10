@@ -53,7 +53,6 @@ class BSSBase(object):
                       "Please check that the correct TSI is installed, and " \
                       "check the configuration of 'tsi.qstat_cmd' : %s" % output
                 LOG.error(msg)
-                raise RuntimeError(msg)
         # for storing child process PIDs
         children = config.get('tsi.NOBATCH.children')
         if children is None:

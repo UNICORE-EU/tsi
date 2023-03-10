@@ -3,6 +3,13 @@ Changelog for the UNICORE TSI
 
 Issue tracker: https://sourceforge.net/p/unicore/issues
 
+Version 9.2.0
+-------------
+ - fix: don't exit TSI if batch system is not available when the
+   TSI is started
+ - fix: clear SIGCHLD handler in TSI worker so the return codes of
+   subprocesses are correct again
+
 Version 9.1.2
 -------------
  - fix: RPM package file permissions
