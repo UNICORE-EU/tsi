@@ -1,7 +1,14 @@
 Changelog for the UNICORE TSI
 =============================
 
-Issue tracker: https://sourceforge.net/p/unicore/issues
+Issue tracker:
+  https://github.com/UNICORE-EU/tsi/issues
+  https://sourceforge.net/p/unicore/issues
+
+Version 9.3.0
+-------------
+ - new feature: add standard resource 'GPUsPerNode'
+ - improvement: accept standard (non-"SSR_") resource EXCLUSIVE
 
 Version 9.2.0
 -------------

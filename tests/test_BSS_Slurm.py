@@ -82,6 +82,7 @@ class TestBSSSlurm(unittest.TestCase):
 #TSI_ARRAY_LIMIT 2
 #TSI_BSS_NODES_FILTER NONE
 #TSI_JOBNAME test_job
+#TSI_EXCLUSIVE true
 #TSI_SCRIPT
 echo "Hello World!"
 sleep 3
@@ -95,9 +96,9 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --array", "10%2"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --account", "myproject"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --chdir", uspace))
+        self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
         self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --gres"))
         self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --constraint"))
-        self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
 
     def test_submit_exclusive(self):
         os.chdir(basedir)
@@ -165,6 +166,7 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --array", "10%2"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --account", "myproject"))
         self.assertTrue(self.has_directive(submit_cmds, "#SBATCH --constraint", "gpu"))
+        self.assertFalse(self.has_directive(submit_cmds, "#SBATCH --exclusive"))
 
 
     def test_submit_raw(self):

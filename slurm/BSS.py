@@ -46,8 +46,11 @@ class BSS(BSSBase):
         req_time = extract_number(message, "TIME")
         nodes_filter = config.get("tsi.nodes_filter", "")
         user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
+        gpus_per_node = extract_number(message, "GPUS_PER_NODE")
         qos = extract_parameter(message, "QOS", "NONE")
-        exclusive = extract_parameter(message, "SSR_EXCLUSIVE", "NONE")
+        exclusive = extract_parameter(message, "EXCLUSIVE", "NONE")
+        # backwards compatibility: check also TSI_SSR_EXCLUSIVE
+        exclusive = extract_parameter(message, "SSR_EXCLUSIVE", exclusive)
         comment = extract_parameter(message, "SSR_COMMENT", "NONE")
 
         # jobname: check for illegal characters
@@ -78,6 +81,10 @@ class BSS(BSSBase):
             # request tasks and let Slurm figure out the nodes
             if total_processors > 0:
                 cmds.append("--ntasks=%s" % total_processors)
+
+        if gpus_per_node > 0:
+            # GPUS per node
+            cmds.append("--gpus-per-node=%s" % gpus_per_node)
 
         # nodes filter, can be both global and user defined
         if user_nodes_filter != "NONE":
