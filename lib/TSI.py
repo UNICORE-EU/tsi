@@ -41,6 +41,7 @@ def setup_defaults(config):
     config['tsi.unicorex_machine'] = 'localhost'
     config['tsi.safe_dir'] = '/tmp'
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
+    config['tsi.child_pids'] = []
 
 
 def process_config_value(key, value, config):
@@ -218,8 +219,8 @@ def execute_script(message, connector, config, LOG):
     the output is discarded, otherwise it is returned to UNICORE/X.
     """
     discard = "#TSI_DISCARD_OUTPUT true\n" in message
-    children = config.get('tsi.NOBATCH.children', None)
-    (success, output) = Utils.run_command(message, discard, children)
+    child_pids = config.get('tsi.child_pids', None)
+    (success, output) = Utils.run_command(message, discard, child_pids)
     if success:
         connector.ok(output)
     else:
@@ -316,6 +317,7 @@ def process(connector, config, LOG):
     # read message from control
     first = True
     while True:
+        bss.cleanup(config)
         if config.get('tsi.testing', False) and not first:
             LOG.info("Testing mode, exiting main loop")
             break

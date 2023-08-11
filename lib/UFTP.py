@@ -80,8 +80,8 @@ def uftp(message, connector, config, LOG):
     for c in cmds:
         cmd += c + u"\n"
 
-    children = config.get('tsi.NOBATCH.children', None)
-    (success, reply) = run_command(cmd, True, children)
+    child_pids = config.get('tsi.child_pids', None)
+    (success, reply) = run_command(cmd, True, child_pids)
 
 
 

@@ -56,9 +56,9 @@ ENDOFMESSAGE
             result = result.splitlines()[0]
             print("Submitted with ID %s" % result)
         control_source.close()
-        children = self.config.get('tsi.NOBATCH.children')
-        print("Children: " + str(children))
-        self.assertEqual(1, len(children))
+        child_pids = self.config.get('tsi.child_pids')
+        print("Child PIDs: " + str(child_pids))
+        self.assertEqual(1, len(child_pids))
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
@@ -69,8 +69,8 @@ ENDOFMESSAGE
         # test cleanup
         time.sleep(2)
         self.bss.cleanup(self.config)
-        print("Children after cleanup: " + str(children))
-        self.assertEqual(0, len(children))
+        print("Child PIDs after cleanup: " + str(child_pids))
+        self.assertEqual(0, len(child_pids))
 
 
 if __name__ == '__main__':

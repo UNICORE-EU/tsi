@@ -24,11 +24,14 @@ class BSSBase(object):
 
     def cleanup(self, config):
         """ cleanup child processes """
-        children = config.get('tsi.NOBATCH.children')
-        for child in children:
-            return_code = child.poll()
-            if return_code is not None:
-                children.remove(child)
+        children = config.get('tsi.child_pids', [])
+        for child_pid in children:
+            try:
+                _pid, _exit_code = os.waitpid(child_pid, os.WNOHANG)
+                if _pid!=0:
+                    children.remove(child_pid)
+            except ChildProcessError:
+                children.remove(child_pid)
 
     defaults = {
         'tsi.qstat_cmd': 'ps -e -os,args',
@@ -54,9 +57,9 @@ class BSSBase(object):
                       "check the configuration of 'tsi.qstat_cmd' : %s" % output
                 LOG.error(msg)
         # for storing child process PIDs
-        children = config.get('tsi.NOBATCH.children')
+        children = config.get('tsi.child_pids')
         if children is None:
-            config['tsi.NOBATCH.children'] = []
+            config['tsi.child_pids'] = []
 
     def create_submit_script(self, message, config, LOG):
         """ For batch systems, this method is responsible for 
@@ -132,7 +135,7 @@ class BSSBase(object):
             cmd += u"} & echo $! > %s \n" % pid_file_name
             with open(userjob_file_name, "w") as job:
                 job.write(u"" + cmd)
-            children = config.get('tsi.NOBATCH.children', None)
+            children = config.get('tsi.child_pids', None)
             (success, reply) = Utils.run_command(cmd, True, children)
         else:
             with open(userjob_file_name, "w") as job:

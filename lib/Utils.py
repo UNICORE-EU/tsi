@@ -57,7 +57,7 @@ def addperms(path, mode):
     os.chmod(path, mode)
 
 
-def run_command(cmd, discard=False, children=None):
+def run_command(cmd, discard=False, child_pids=None):
     """
     Runs command, capturing the output if the discard flag is True
     Returns a success flag and the output.
@@ -75,8 +75,8 @@ def run_command(cmd, discard=False, children=None):
             # run the command in the background
             child = subprocess.Popen(cmd, shell=True, start_new_session=True)
             # remember child to be able to clean up processes later
-            if children is not None: 
-                children.append(child)
+            if child_pids is not None:
+                child_pids.append(child.pid)
 
         success = True
     except subprocess.CalledProcessError as cpe:
