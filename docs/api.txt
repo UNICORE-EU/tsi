@@ -410,7 +410,7 @@ The output is a multiline string
 
 ==== Partition information (#TSI_GET_PARTITIONS)
 
- * +#TSI_GET_PARTITIONS+ the +BSS.get_partition_info()+ function sends a
+ * +#TSI_GET_PARTITIONS+ the +BSS.get_partitions()+ function sends a
  command to the BSS requesting information about the availeble partitions.
  This information is sent to UNICORE/X in JSON format.
 

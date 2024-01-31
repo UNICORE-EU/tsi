@@ -249,7 +249,7 @@ def init_functions(bss):
         "TSI_GETSTATUSLISTING": bss.get_status_listing,
         "TSI_GETPROCESSLISTING": bss.get_process_listing,
         "TSI_GETJOBDETAILS": bss.get_job_details,
-        "TSI_GET_PARTITIONS": bss.get_partition_info,
+        "TSI_GET_PARTITIONS": bss.get_partitions,
         "TSI_ABORTJOB": bss.abort_job,
         "TSI_HOLDJOB": bss.hold_job,
         "TSI_RESUMEJOB": bss.resume_job,

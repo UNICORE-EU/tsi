@@ -1,6 +1,5 @@
 from time import time
-import re
-import os
+import json, re, os
 import Quota
 import Utils
 from abc import ABCMeta
@@ -37,7 +36,7 @@ class BSSBase(object):
         'tsi.qstat_cmd': 'ps -e -os,args',
         'tsi.abort_cmd': 'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
         'tsi.get_processes_cmd': 'ps -e',
-        'tsi.partitions_info_cmd': 'echo'
+        'tsi.get_partitions_cmd': 'echo'
     }
 
     def init(self, config, LOG):
@@ -250,7 +249,6 @@ class BSSBase(object):
             return
         result = self.parse_job_details(output)
         try:
-            import json
             out = json.dumps(result)
         except:
             out = str(result)
@@ -282,15 +280,14 @@ class BSSBase(object):
         """ Converts the raw partition info into a dictionary """
         return {}
 
-    def get_partition_info(self, message, connector, config, LOG):
-        cmd = config["tsi.partitions_info_cmd"]
+    def get_partitions(self, message, connector, config, LOG):
+        cmd = config["tsi.get_partitions_cmd"]
         (success, output) = Utils.run_command(cmd)
         if not success:
             connector.failed(output)
             return
         result = self.parse_partitions(output)
         try:
-            import json
             out = json.dumps(result)
         except:
             out = str(result)

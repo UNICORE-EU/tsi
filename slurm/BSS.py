@@ -26,7 +26,7 @@ class BSS(BSSBase):
         'tsi.abort_cmd': 'scancel %s',
         'tsi.hold_cmd': 'scontrol hold',
         'tsi.resume_cmd': 'scontrol release',
-        'tsi.partitions_info_cmd': 'sinfo --all --format \"%P %D\"'
+        'tsi.get_partitions_cmd': 'sinfo --all --format \"%P %D\"'
     }
 
     def parse_common_options(self, message, config, LOG):
