@@ -2,6 +2,7 @@
    - submit jobs
    - get status listing
    - control jobs (abort, hold, resume, get details, ...)
+   - get information about queues and nodes
 
 This is the "Slurm" version.
 
@@ -25,6 +26,7 @@ class BSS(BSSBase):
         'tsi.abort_cmd': 'scancel %s',
         'tsi.hold_cmd': 'scontrol hold',
         'tsi.resume_cmd': 'scontrol release',
+        'tsi.partitions_info_cmd': 'sinfo --all --format \"%P %D\"'
     }
 
     def parse_common_options(self, message, config, LOG):
@@ -38,7 +40,6 @@ class BSS(BSSBase):
         project = extract_parameter(message, "PROJECT", "NONE")
         memory = extract_number(message, "MEMORY")
         nodes = extract_number(message, "NODES")
-        processors = extract_number(message, "PROCESSORS")
         processors_per_node = extract_number(message, "PROCESSORS_PER_NODE")
         total_processors = extract_number(message, "TOTAL_PROCESSORS")
         queue = extract_parameter(message, "QUEUE", "NONE")
@@ -218,10 +219,24 @@ class BSS(BSSBase):
     }
 
     def convert_status(self, bss_state):
-        """ converts BSS status to UNICORE status """
+        """ converts Slurm job status to UNICORE job status """
         ustate = "UNKNOWN"
         for _ustate, _states in self.decoders.items():
             if bss_state in _states:
                 ustate = _ustate
                 break
         return ustate
+
+    def parse_partitions(self, raw_info: str):
+        """ Converts the raw partition info (sinfo --all) into a dictionary """
+        lines = raw_info.split("\n")
+        result = {}
+        for line in lines[1:]:
+            p_name, nodes = line.split()
+            is_default = p_name.endswith("*")
+            if is_default:
+                p_name = p_name[:-1]
+            have_nodes = result.get(p_name, 0)
+            have_nodes += int(nodes)
+            result[p_name] = { "Nodes": have_nodes, "isDefault": is_default }
+        return result

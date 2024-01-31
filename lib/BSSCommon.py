@@ -36,7 +36,8 @@ class BSSBase(object):
     defaults = {
         'tsi.qstat_cmd': 'ps -e -os,args',
         'tsi.abort_cmd': 'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
-        'tsi.get_processes_cmd': 'ps -e'
+        'tsi.get_processes_cmd': 'ps -e',
+        'tsi.partitions_info_cmd': 'echo'
     }
 
     def init(self, config, LOG):
@@ -276,3 +277,21 @@ class BSSBase(object):
         """
         quota = Quota.get_quota(config, LOG)
         connector.ok("%s\n" % quota)
+
+    def parse_partitions(self, raw_info):
+        """ Converts the raw partition info into a dictionary """
+        return {}
+
+    def get_partition_info(self, message, connector, config, LOG):
+        cmd = config["tsi.partitions_info_cmd"]
+        (success, output) = Utils.run_command(cmd)
+        if not success:
+            connector.failed(output)
+            return
+        result = self.parse_partitions(output)
+        try:
+            import json
+            out = json.dumps(result)
+        except:
+            out = str(result)
+        connector.ok("%s\n" % out)

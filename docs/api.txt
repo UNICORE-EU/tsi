@@ -150,21 +150,21 @@ is:
  * +#TSI_USPACE_DIR+ The initial working directory of the script
    (i.e. the Uspace directory).
 
+ * +#TSI_QUEUE+ The BSS queue to which this job should be submitted.
+
+ * +#TSI_NODES+ The number of nodes to be allocated.
+
  * +#TSI_TIME+ The run time (wall clock) limit requested by this job
    in seconds
 
+ * +#TSI_TOTAL_PROCESSORS+ The number of processors to be allocated.
+
+ * +#TSI_PROCESSORS_PER_NODE+ The number of processors per node to be allocated.
+
+ * +#TSI_GPUS_PER_NODE+ The number of GPUs per node to be allocated.
+
  * +#TSI_MEMORY#+ The memory requirement of the job. The UNICORE/X
    server supplies this as a "megabytes per node" value
-
- * +#TSI_TOTAL_PROCESSORS+ The number of processors required by the
-   job.
-
- * +#TSI_PROCESSORS+ The number of processors per node required by the
-   job.
-
- * +#TSI_NODES+ The number of nodes required by this job.
-
- * +#TSI_QUEUE+ The BSS queue to which this job should be submitted.
 
  * +#TSI_UMASK+ The default umask for the job
 
@@ -185,8 +185,13 @@ is:
    string in the IDB which is to be used as nodes filter, if the BSS
    supports this.
 
-In addition to these, additional site-specific resources (e.g. GPUs)
-can be defined on the UNICORE/X server, which are passed via
+* +#TSI_EXCLUSIVE+ If this is set to "true", the job will request
+  exclusive (i.e. non timesharing) use of the node(s)
+
+* +#TSI_QOS <value>+ QoS attribute to pass on to the batch system
+
+In addition to these, additional site-specific resources can be defined
+on the UNICORE/X server, which are passed to the TSI via
 +#TSI_SSR_<resource_name> <resource_value>+ lines.
 
 Output
@@ -402,6 +407,24 @@ The output is a multiline string
    ...
  status: <status message>
 ------
+
+==== Partition information (#TSI_GET_PARTITIONS)
+
+ * +#TSI_GET_PARTITIONS+ the +BSS.get_partition_info()+ function sends a
+ command to the BSS requesting information about the availeble partitions.
+ This information is sent to UNICORE/X in JSON format.
+
+Input
+++++
+All job control functions require the BSS job ID as parameter in the form
++#TSI_BSSID <identifier>+
+
+Output
++++++
+
+ * Normal: detailed job information sent via +ok()+
+ * Error: +failed()+ called with the reason for failure.
+
 
 I/O functions
 ~~~~~~~~~~~~~

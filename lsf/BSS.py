@@ -52,9 +52,7 @@ class BSS(BSSBase):
         processors_per_node = extract_number(message,
                                                 "PROCESSORS_PER_NODE")
         total_processors = extract_number(message, "TOTAL_PROCESSORS")
-        
-        gpus = extract_parameter(message, "SSR_GPUS", "NONE")
-        
+        gpus = extract_parameter(message, "GPUS_PER_NODE", "NONE")    
         array_spec = extract_number(message, "ARRAY")
         array_limit = extract_number(message, "ARRAY_LIMIT")
 

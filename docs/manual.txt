@@ -433,13 +433,13 @@ budgeted.
 Filtering cluster working nodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Starting from version 6.5.1 the TSI can filter nodes based on the properties
-defined for nodes in BSS configuration. It can limit working nodes only to
-those having shared file system. 
+The TSI can filter nodes based on the properties defined for nodes in BSS configuration.
+For example, this can be used to limit the working nodes only to those having
+access to the shared file system.
 It can be defined in the +tsi.properties+ file by setting the property +tsi.nodes_filter+.
 
 Note that this feature is not working for all batch systems. Currently it is 
-supported in: Torque and SLURM.
+supported in: Slurm and Torque.
 
 Resource reservation
 ~~~~~~~~~~~~~~~~~~~~
@@ -448,7 +448,7 @@ The reservation module Reservation.py is responsible for interacting
 with the reservation system of your batch system. 
 
 Note that this feature is not available for all batch systems. Currently it is 
-included in: Torque and SLURM.
+included in: Slurm and Torque.
 
 Execution model
 ---------------
@@ -613,7 +613,7 @@ to a new BSS usually requires changes to the following files:
  * Reservation.py (reservation functions if applicable)
 
 It is recommended to start from a up-to-date and well-documented TSI, e.g.
-the Torque or Slurm variation. If you have further questions regarding porting
+the Slurm variation. If you have further questions regarding porting
 to a new batch system, please use the unicore-support@lists.sf.net
 or unicore-devel@lists.sf.net mailing lists.
 

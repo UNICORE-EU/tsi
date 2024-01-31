@@ -1,0 +1,5 @@
+PARTITION NODES
+foo 16
+batch* 110
+spam 39
+bar 181

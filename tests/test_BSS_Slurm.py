@@ -1,7 +1,4 @@
-import io
-import os
-import unittest
-import uuid
+import io, json, os, unittest, uuid
 import slurm.BSS
 import MockConnector
 import Log, TSI
@@ -333,6 +330,15 @@ echo "Hello World!"
         result = control_out.getvalue()
         print(result)
 
-
+    def test_parse_partitions(self):
+        os.chdir(basedir)
+        config = {'tsi.testing': True}
+        TSI.setup_defaults(config)
+        with open("tests/input/partitions_slurm.txt", "r") as f:
+            raw = f.read()
+        parsed = self.bss.parse_partitions(raw)
+        print("Partition info: ", json.dumps(parsed))
+        self.assertEqual(16, parsed["foo"]["Nodes"])
+        
 if __name__ == '__main__':
     unittest.main()

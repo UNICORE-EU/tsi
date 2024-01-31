@@ -145,9 +145,8 @@ def setup_portrange(config, LOG):
 
 def read_config_file(file_name):
     """
-    Read config properties file, check values, and return
+    Read the config properties file, check values, and return
     a dictionary with the configuration.
-    Parameters: file_name, LOG logger object
     Returns: a dictionary with config values
     """
     with open(file_name, "r") as f:
@@ -250,6 +249,7 @@ def init_functions(bss):
         "TSI_GETSTATUSLISTING": bss.get_status_listing,
         "TSI_GETPROCESSLISTING": bss.get_process_listing,
         "TSI_GETJOBDETAILS": bss.get_job_details,
+        "TSI_GET_PARTITIONS": bss.get_partition_info,
         "TSI_ABORTJOB": bss.abort_job,
         "TSI_HOLDJOB": bss.hold_job,
         "TSI_RESUMEJOB": bss.resume_job,

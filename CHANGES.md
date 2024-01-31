@@ -5,9 +5,17 @@ Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
   https://sourceforge.net/p/unicore/issues
 
+Version 10.0.0
+--------------
+ - new feature: TSI API call to get information about the available partitions
+
+Version 9.3.1
+-------------
+ - n/a
+
 Version 9.3.0
 -------------
- - new feature: add standard resource 'GPUsPerNode'
+ - new feature: add standard resource 'TSI_GPUS_PER_NODE'
  - improvement: accept standard (non-"SSR_") resource EXCLUSIVE
 
 Version 9.2.0
