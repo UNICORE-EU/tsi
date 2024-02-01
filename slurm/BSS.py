@@ -26,7 +26,7 @@ class BSS(BSSBase):
         'tsi.abort_cmd': 'scancel %s',
         'tsi.hold_cmd': 'scontrol hold',
         'tsi.resume_cmd': 'scontrol release',
-        'tsi.get_partitions_cmd': 'sinfo --all --format \"%P %D\"'
+        'tsi.get_partitions_cmd': 'sinfo --all --noheader --format \"%P %D\"'
     }
 
     def parse_common_options(self, message, config, LOG):
@@ -231,8 +231,11 @@ class BSS(BSSBase):
         """ Converts the raw partition info (sinfo --all) into a dictionary """
         lines = raw_info.split("\n")
         result = {}
-        for line in lines[1:]:
-            p_name, nodes = line.split()
+        for line in lines:
+            try:
+                p_name, nodes = line.split()
+            except ValueError:
+                continue
             is_default = p_name.endswith("*")
             if is_default:
                 p_name = p_name[:-1]
