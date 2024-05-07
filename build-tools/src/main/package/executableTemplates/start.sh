@@ -45,5 +45,4 @@ then
   $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
 fi
 
-
 echo "UNICORE TSI starting"

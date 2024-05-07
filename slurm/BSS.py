@@ -45,8 +45,14 @@ class BSS(BSSBase):
         queue = extract_parameter(message, "QUEUE", "NONE")
         reservation_id = extract_parameter(message, "RESERVATION_REFERENCE", "NONE")
         req_time = extract_number(message, "TIME")
+        # nodes filter, can be both global and user defined
         nodes_filter = config.get("tsi.nodes_filter", "")
         user_nodes_filter = extract_parameter(message, "BSS_NODES_FILTER", "NONE")
+        if user_nodes_filter != "NONE":
+            if nodes_filter != "":
+                nodes_filter = nodes_filter + "&" + user_nodes_filter
+            else:
+                nodes_filter =  user_nodes_filter
         gpus_per_node = extract_number(message, "GPUS_PER_NODE")
         qos = extract_parameter(message, "QOS", "NONE")
         exclusive = extract_parameter(message, "EXCLUSIVE", "NONE")
@@ -84,15 +90,8 @@ class BSS(BSSBase):
                 cmds.append("--ntasks=%s" % total_processors)
 
         if gpus_per_node > 0:
-            # GPUS per node
             cmds.append("--gpus-per-node=%s" % gpus_per_node)
 
-        # nodes filter, can be both global and user defined
-        if user_nodes_filter != "NONE":
-            if nodes_filter != "":
-                nodes_filter = nodes_filter + "&" + user_nodes_filter
-            else:
-                nodes_filter =  user_nodes_filter
         if nodes_filter != "":
                 cmds.append("--constraint=%s" % nodes_filter)
 

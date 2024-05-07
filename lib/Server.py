@@ -91,14 +91,16 @@ def connect(configuration, LOG):
     port = int(configuration['tsi.my_port'])
     ssl_mode = configuration.get('tsi.keystore') is not None
 
-    LOG.info("Listening on %s:%s" % (host, port))
-    LOG.info("SSL enabled: %s" % ssl_mode)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((host, port))
+    if port==0:
+        port = server.getsockname()[1]
+        configuration["tsi.my_port"] = port
     if ssl_mode:
         server = setup_ssl(configuration, server, LOG, True)
-
+    LOG.info("Listening on %s:%s" % (host, port))
+    LOG.info("SSL enabled: %s" % ssl_mode)
     server.listen(2)
 
     while True:

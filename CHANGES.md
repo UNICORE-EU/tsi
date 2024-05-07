@@ -5,6 +5,10 @@ Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
   https://sourceforge.net/p/unicore/issues
 
+Version 10.1.0
+--------------
+ - n/a
+
 Version 10.0.0
 --------------
  - new feature: TSI API call to get information about the available partitions
