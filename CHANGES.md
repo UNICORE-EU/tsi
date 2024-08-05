@@ -7,7 +7,7 @@ Issue tracker:
 
 Version 10.1.0
 --------------
- - n/a
+ - fix: decode error output in Utils.run_command
 
 Version 10.0.0
 --------------

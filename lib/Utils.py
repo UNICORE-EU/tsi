@@ -81,7 +81,7 @@ def run_command(cmd, discard=False, child_pids=None):
         success = True
     except subprocess.CalledProcessError as cpe:
         output = "Command '%s' failed with code %s: %s" % (
-            cmd, cpe.returncode, cpe.output)
+            cmd, cpe.returncode, cpe.output.decode("UTF-8"))
         success = False
 
     return success, output
