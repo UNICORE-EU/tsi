@@ -39,8 +39,6 @@ echo "Output redirected to ${STARTLOG}"
 #
 if [ "$SETPRIV" != "" ] && [ -e "$SETPRIV" ]
 then
-  export USER_ID=$(id -u $USER_NAME)
-  export GROUP_ID=$(id -g $USER_NAME)
   echo "Starting as $USER_NAME ($USER_ID:$GROUP_ID) with capabilites: $CAPS"
   $SETPRIV $SETPRIV_OPTIONS $PYTHON $PY/TSI.py $PARAM > ${STARTLOG} 2>&1  & echo $! > ${PID}
  else
