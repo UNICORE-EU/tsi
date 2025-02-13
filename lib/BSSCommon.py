@@ -34,7 +34,7 @@ class BSSBase(object):
 
     defaults = {
         'tsi.qstat_cmd': 'ps -e -os,args',
-        'tsi.abort_cmd': 'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
+        'tsi.abort_cmd': r'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
         'tsi.get_processes_cmd': 'ps -e',
         'tsi.get_partitions_cmd': 'echo'
     }
@@ -228,7 +228,7 @@ class BSSBase(object):
         """ Converts the raw job info into a dictionary """
         result = {}
         try:
-            tokens = re.compile("\s+").split(raw_info.strip())
+            tokens = re.compile("\\s+").split(raw_info.strip())
             for t in tokens:
                 try:
                     kv = t.split("=",1)

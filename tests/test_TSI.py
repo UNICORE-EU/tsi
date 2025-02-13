@@ -1,6 +1,6 @@
 import unittest
 import io, os
-import BecomeUser, Log, SSL, TSI, UserCache
+import BecomeUser, Log, TSI, UserCache, Utils
 import MockConnector
 
 
@@ -16,10 +16,10 @@ class TestTSI(unittest.TestCase):
         acl = c["tsi.allowed_dns"]
         subject = ((('commonName', 'Some Guy'),),
                    (('countryName','EU',),))
-        self.assertTrue(SSL.match(subject, acl), msg="should match %s" % str(subject))
+        self.assertTrue(Utils.check_access(subject, acl), msg="should match %s" % str(subject))
         subject = ((('commonName', 'Some Guy'),),
                    (('countryName','DE',),))
-        self.assertFalse(SSL.match(subject, acl), msg="wrong match %s" % str(subject))
+        self.assertFalse(Utils.check_access(subject, acl), msg="wrong match %s" % str(subject))
         # accept white space in property lines?
         self.assertEqual("some_value", c["whitespace"])
         self.assertEqual("50000:52000", c["tsi.local_portrange"])

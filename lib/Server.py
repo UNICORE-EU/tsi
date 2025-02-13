@@ -13,7 +13,6 @@ import signal
 import socket
 import sys
 import time
-from SSL import setup_ssl, verify_peer
 
 def configure_socket(sock):
     """
@@ -90,7 +89,15 @@ def connect(configuration, LOG):
     host = configuration['tsi.my_addr']
     port = int(configuration['tsi.my_port'])
     ssl_mode = configuration.get('tsi.keystore') is not None
+    LOG.info("Listening on %s:%s" % (host, port))
+    LOG.info("SSL enabled: %s" % ssl_mode)
 
+    if ssl_mode:
+        try:
+            from SSL import setup_ssl, verify_peer
+        except ImportError as e:
+            LOG.error("SSL module could not be imported!")
+            raise e
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((host, port))
@@ -99,8 +106,6 @@ def connect(configuration, LOG):
         configuration["tsi.my_port"] = port
     if ssl_mode:
         server = setup_ssl(configuration, server, LOG, True)
-    LOG.info("Listening on %s:%s" % (host, port))
-    LOG.info("SSL enabled: %s" % ssl_mode)
     server.listen(2)
 
     while True:

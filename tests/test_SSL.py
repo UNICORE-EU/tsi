@@ -1,7 +1,7 @@
 import unittest
 import socket
 
-import Log, SSL
+import Log, Utils
 
 class TestSSL(unittest.TestCase):
     def setUp(self):
@@ -18,9 +18,14 @@ class TestSSL(unittest.TestCase):
 
     def test_ParseACL(self):
         dn = 'CN=Foo,C=DE'
-        print(SSL.convert_dn(dn))
+        print(Utils.convert_dn(dn))
 
     def test_setup_ssl(self):
+        try:
+            import SSL
+        except ImportError:
+            print("SSL is not available, skipping test.")
+            return
         self.config['tsi.keystore'] = 'tests/certs/tsi-key-encrypted.pem'
         self.config['tsi.keypass'] = 'the!tsi'
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
@@ -30,6 +35,11 @@ class TestSSL(unittest.TestCase):
             ssl_server.close()
 
     def test_setup_ssl_unencrypted_key(self):
+        try:
+            import SSL
+        except ImportError:
+            print("SSL is not available, skipping test.")
+            return
         self.config['tsi.keystore'] = 'tests/certs/tsi-key-plain.pem'
         self.config['tsi.keypass'] = 'dummy-unused'
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:

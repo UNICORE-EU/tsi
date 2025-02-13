@@ -3,7 +3,7 @@ import os
 import signal
 import socket
 import time
-import Log, Server, SSL
+import Log, Server, Utils
 
 
 class TestServerSSL(unittest.TestCase):
@@ -18,9 +18,14 @@ class TestServerSSL(unittest.TestCase):
         self.config['tsi.certificate'] = 'tests/certs/tsi-cert.pem'
         self.config['tsi.truststore'] = 'tests/certs/tsi-truststore.pem'
         self.config['tsi.allowed_dns'] = [
-            SSL.convert_dn('CN=TSI,O=UNICORE,C=EU')]
+            Utils.convert_dn('CN=TSI,O=UNICORE,C=EU')]
 
     def test_Connect(self):
+        try:
+            import SSL
+        except ImportError:
+            print("SSL is not available, skipping test.")
+            return
         # fork, creating the TSI shepherd and a fake U/X
         pid = os.fork()
         if pid == 0:

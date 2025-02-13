@@ -6,7 +6,7 @@ import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, SSL, IO, UFTP, Utils
+import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, IO, UFTP, Utils
 
 #
 # the TSI version
@@ -72,7 +72,7 @@ def process_config_value(key, value, config):
                            "must be 'NONE', 'POSIX' or 'NFS'" % (value, key))
     elif key.startswith('tsi.allowed_dn.'):
         allowed_dns = config.get('tsi.allowed_dns', [])
-        dn = SSL.convert_dn(value)
+        dn = Utils.convert_dn(value)
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
     elif key == "tsi.keyfiles":

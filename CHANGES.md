@@ -5,6 +5,10 @@ Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
   https://sourceforge.net/p/unicore/issues
 
+Version 10.2.0
+--------------
+ - fix: Python syntax warnings/errors with 3.12 and later
+
 Version 10.1.0
 --------------
  - fix: decode error output in Utils.run_command
