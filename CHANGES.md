@@ -5,9 +5,11 @@ Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
   https://sourceforge.net/p/unicore/issues
 
-Version 10.2.0
+Version 10.1.3
 --------------
  - fix: Python syntax warnings/errors with 3.12 and later
+ - fix: import error when using ssl with system truststore
+ - minor code reorganisation to improve testability
 
 Version 10.1.0
 --------------

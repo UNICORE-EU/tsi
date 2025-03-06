@@ -140,7 +140,7 @@ def match_rdn(rdn, subject):
 
 
 def check_access(subject, acl):
-    """ matches the given cert subject to the ACL. The subject must be 
+    """ matches the given cert subject to the ACL. The subject must be
         in the format as returned by ssl.getpeercert()['subject']
     """
     for dn in acl:

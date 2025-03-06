@@ -325,7 +325,7 @@ def process(connector, config, LOG):
         try:
             message = Utils.encode(connector.read_message())
         except IOError:
-            LOG.info("Peer shutdown, exiting")
+            LOG.info("Peer shutdown, stopping worker.")
             connector.close()
             return
 
