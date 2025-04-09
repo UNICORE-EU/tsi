@@ -1,13 +1,15 @@
 """ Wrapper class around common I/O operations """
 
 from os import _exit
+from socket import socket
 from time import sleep, time
 import Server
 import threading
 import Utils
+from Log import Logger
 
 class Connector():
-    def __init__(self, command, data, LOG):
+    def __init__(self, command: socket, data: socket, LOG: Logger):
         self.data = data
         self.command = command
         self.control_in = command.makefile("r")
@@ -17,7 +19,7 @@ class Connector():
         self.LOG = LOG
         self.buf_size = 32768
 
-    def failed(self, message):
+    def failed(self, message: str):
         """ Write single line of TSI_FAILED and error message to control
         channel
         """
@@ -26,7 +28,7 @@ class Connector():
             msg += message.replace("\n", ":")
         self.write_message(msg)
 
-    def ok(self, message=None):
+    def ok(self, message: str=None):
         """ Write TSI_OK line and any message to control channel """
         msg = "TSI_OK"
         if message is not None:
@@ -75,7 +77,7 @@ class Connector():
 
 
 class Forwarder():
-    def __init__(self, client_socket, message, config, LOG):
+    def __init__(self, client_socket: socket, message: str, config: dict, LOG: Logger):
         self.client_socket = client_socket
         self.service_socket = None
         self.message = message
@@ -83,7 +85,7 @@ class Forwarder():
         self.LOG = LOG
         self.rate_limit = int(config.get("tsi.port_forwarding.rate_limit", 0))
 
-    def failed(self, message):
+    def failed(self, message: str):
         self.LOG.error(message)
         self.close(1)
 
@@ -112,7 +114,7 @@ class Forwarder():
                 pass
         _exit(status)
 
-    def transfer(self, source, destination):
+    def transfer(self, source: socket, destination: socket):
         desc = "%s --> %s" % (source.getpeername(), destination.getpeername())
         limit_rate = self.rate_limit > 0
         start_time = int(time()*1000)

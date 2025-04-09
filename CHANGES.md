@@ -3,7 +3,15 @@ Changelog for the UNICORE TSI
 
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
-  https://sourceforge.net/p/unicore/issues
+
+Version 10.2.0
+--------------
+ - run scripts via "/bin/bash -l" for a more consistent environment
+ - improvement: IPv6 support for UNICORE/X connections
+ - new property 'tsi.disable_ipv6' to explicitely DISABLE IPv6 support
+ - new API call TSI_RUN_ON_LOGIN_NODE, where the user script is written to
+   a file in the job directory and executed
+ - nicer names for unique files in job directory
 
 Version 10.1.3
 --------------

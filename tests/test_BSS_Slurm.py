@@ -4,6 +4,7 @@ import MockConnector
 import Log, TSI
 from time import sleep
 
+
 basedir = os.getcwd()
 
 class TestBSSSlurm(unittest.TestCase):

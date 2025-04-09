@@ -24,8 +24,7 @@ def get_file_chunk(message, connector, config, LOG):
     start = int(extract_parameter(message, 'START'))
     length = int(extract_parameter(message, 'LENGTH'))
 
-    LOG.debug("Getting data from %s start at %d length %d" % (path, start,
-                                                              length))
+    LOG.debug("Getting data from %s start at %d length %d" % (path, start, length))
 
     with io.FileIO(path, "rb") as f:
         if f.seekable():

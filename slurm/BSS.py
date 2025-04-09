@@ -15,6 +15,7 @@ from Utils import extract_parameter, extract_number
 
 
 class BSS(BSSBase):
+
     def get_variant(self):
         return "Slurm"
 
@@ -28,6 +29,7 @@ class BSS(BSSBase):
         'tsi.resume_cmd': 'scontrol release',
         'tsi.get_partitions_cmd': 'sinfo --all --noheader --format \"%P %D\"'
     }
+
 
     def parse_common_options(self, message, config, LOG):
         """ parse #TSI_" BSS parameters from the message
@@ -123,6 +125,7 @@ class BSS(BSSBase):
         Returns the script to submit to the BSS (as a list of lines)
         """
         submit_cmds = []
+        submit_cmds.append("#!/bin/bash -l")
         outcome_dir = extract_parameter(message, "OUTCOME_DIR")
         stderr = extract_parameter(message, "STDERR", "stderr")
         stdout = extract_parameter(message, "STDOUT", "stdout")
@@ -130,8 +133,6 @@ class BSS(BSSBase):
         uspace_dir = extract_parameter(message, "USPACE_DIR")
         array_spec = extract_number(message, "ARRAY")
         array_limit = extract_number(message, "ARRAY_LIMIT")
-
-        submit_cmds.append("#!/bin/bash")
 
         for option in self.parse_common_options(message, config, LOG):
             submit_cmds.append("#SBATCH %s" % option)
@@ -153,6 +154,7 @@ class BSS(BSSBase):
             submit_cmds.append("umask %s" % umask)
 
         return submit_cmds
+
 
     def create_alloc_script(self, message, config, LOG):
         """ parse the #TSI_" BSS parameters from the message
@@ -176,9 +178,11 @@ class BSS(BSSBase):
                 ]
         return cmds
 
+
     def get_extract_id_expr(self):
         """ regular expression for extracting the job ID after batch submit """
         return r"Submitted\D*(\d+)\D*"
+
 
     def extract_info(self, qstat_line):
         """ extracts the bssid, queue status and queue name
@@ -217,6 +221,7 @@ class BSS(BSSBase):
                         "TIMEOUT" ]
     }
 
+
     def convert_status(self, bss_state):
         """ converts Slurm job status to UNICORE job status """
         ustate = "UNKNOWN"
@@ -225,6 +230,7 @@ class BSS(BSSBase):
                 ustate = _ustate
                 break
         return ustate
+
 
     def parse_partitions(self, raw_info: str):
         """ Converts the raw partition info (sinfo --all) into a dictionary """

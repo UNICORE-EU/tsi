@@ -2,9 +2,9 @@
 
 import io
 import time
+from Connector import Connector
 
-
-class MockConnector(object):
+class MockConnector(Connector):
     def encode(self, message):
         if type(message) is type(u" "):
             return message

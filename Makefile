@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=10.1.4
+VERSION=10.2.0
 RELEASE=1
 MVN=mvn -q
 
@@ -48,7 +48,7 @@ mkdir -p build/lib
 mkdir -p build/src/main/package/distributions/Default/src/etc/unicore/tsi
 mkdir -p build/src/main/package/distributions/Default/src/var/log/unicore/tsi
 mkdir -p build/src/main/package/distributions/Default/src/usr/share/unicore/tsi
-cp lib/* build/lib
+cp lib/*.py build/lib
 cp CHANGES.md LICENSE build/docs/
 cp build-tools/conf.properties.bssspecific build/src/main/package/conf.properties
 sed -i "s/name=tsi/name=$1/" build/src/main/package/conf.properties
@@ -144,7 +144,7 @@ all: nobatch-all torque-all slurm-all lsf-all ll-all tgz
 # Generic binary tgz containing everything required to install the TSI
 # using the Install.sh script
 #
-tgz:
+tgz: clean
 	@echo "Building target/unicore-tsi-${VERSION}.tgz ..."
 	@mkdir -p target
 	@mkdir -p build
@@ -163,4 +163,3 @@ clean:
 
 realclean: clean
 	@rm target -rf
-

@@ -1,11 +1,9 @@
 import io
 import os
-import time
 import unittest
 import MockBSS
 import MockConnector
-import Log, TSI
-
+import Log, TSI, Utils
 
 class TestBSSCommon(unittest.TestCase):
     def setUp(self):
@@ -19,7 +17,7 @@ class TestBSSCommon(unittest.TestCase):
         
     def test_submit(self):
         cwd = os.getcwd()
-        uspace = cwd + "/build/uspace-%s" % int(100 * time.time())
+        uspace = cwd + "/build/uspace-%s" % Utils.random_string()
         os.mkdir(uspace)
         msg = """#!/bin/bash
 #TSI_SUBMIT
@@ -44,7 +42,7 @@ echo "Hello World!"
         
     def test_submit_raw(self):
         cwd = os.getcwd()
-        uspace = cwd + "/build/uspace-%s" % int(105 * time.time())
+        uspace = cwd + "/build/uspace-%s" % Utils.random_string()
         os.mkdir(uspace)
         msg = """#!/bin/bash
 #TSI_SUBMIT
@@ -67,6 +65,31 @@ echo "Hello World!"
             print("Submitted with ID %s" % result)
             print (uspace)
         control_source.close()
+
+    def test_run_on_login_node(self):
+        cwd = os.getcwd()
+        uspace = cwd + "/build/uspace-%s" % Utils.random_string()
+        os.mkdir(uspace)
+        msg = """#!/bin/bash
+#TSI_RUN_ON_LOGIN_NODE
+#TSI_OUTCOME_DIR %s
+#TSI_USPACE_DIR %s
+#TSI_SCRIPT
+echo "Hello World!"
+""" % (uspace, uspace)
+        control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
+        control_in = io.TextIOWrapper(control_source)
+        control_out = io.StringIO()
+        connector = MockConnector.MockConnector(control_in, control_out, None,
+                                                None, self.LOG)
+        self.bss.run_on_login_node(msg, connector, self.config, self.LOG)
+        result = control_out.getvalue()
+        if "TSI_FAILED" in result:
+            print(result)
+        else:
+            print("Submitted with PID %s" % result)
+        control_source.close()
+        os.chdir(cwd)
 
     def test_get_process_listing(self):
         cwd = os.getcwd()

@@ -11,14 +11,18 @@ import re
 import os
 import subprocess
 from BSSCommon import BSSBase
+from Connector import Connector
+from Log import Logger
 import Utils
 
 
 class BSS(BSSBase):
+
     def get_variant(self):
         return "NOBATCH"
 
-    def submit(self, message, connector, config, LOG):
+
+    def submit(self, message: str, connector: Connector, config: dict, LOG: Logger):
         """Submit a script, which for NOBATCH means fork a child process to
         execute the script.
         The message must be unicode.
@@ -79,7 +83,6 @@ class BSS(BSSBase):
         job_id = str(os.getpid()) + str(int(time() * 1000))[5:]
         cmds_file_name = "UNICORE_Job_%s" % job_id
 
-        # Write the commands to a file
         with open(cmds_file_name, "w") as cmds:
             cmds.write(message)
         Utils.addperms(cmds_file_name, 0o755)
@@ -87,12 +90,11 @@ class BSS(BSSBase):
             ulimits, ionice, nice, timeoutcmd, cmds_file_name, outcome_dir,
             stdout, outcome_dir, stderr)
         LOG.debug("Running: %s" % cmd)
-        # fork a child to run the command
         child = subprocess.Popen(cmd, shell=True, start_new_session=True)
-        # remember child PID to be able to clean up processes later
         child_pids = config.get('tsi.child_pids')
         child_pids.append(child.pid)
         connector.write_message(job_id)
+
 
     def extract_info(self, qstat_line):
         """ extracts the bssid, queue status and queue name """
@@ -104,6 +106,7 @@ class BSS(BSSBase):
         queue_name = "NOBATCH"
         return (bssid, state, queue_name)
 
+
     def convert_status(self, bss_state):
         """ converts BSS status to UNICORE status """
         if bss_state == "T":
@@ -112,17 +115,19 @@ class BSS(BSSBase):
             ustate = "RUNNING"
         return ustate
 
-    def get_job_details(self, message, connector, config, LOG):
+
+    def get_job_details(self, msg: str, connector: Connector, config: dict, LOG: Logger):
         # for nobatch, there is nothing to report
-        bssid = Utils.extract_parameter(message, "BSSID")
+        bssid = Utils.extract_parameter(msg, "BSSID")
         output = "No info available for job %s \n" % bssid
         connector.ok(output)
 
-    def hold_job(self, message, connector, config, LOG):
+
+    def hold_job(self, msg: str, connector: Connector, config: dict, LOG: Logger):
         # for nobatch, there is nothing to do
         connector.ok("\n")
 
-    def resume_job(self, message, connector, config, LOG):
+
+    def resume_job(self, msg: str, connector: Connector, config: dict, LOG: Logger):
         # for nobatch, there is nothing to do
         connector.ok("\n")
-

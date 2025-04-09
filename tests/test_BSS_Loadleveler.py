@@ -12,7 +12,7 @@ class TestBSSLoadLeveler(unittest.TestCase):
         self.config = {'tsi.testing': True}
         TSI.setup_defaults(self.config)
         self.bss.init(self.config, self.LOG)
-        
+
     def test_init(self):
         self.assertTrue(self.config['tsi.submit_cmd'] is not None)
 

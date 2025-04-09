@@ -62,7 +62,7 @@ def close_quietly(closeable):
         pass
 
 
-def connect(configuration, LOG):
+def connect(config, LOG):
     """
     Accept connection from UNICORE/X and handle the control command
 
@@ -86,31 +86,35 @@ def connect(configuration, LOG):
     # register a handler to clean up finished worker TSIs
     signal.signal(signal.SIGCHLD, worker_completed)
 
-    host = configuration['tsi.my_addr']
-    port = int(configuration['tsi.my_port'])
-    ssl_mode = configuration.get('tsi.keystore') is not None
-    LOG.info("Listening on %s:%s" % (host, port))
-    LOG.info("SSL enabled: %s" % ssl_mode)
-
+    host = config.get('tsi.my_addr', '')
+    port = int(config['tsi.my_port'])
+    ssl_mode = config.get('tsi.keystore') is not None
     if ssl_mode:
         try:
             from SSL import setup_ssl, verify_peer
         except ImportError as e:
             LOG.error("SSL module could not be imported!")
             raise e
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((host, port))
+    addr = (host, port)
+    fam = "IPv4"
+    if _check_ipv6_support(host, port, config):
+        fam = "IPv6/IPv4"
+        server = socket.create_server(addr, family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+    else:
+        server = socket.create_server(addr, reuse_port=True)
     if port==0:
         port = server.getsockname()[1]
-        configuration["tsi.my_port"] = port
+        config["tsi.my_port"] = port
     if ssl_mode:
-        server = setup_ssl(configuration, server, LOG, True)
+        server = setup_ssl(config, server, LOG, True)
+    LOG.info("Listening (%s) on %s:%s" % (fam, host, port))
+    LOG.info("SSL enabled: %s" % ssl_mode)
     server.listen(2)
 
     while True:
         try:
-            (unicorex, (unicorex_host, _)) = server.accept()
+            (unicorex, peer_info) = server.accept()
+            unicorex_host = peer_info[0]
         except EnvironmentError as e:
             if e.errno != errno.EINTR:
                 LOG.info("Error waiting for new connection: " + str(e))
@@ -118,7 +122,7 @@ def connect(configuration, LOG):
 
         if ssl_mode:
             try:
-                verify_peer(configuration, unicorex, LOG)
+                verify_peer(config, unicorex, LOG)
             except EnvironmentError as e:
                 LOG.info("Error verifying connection from %s : %s" % (
                     unicorex_host, str(e)))
@@ -126,7 +130,7 @@ def connect(configuration, LOG):
                 continue
 
         try:
-            verify_ip(configuration, unicorex_host, LOG)
+            verify_ip(config, unicorex_host, LOG)
         except EnvironmentError as e:
             LOG.info("Error verifying connection from %s : %s" % (
                 unicorex_host, str(e)))
@@ -156,7 +160,14 @@ def connect(configuration, LOG):
             num_conns = 1
         elif cmd == "newtsiprocess":
             num_conns = 2
-            pass
+        elif cmd == "set":
+            settings = config.get("settings", {})
+            key, value = params.split(" ",1)
+            settings[key] = value
+            config['settings'] = settings
+            close_quietly(unicorex)
+            LOG.info("SET: %s=%s"%(key,value))
+            continue
         else:
             LOG.info("Command from UNICORE/X not understood: %s " % msg)
             close_quietly(unicorex)
@@ -166,7 +177,7 @@ def connect(configuration, LOG):
             # write to UNICORE/X to tell it everything is OK
             unicorex.sendall(b'OK\n')
             # callback to UNICORE/X
-            unicorex_port = get_unicorex_port(configuration, params)
+            unicorex_port = get_unicorex_port(config, params)
             if unicorex_port is None:
                 raise EnvironmentError("Received invalid message")
             address = (unicorex_host, unicorex_port)
@@ -175,9 +186,9 @@ def connect(configuration, LOG):
             time.sleep(1)
             xnjs_sockets = []
             for _ in range(0, num_conns):
-                new_socket = open_connection(address, 10, configuration)
+                new_socket = open_connection(address, 10, config)
                 if ssl_mode:
-                    new_socket = setup_ssl(configuration, new_socket, LOG)
+                    new_socket = setup_ssl(config, new_socket, LOG)
                 configure_socket(new_socket)
                 xnjs_sockets.append(new_socket)
         except EnvironmentError as e:
@@ -186,7 +197,7 @@ def connect(configuration, LOG):
             continue
         close_quietly(unicorex)
         LOG.info("Connection to UNICORE/X at %s:%s established." % address)
-        worker_id = configuration.get('tsi.worker.id', 1)
+        worker_id = config.get('tsi.worker.id', 1)
         LOG.info("Starting tsi-worker-%d" % worker_id)
 
         # fork, cleanup and return sockets to the caller (main loop)
@@ -210,7 +221,7 @@ def connect(configuration, LOG):
             # parent
             for i in range(0, num_conns):
                 xnjs_sockets[i].close()
-            configuration['tsi.worker.id'] = worker_id + 1
+            config['tsi.worker.id'] = worker_id + 1
 
 
 def open_connection(address, timeout, configuration):
@@ -259,3 +270,13 @@ def get_unicorex_port(configuration, params):
         except:
             pass
     return port
+
+def _check_ipv6_support(host: str, port: int, config: dict) -> bool:
+    if config.get('tsi.disable_ipv6', False):
+        return False
+    if len(host)==0 or host=="*":
+        return True
+    for addrinfo in socket.getaddrinfo(host, port):
+        if addrinfo[0]==socket.AF_INET6:
+            return True
+    return False

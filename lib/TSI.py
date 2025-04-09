@@ -6,7 +6,8 @@ import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, IO, UFTP, Utils
+import ACL, BecomeUser, BSS, Connector, PAM, Reservation, Server, IO, UFTP, Utils
+from Log import Logger
 
 #
 # the TSI version
@@ -14,7 +15,7 @@ import ACL, BecomeUser, BSS, Connector, Log, PAM, Reservation, Server, IO, UFTP,
 MY_VERSION = "__VERSION__"
 
 # supported Python versions
-REQUIRED_VERSION = (3, 6, 0)
+REQUIRED_VERSION = (3, 7, 0)
 
 
 def assert_version():
@@ -39,6 +40,7 @@ def setup_defaults(config):
     config['tsi.use_syslog'] = False
     config['tsi.worker.id'] = 1
     config['tsi.unicorex_machine'] = 'localhost'
+    config['tsi.disable_ipv6'] = False
     config['tsi.safe_dir'] = '/tmp'
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
     config['tsi.child_pids'] = []
@@ -55,7 +57,8 @@ def process_config_value(key, value, config):
             'tsi.fail_on_invalid_gids',
             'tsi.use_id_to_resolve_gids',
             'tsi.use_syslog',
-            'tsi.debug'
+            'tsi.debug',
+            'tsi.disable_ipv6'
     ]
     for bool_key in boolean_keys:
         if bool_key == key:
@@ -75,14 +78,14 @@ def process_config_value(key, value, config):
         dn = Utils.convert_dn(value)
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
-    elif key == "tsi.keyfiles":
+    elif key=="tsi.keyfiles":
         config["tsi.keyfiles"] = value.split(":")
-    elif key== "tsi.njs_machine":
+    elif key=="tsi.njs_machine":
         config["tsi_unicorex_machine"] = value
-    elif key== "tsi_njs_port":
+    elif key=="tsi_njs_port":
         config["tsi_unicorex_port"] = value
     else:
-        config[key]=value
+        config[key] = value
 
 
 def setup_acl(config, LOG):
@@ -114,9 +117,11 @@ def setup_allowed_ips(config, LOG):
     for machine in machines:
         machine = machine.strip()
         try:
-            ip = socket.gethostbyname(machine)
-            ips.append(ip)
-            LOG.info("Access allowed from %s (%s)" % (machine, ip))
+            for info in socket.getaddrinfo(machine, 0, type=socket.SOCK_STREAM, proto=socket.IPPROTO_TCP):
+                ip = info[4][0]
+                LOG.info("Access allowed from %s (%s)" % (machine, ip))
+                if ip not in ips:
+                    ips.append(ip)
         except:
             LOG.error("Could not resolve: '%s'" % machine)
     config['tsi.allowed_ips'] = ips
@@ -246,6 +251,7 @@ def init_functions(bss):
         "TSI_DF": IO.df,
         "TSI_UFTP": UFTP.uftp,
         "TSI_SUBMIT": bss.submit,
+        "TSI_RUN_ON_LOGIN_NODE": bss.run_on_login_node,
         "TSI_GETSTATUSLISTING": bss.get_status_listing,
         "TSI_GETPROCESSLISTING": bss.get_process_listing,
         "TSI_GETJOBDETAILS": bss.get_job_details,
@@ -291,7 +297,7 @@ def handle_function(function, command, message, connector, config, LOG):
         connector.failed(str(sys.exc_info()[1]))
         LOG.error("Error executing %s" % command)
     if switch_uid and command!="_START_FORWARDING":
-        BecomeUser.restore_id(config, LOG)
+        BecomeUser.restore_id(config)
         if open_user_session:
             pam_session.close_session()
     if open_user_session:
@@ -366,7 +372,7 @@ def main(argv=None):
     config = read_config_file(config_file)
     verbose = config['tsi.debug']
     use_syslog = config['tsi.use_syslog']
-    LOG = Log.Logger("TSI-main", verbose, use_syslog)
+    LOG = Logger("TSI-main", verbose, use_syslog)
     LOG.info("Debug logging: %s" % verbose)
     LOG.info("Opening PAM sessions for user tasks: %s" % config['tsi.open_user_sessions'])
     finish_setup(config, LOG)

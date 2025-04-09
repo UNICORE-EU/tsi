@@ -51,7 +51,7 @@ class TestBecomeUser(unittest.TestCase):
         result = BecomeUser.become_user(user, ["DEFAULT_GID"], self.config,
                                         self.LOG)
         self.assertTrue(result)
-        BecomeUser.restore_id(self.config, self.LOG)
+        BecomeUser.restore_id(self.config)
 
 
 if __name__ == '__main__':

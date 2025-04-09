@@ -1,8 +1,8 @@
 import unittest
 import io
 import os
-import Log, TSI
 import MockConnector
+import Log, TSI
 
 
 class TestIO(unittest.TestCase):

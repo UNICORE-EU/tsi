@@ -5,7 +5,6 @@ import socket
 import time
 import Log, Server, Utils
 
-
 class TestServerSSL(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)

@@ -93,7 +93,7 @@ if __name__ == "__main__":
     config = {"tsi.enforce_os_gids": False,
               "tsi.use_id_to_resolve_gids": True,
               "tsi.fail_on_invalid_gids": True }
-    import BecomeUser, Log, PAM, Utils
+    import BecomeUser, PAM, Log
 
     argv = sys.argv
     if len(argv)>1:
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         Utils.run_command("sleep 120", discard=True)
         LOG.info("Successfully launched 'sleep 120' for user %s" % USER)
         # switch back to privileged
-        BecomeUser.restore_id(config, LOG)
+        BecomeUser.restore_id(config)
         # close session
         pam.close_session()
         os._exit(0)

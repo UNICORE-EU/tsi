@@ -1,10 +1,11 @@
 """This module contains the user-switching logic"""
 
 import os
-import UserCache
 
+from Log import Logger
+from UserCache import UserCache
 
-def initialize(config, LOG):
+def initialize(config: dict, LOG: Logger):
     """ Store initial values for UID/GID, and setup the user cache."""
     (_, euid, _) = os.getresuid()
     (_, egid, _) = os.getresgid()
@@ -31,15 +32,15 @@ def initialize(config, LOG):
     if use_id:
         LOG.info("Groups will be resolved via 'id -G <username>")
 
-    user_cache = UserCache.UserCache(cache_ttl, LOG, use_id)
+    user_cache = UserCache(cache_ttl, LOG, use_id)
     config['tsi.user_cache'] = user_cache
 
 
 # if requested group is the primary group or if checking is disabled return OK
 # otherwise check that this user is a member of the requested group
-def check_membership(group, group_gid, user, config):
+def check_membership(group, group_gid, user, config: dict):
     enforce_os_gids = config['tsi.enforce_os_gids']
-    user_cache = config['tsi.user_cache']
+    user_cache: UserCache = config['tsi.user_cache']
     if enforce_os_gids and group_gid != user_cache.get_gid_4user(user):
         user_gids = user_cache.get_gids_4user(user)
         if group_gid not in user_gids:
@@ -47,8 +48,7 @@ def check_membership(group, group_gid, user, config):
     return True
 
 
-def get_primary_group(primary, user, user_cache, fail_on_invalid_gids, config,
-                      LOG):
+def get_primary_group(primary, user, user_cache: UserCache, fail_on_invalid_gids, config: dict, LOG: Logger):
     if primary == "DEFAULT_GID":
         new_gid = user_cache.get_gid_4user(user)
     else:
@@ -77,8 +77,8 @@ def get_primary_group(primary, user, user_cache, fail_on_invalid_gids, config,
     return new_gid
 
 
-def get_supplementary_groups(requested_groups, primary, user, config, LOG):
-    user_cache = config['tsi.user_cache']
+def get_supplementary_groups(requested_groups, primary, user, config: dict, LOG: Logger):
+    user_cache: UserCache = config['tsi.user_cache']
     fail_on_invalid_gids = config['tsi.fail_on_invalid_gids']
     sup_gids = {}
     added_default = False
@@ -120,7 +120,7 @@ def get_supplementary_groups(requested_groups, primary, user, config, LOG):
     return gids
 
 
-def become_user(user, requested_groups, config, LOG):
+def become_user(user, requested_groups, config: dict, LOG: Logger):
     """
     Change the process' identity (real and effective) to a user's (if
     process was started with sufficient privileges to allow this,
@@ -139,7 +139,7 @@ def become_user(user, requested_groups, config, LOG):
 
     euid = config['tsi.effective_uid']
     setting_uids = config['tsi.switch_uid']
-    user_cache = config['tsi.user_cache']
+    user_cache: UserCache = config['tsi.user_cache']
     fail_on_invalid_gids = config['tsi.fail_on_invalid_gids']
     primary = requested_groups[0]
 
@@ -199,7 +199,7 @@ def become_user(user, requested_groups, config, LOG):
     return True
 
 
-def restore_id(config, LOG):
+def restore_id(config: dict):
     """
     Restore the process' UID and GID to the stored values (usually root)
     """

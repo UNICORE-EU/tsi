@@ -197,9 +197,7 @@ on the UNICORE/X server, which are passed to the TSI via
 Output
 +++++
 
- * Normal: the output is the BSS identifier of the job unless the execution was interactive.
-   In this case the execution is complete when the TSI returns from this call and the output
-   is that from +ok()+.
+ * Normal: the output is the BSS identifier of the job.
 
  * Error: +failed()+ called with the reason for failure
 
@@ -222,6 +220,28 @@ does not launch anything. The allocation identifier will be written to a file
 
 Once this job has finished, the allocation ID can be read from the 'UNICORE_ALLOCATION_ID",
 and can be used in subsequent jobs.
+
+==== Job execution on login node (#TSI_RUN_ON_LOGIN_NODE)
+
+The function +BSS.run_on_login_node()+ executes the script
+as a subprocesson the login node, without submitting the script to the batch
+subsystem. The user script is written to a file in the job directory.
+
+Input
+++++
+
+The script to be executed. The string from the UNICORE/X server is
+processed to replace all instances of +$USER+ by the user's name and
++$HOME+ by the user's home directory. No further processing needs to
+be done on the script.
+
+Output
++++++
+
+ * Normal: The script is launched as a subprocess, and the PID of the subprocess
+ is returned.
+
+ * Error: +failed()+ called with the reason for failure.
 
 
 ==== Script execution (#TSI_EXECUTESCRIPT)

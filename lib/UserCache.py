@@ -39,10 +39,7 @@ class UserCache(object):
 
     # checks if cache TTL is expired
     def expired(self, timestamp):
-        if timestamp is None or timestamp + self.cache_ttl < time.time():
-            return True
-        else:
-            return False
+        return (timestamp is None) or (timestamp + self.cache_ttl < time.time())
 
     # retrieves all gids the username is member of
     def get_gids_4user(self, user):
@@ -93,7 +90,6 @@ class UserCache(object):
             all_groups = self.get_gids_4user_via_id(user, gid)
         else:
             all_groups = self.get_gids_4user_via_getgrall(user, gid)
-        
         if str(all_groups)!=str(old_info):
             self.LOG.debug("Updated groups list for the user %s : %s" % (
                 user, str(all_groups)))
@@ -108,7 +104,7 @@ class UserCache(object):
 
     # alternative implementation using 'id -G <user>'
     def get_gids_4user_via_id(self, user, gid):
-        success, out = Utils.run_command("id -G %s" % user)
+        success, out = Utils.run_command("id -G %s" % user, login_shell=False)
         if not success:
             return []
         all_groups = [int(g) for g in out.split(" ")]
@@ -125,7 +121,6 @@ class UserCache(object):
             g = grp.getgrnam(group)
         except KeyError:
             return
-
         self.groups[group] = g.gr_gid
         self.groups_timestamps[group] = time.time()
 

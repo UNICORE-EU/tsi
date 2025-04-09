@@ -1,7 +1,7 @@
 import unittest
 import socket
-
 import Log, Utils
+
 
 class TestSSL(unittest.TestCase):
     def setUp(self):

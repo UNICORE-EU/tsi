@@ -5,7 +5,6 @@ import unittest
 import MockConnector
 import Log, TSI, UFTP
 
-
 class TestUFTP(unittest.TestCase):
 
     def setUp(self):

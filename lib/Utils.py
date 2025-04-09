@@ -2,9 +2,13 @@
  helper functions
 """
 
+
 import re
 import os
+import string
 import subprocess
+
+from random import choice
 
 def encode(message):
     if type(message) is not type(u" "):
@@ -12,7 +16,7 @@ def encode(message):
     return message
 
 
-def extract_parameter(message, parameter, default_value=None):
+def extract_parameter(message: str, parameter: str, default_value:str = None) -> str:
     """
     Extracts a value that is given in the form '#TSI_<parameter> <value>\n'
     from the message. Returns the value or None if it is not present or empty.
@@ -25,7 +29,7 @@ def extract_parameter(message, parameter, default_value=None):
     return value
 
 
-def extract_number(message, parameter):
+def extract_number(message: str, parameter: str) -> int:
     """
     Extracts a value that is given in the form '#TSI_<parameter> <value>\n'
     from the message. Returns the value as an integer, or -1 if 
@@ -39,7 +43,7 @@ def extract_number(message, parameter):
     return value
 
 
-def expand_variables(message):
+def expand_variables(message: str) -> str:
     """
     Expands $HOME and $USER into the values from the current environment
     """
@@ -48,7 +52,7 @@ def expand_variables(message):
     return message.replace("$USER", os.environ.get('USER', ""))
 
 
-def addperms(path, mode):
+def addperms(path: str, mode: int):
     """
     Adds the mode permissions to those which are already set for the file.
     """
@@ -57,7 +61,7 @@ def addperms(path, mode):
     os.chmod(path, mode)
 
 
-def run_command(cmd, discard=False, child_pids=None):
+def run_command(cmd: str, discard=False, child_pids=None, login_shell=True):
     """
     Runs command, capturing the output if the discard flag is True
     Returns a success flag and the output.
@@ -67,23 +71,23 @@ def run_command(cmd, discard=False, child_pids=None):
     """
     output = ""
     try:
+        cmds = ["/bin/bash", "-l", "-c", cmd]
+        if not login_shell:
+            cmds.pop(1)
         if not discard:
-            raw_output = subprocess.check_output(cmd, shell=True, bufsize=4096,
-                                                 stderr=subprocess.STDOUT)
+            raw_output = subprocess.check_output(cmds, bufsize=4096, stderr=subprocess.STDOUT)
             output = raw_output.decode("UTF-8")
         else:
             # run the command in the background
-            child = subprocess.Popen(cmd, shell=True, start_new_session=True)
+            child = subprocess.Popen(cmds, start_new_session=True)
             # remember child to be able to clean up processes later
             if child_pids is not None:
                 child_pids.append(child.pid)
-
         success = True
     except subprocess.CalledProcessError as cpe:
         output = "Command '%s' failed with code %s: %s" % (
             cmd, cpe.returncode, cpe.output.decode("UTF-8"))
         success = False
-
     return success, output
 
 
@@ -108,7 +112,7 @@ rdn_map = {"C": "countryName",
            }
 
 
-def convert_rdn(rdn):
+def convert_rdn(rdn: str):
     split = rdn.split("=")
     translated = rdn_map.get(split[0])
     if translated is None:
@@ -117,7 +121,7 @@ def convert_rdn(rdn):
     return translated, val
 
 
-def convert_dn(dn):
+def convert_dn(dn: str):
     """ Convert X500 DN in RFC format to a tuple """
     converted = []
     # split dn and strip leading/trailing whitespace
@@ -153,3 +157,7 @@ def check_access(subject, acl):
         if accept:
             return True
     return False
+
+def random_string(size=6, chars=string.ascii_uppercase + string.digits):
+    """ returns a random string """
+    return ''.join(choice(chars) for _ in range(size))
