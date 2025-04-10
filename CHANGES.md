@@ -6,6 +6,7 @@ Issue tracker:
 
 Version 10.2.0
 --------------
+ - NOTE: requires Python 3.9 or later
  - run scripts via "/bin/bash -l" for a more consistent environment
  - improvement: IPv6 support for UNICORE/X connections
  - new property 'tsi.disable_ipv6' to explicitely DISABLE IPv6 support

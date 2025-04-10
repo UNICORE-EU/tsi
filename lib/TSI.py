@@ -14,8 +14,8 @@ from Log import Logger
 #
 MY_VERSION = "__VERSION__"
 
-# supported Python versions
-REQUIRED_VERSION = (3, 7, 0)
+# minimum required Python version
+REQUIRED_VERSION = (3, 9, 0)
 
 
 def assert_version():
