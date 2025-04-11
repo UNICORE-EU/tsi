@@ -8,8 +8,8 @@ import MockConnector
 class TestACL(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {}
-        self.config = {'tsi.testing': True}
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
         self.config['tsi.switch_uid'] = False
         self.config['tsi.acl'] = {}
         self.config['tsi.getfacl'] = "getfacl"

@@ -91,11 +91,11 @@ def run_command(cmd: str, discard=False, child_pids=None, login_shell=True):
     return success, output
 
 
-def run_and_report(cmd, connector):
+def run_and_report(cmd, connector, login_shell=True):
     """
     Runs the command and report success/failure with output
     """
-    (success, output) = run_command(cmd)
+    (success, output) = run_command(cmd, login_shell=login_shell)
     if not success:
         connector.failed(output)
     else:

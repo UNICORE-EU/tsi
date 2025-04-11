@@ -7,6 +7,8 @@ from os import environ
 from pathlib import Path
 import sys
 
+from Connector import Connector
+from Log import Logger
 from Utils import expand_variables, extract_parameter, run_command
 
 def open_session(host, port, secret):
@@ -21,7 +23,7 @@ def open_session(host, port, secret):
 def log_reply(reply):
     print("uftpd: %s" % reply)
 
-def uftp(message, connector, config, LOG):
+def uftp(message: str, connector: Connector, config: dict, LOG: Logger):
     """
     Launches a child process that reads/writes a file via UFTP
 
@@ -81,11 +83,14 @@ def uftp(message, connector, config, LOG):
         cmd += c + u"\n"
 
     child_pids = config.get('tsi.child_pids', None)
-    (success, reply) = run_command(cmd, True, child_pids)
+    use_login_shell = config.get('tsi.use_login_shell', True)
+    (success, reply) = run_command(cmd, True, child_pids, use_login_shell)
+    if not success:
+        connector.failed("Failed to launch uftp command: %s" % reply)
 
 
 
-def main(argv=None):
+def main():
     """
     run UFTP client code
     """

@@ -43,12 +43,12 @@ def worker_completed(signal, frame):
         pass
 
 
-def verify_ip(configuration, unicorex_host, LOG):
-    if 'tsi.allowed_ips' not in configuration:
+def verify_ip(config, unicorex_host, LOG):
+    if 'tsi.allowed_ips' not in config:
         LOG.warning('No list of allowed IPs set. Not production ready')
         return True
 
-    allowed_ips = configuration['tsi.allowed_ips']
+    allowed_ips = config['tsi.allowed_ips']
     for ip in allowed_ips:
         if unicorex_host == ip:
             return True
@@ -86,7 +86,7 @@ def connect(config, LOG):
     # register a handler to clean up finished worker TSIs
     signal.signal(signal.SIGCHLD, worker_completed)
 
-    host = config.get('tsi.my_addr', '')
+    host = config['tsi.my_addr']
     port = int(config['tsi.my_port'])
     ssl_mode = config.get('tsi.keystore') is not None
     if ssl_mode:
@@ -224,9 +224,9 @@ def connect(config, LOG):
             config['tsi.worker.id'] = worker_id + 1
 
 
-def open_connection(address, timeout, configuration):
+def open_connection(address, timeout, config):
     """ Connect to the given address """
-    port_range = configuration.get("tsi.local_portrange", (0,-1,-1))
+    port_range = config['tsi.local_portrange']
     local_port = port_range[0]
     _lower = port_range[1]
     _upper = port_range[2]
@@ -243,7 +243,7 @@ def open_connection(address, timeout, configuration):
                 local_port+=1
                 if local_port>_upper:
                     local_port = _lower
-                configuration["tsi.local_portrange"]=(local_port, _lower, _upper)
+                config['tsi.local_portrange']=(local_port, _lower, _upper)
             return sock
         except OSError as e:
             attempts+=1

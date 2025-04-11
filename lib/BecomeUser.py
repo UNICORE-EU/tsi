@@ -12,7 +12,7 @@ def initialize(config: dict, LOG: Logger):
     # store effective uid/gid, we'll switch back to these after every action
     config['tsi.effective_uid'] = euid
     config['tsi.effective_gid'] = egid
-    switch_uid = config.get("tsi.switch_uid", True)
+    switch_uid = config['tsi.switch_uid']
     if switch_uid or euid==0:
         LOG.info("Running privileged, will perform all operations as the requested user.")
         config['tsi.switch_uid'] = True
@@ -27,7 +27,7 @@ def initialize(config: dict, LOG: Logger):
         LOG.info("UNICORE will be free to assign any groups to the user "
                  "regardless of the OS settings.")
 
-    cache_ttl = config.get('tsi.userCacheTtl', 600)
+    cache_ttl = config['tsi.userCacheTtl']
     use_id = config['tsi.use_id_to_resolve_gids']
     if use_id:
         LOG.info("Groups will be resolved via 'id -G <username>")

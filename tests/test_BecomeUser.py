@@ -8,8 +8,9 @@ import BecomeUser, Log, TSI
 class TestBecomeUser(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog = False)
-        self.config = {'tsi.testing': True, "tsi.switch_uid": False}
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.switch_uid'] = False
         BecomeUser.initialize(self.config, self.LOG)
 
     def getlogin(self):

@@ -91,7 +91,7 @@ class BSS(BSSBase):
             stdout, outcome_dir, stderr)
         LOG.debug("Running: %s" % cmd)
         child = subprocess.Popen(cmd, shell=True, start_new_session=True)
-        child_pids = config.get('tsi.child_pids')
+        child_pids = config['tsi.child_pids']
         child_pids.append(child.pid)
         connector.write_message(job_id)
 

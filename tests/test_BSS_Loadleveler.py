@@ -9,8 +9,9 @@ class TestBSSLoadLeveler(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.bss = loadleveler.BSS.BSS()
-        self.config = {'tsi.testing': True}
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.submit_cmd'] = 'echo 1234.server'
         self.bss.init(self.config, self.LOG)
 
     def test_init(self):

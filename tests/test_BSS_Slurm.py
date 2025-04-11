@@ -11,12 +11,10 @@ class TestBSSSlurm(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.bss = slurm.BSS.BSS()
-        self.config = {'tsi.testing': True,
-                # mock submit/alloc cmds
-                'tsi.submit_cmd': "echo 'Submitted batch job 1234'",
-                'tsi.alloc_cmd':  "echo 'salloc: Granted job allocation 115463'"
-        }
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.submit_cmd'] =  "echo 'Submitted batch job 1234'"
+        self.config['tsi.alloc_cmd'] =  "echo 'salloc: Granted job allocation 115463'"
         self.bss.init(self.config, self.LOG)
 
     def test_init(self):
@@ -254,10 +252,6 @@ echo "Hello World!"
 
     def test_run_alloc_cmd(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.alloc_cmd'] = "echo 'salloc: Granted job allocation 115463'"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -275,7 +269,7 @@ echo "Hello World!"
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
 
-        self.bss.submit(msg,connector, config, self.LOG)
+        self.bss.submit(msg,connector, self.config, self.LOG)
         sleep(10)
         with open("%s/UNICORE_ALLOCATION_ID" % uspace) as f:
             line = f.readlines()[0]
@@ -285,10 +279,8 @@ echo "Hello World!"
 
     def test_submit_fail(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "/bin/false"
+        # make sure submit fails
+        self.config['tsi.submit_cmd'] = "/bin/false"
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % uuid.uuid4()
         os.mkdir(uspace)
@@ -303,7 +295,7 @@ echo "Hello World!"
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
 
-        self.bss.submit(msg,connector, config, self.LOG)
+        self.bss.submit(msg,connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         assert "TSI_FAILED" in result
@@ -311,8 +303,6 @@ echo "Hello World!"
 
     def test_parse_details(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
         with open("tests/input/details_slurm.txt", "r") as f:
             raw = f.read()
         parsed = self.bss.parse_job_details(raw)
@@ -320,21 +310,17 @@ echo "Hello World!"
 
     def test_report_details(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        config['tsi.details_cmd'] = "cat "
-        TSI.setup_defaults(config)
+        self.config['tsi.details_cmd'] = "cat "
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(None, control_out, None,
                                                 None, self.LOG)
         msg = "#TSI_BSSID tests/input/details_slurm.txt\n"
-        self.bss.get_job_details(msg, connector, config, self.LOG)
+        self.bss.get_job_details(msg, connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
 
     def test_parse_partitions(self):
         os.chdir(basedir)
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
         with open("tests/input/partitions_slurm.txt", "r") as f:
             raw = f.read()
         parsed = self.bss.parse_partitions(raw)

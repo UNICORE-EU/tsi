@@ -7,7 +7,9 @@ import MockConnector
 class TestTSI(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.file_name = "tests/conf/tsi.properties"
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.switch_uid'] =  False
 
     def test_read_config(self):
         file = "tests/input/test_config.properties"
@@ -23,7 +25,6 @@ class TestTSI(unittest.TestCase):
         # accept white space in property lines?
         self.assertEqual("some_value", c["whitespace"])
         self.assertEqual("50000:52000", c["tsi.local_portrange"])
-
         TSI.finish_setup(c, self.LOG)
         self.assertEqual((50000, 50000, 52000), c["tsi.local_portrange"])
 
@@ -35,14 +36,13 @@ class TestTSI(unittest.TestCase):
     def test_PING(self):
         cwd = os.getcwd()
         version = TSI.MY_VERSION
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
         msg = "#TSI_PING\nENDOFMESSAGE\n"
         control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
         control_in = io.TextIOWrapper(control_source)
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         self.assertTrue(version in result)
@@ -53,8 +53,7 @@ class TestTSI(unittest.TestCase):
     def test_PING2(self):
         cwd = os.getcwd()
         version = TSI.MY_VERSION
-        config = {'tsi.testing': True, 'tsi.enforce_os_gids': False, 'tsi.switch_uid': False}
-        config['tsi.use_id_to_resolve_gids'] = False
+        self.config['tsi.use_id_to_resolve_gids'] = False
         msg = """#TSI_PING_UID
 #TSI_IDENTITY nobody NONE
 ENDOFMESSAGE
@@ -62,10 +61,10 @@ ENDOFMESSAGE
         control_source = io.BufferedReader(io.BytesIO(msg.encode("UTF-8")))
         control_in = io.TextIOWrapper(control_source)
         control_out = io.StringIO()
-        BecomeUser.initialize(config, self.LOG)
+        BecomeUser.initialize(self.config, self.LOG)
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         self.assertTrue(version in result)
@@ -75,8 +74,7 @@ ENDOFMESSAGE
     def test_get_user_info(self):
         cwd = os.getcwd()
         uc = UserCache.UserCache(2, self.LOG)
-        config = {'tsi.user_cache': uc, 'tsi.testing': True, 'tsi.switch_uid': False,
-                  'tsi.keyfiles': ['.ssh/authorized_keys']}
+        self.config['tsi.user_cache'] = uc
         msg = """#TSI_GET_USER_INFO
         #TSI_IDENTITY %s NONE
 ENDOFMESSAGE
@@ -86,14 +84,13 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         os.chdir(cwd)
            
     def test_Exec(self):
         cwd = os.getcwd()
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
         msg = """#TSI_EXECUTESCRIPT
 echo "Hello World!"
 ENDOFMESSAGE
@@ -103,7 +100,7 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         self.assertTrue("TSI_OK" in result)
@@ -113,7 +110,6 @@ ENDOFMESSAGE
         
     def test_Exec_discard_output(self):
         cwd = os.getcwd()
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
         msg = """#TSI_EXECUTESCRIPT
 #TSI_DISCARD_OUTPUT true
 echo "Hello World!"
@@ -124,7 +120,7 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         self.assertTrue("TSI_OK" in result)
@@ -133,7 +129,6 @@ ENDOFMESSAGE
 
     def test_Exec_error(self):
         cwd = os.getcwd()
-        config = {'tsi.testing': True, 'tsi.switch_uid': False}
         msg = """#TSI_EXECUTESCRIPT
 some_invalid_command
 ENDOFMESSAGE
@@ -143,7 +138,7 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, config, self.LOG)
+        TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
         self.assertTrue("TSI_FAILED" in result)

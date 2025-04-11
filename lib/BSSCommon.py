@@ -2,6 +2,7 @@ import json, os, re, subprocess
 import Quota
 import Utils
 from abc import ABCMeta
+from Log import Logger
 
 class BSSBase(object):
     """Base class for batch system specific functions:
@@ -22,7 +23,7 @@ class BSSBase(object):
 
     def cleanup(self, config):
         """ cleanup child processes """
-        children = config.get('tsi.child_pids', [])
+        children = config['tsi.child_pids']
         for child_pid in children:
             try:
                 _pid, _ = os.waitpid(child_pid, os.WNOHANG)
@@ -39,7 +40,7 @@ class BSSBase(object):
     }
 
 
-    def init(self, config, LOG):
+    def init(self, config, LOG: Logger):
         """ setup default commands if necessary """
         defs = BSSBase.defaults
         defs.update(self.defaults)
@@ -48,19 +49,16 @@ class BSSBase(object):
                 value = defs[key]
                 config[key] = value
                 LOG.info("Using default: '%s' = '%s'" % (key, value))
+        # use login shell (/bin/bash -l) for actions
+        self.use_login_shell = config['tsi.use_login_shell']
         # check if BSS commands are accessible
-        if config.get('tsi.testing') is not True:
+        if not config['tsi.testing']:
             (success, output) = Utils.run_command(config['tsi.qstat_cmd'])
             if not success:
                 msg = "Could not run command to check job statuses! " \
-                      "Please check that the correct TSI is installed, and " \
-                      "check the configuration of 'tsi.qstat_cmd' : %s" % output
-                LOG.error(msg)
-        # for storing child process PIDs
-        children = config.get('tsi.child_pids')
-        if children is None:
-            config['tsi.child_pids'] = []
-
+                        "Please check that the correct TSI is installed, and " \
+                        "check the configuration of 'tsi.qstat_cmd' : %s" % output
+                LOG.warning(msg)
 
     def create_submit_script(self, msg, config, LOG):
         """ For batch systems, this method is responsible for 
@@ -139,7 +137,7 @@ class BSSBase(object):
             with open(userjob_file_name, "w") as job:
                 job.write(u"" + cmd)
             children = config.get('tsi.child_pids', None)
-            (success, reply) = Utils.run_command(cmd, True, children)
+            (success, reply) = Utils.run_command(cmd, True, children, self.use_login_shell)
         else:
             with open(userjob_file_name, "w") as job:
                 job.write(u"" + message)
@@ -189,12 +187,13 @@ class BSSBase(object):
         Utils.addperms(cmds_file_name, 0o700)
         cmd = "./%s > %s/%s 2> %s/%s" % (cmds_file_name, outcome_dir, stdout, outcome_dir, stderr)
         LOG.debug("Running: %s" % cmd)
-        cmds = ["/bin/bash", "-l", "-c", cmd]
-        child = subprocess.Popen(cmds, start_new_session=True)
         child_pids = config.get('tsi.child_pids')
-        child_pids.append(child.pid)
-        connector.write_message(str(child.pid))
-
+        (success, reply) = Utils.run_command(cmd, True, child_pids, self.use_login_shell)
+        if success:
+            job_pid = child_pids[-1]
+            connector.write_message(str(job_pid))
+        else:
+            connector.failed("Submit failed? Submission result:" + reply)
 
     def get_extract_id_expr(self):
         """ regular expression for extracting the job ID after batch submit """
@@ -224,7 +223,7 @@ class BSSBase(object):
 
     def parse_status_listing(self, qstat_result: str):
         """ Does the actual parsing of the status listing. """
-        states: dict = {}
+        states = {}
         for line in qstat_result.splitlines():
             (bssid, state, queue_name) = self.extract_info(Utils.encode(line))
             if bssid is None:
@@ -261,7 +260,7 @@ class BSSBase(object):
         """ Get list of the processes on this machine.
         """
         ps_cmd = Utils.extract_parameter(message, "PS", config["tsi.get_processes_cmd"])
-        Utils.run_and_report(ps_cmd, connector)
+        Utils.run_and_report(ps_cmd, connector, self.use_login_shell)
 
 
     def parse_job_details(self, raw_info):
@@ -299,19 +298,19 @@ class BSSBase(object):
     def abort_job(self, message, connector, config, LOG):
         bssid = Utils.extract_parameter(message, "BSSID")
         cmd = config["tsi.abort_cmd"] % bssid
-        Utils.run_and_report(cmd, connector)
+        Utils.run_and_report(cmd, connector, self.use_login_shell)
 
 
     def hold_job(self, message, connector, config, LOG):
         bssid = Utils.extract_parameter(message, "BSSID")
         cmd = config["tsi.hold_cmd"] + " " + bssid
-        Utils.run_and_report(cmd, connector)
+        Utils.run_and_report(cmd, connector, self.use_login_shell)
 
 
     def resume_job(self, message, connector, config, LOG):
         bssid = Utils.extract_parameter(message, "BSSID")
         cmd = config["tsi.resume_cmd"] + " " + bssid
-        Utils.run_and_report(cmd, connector)
+        Utils.run_and_report(cmd, connector, self.use_login_shell)
 
 
     def get_budget(self, message, connector, config, LOG):

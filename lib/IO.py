@@ -302,7 +302,8 @@ def df(message, connector, config, LOG):
     # free space for certain paths
 
     command = "df -P -B 1 %s" % path
-    (success, result) = run_command(command)
+    (success, result) = run_command(command, login_shell=config.get('tsi.use_login_shell', True))
+    print(success)
     total = free = user = '-1'
 
     if success:

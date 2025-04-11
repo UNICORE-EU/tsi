@@ -4,16 +4,16 @@ import signal
 import socket
 import sys
 import time
-import Connector, Log, Server
+import Connector, Log, Server, TSI
 
 class TestServer(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {'tsi.my_addr': 'localhost',
-                       'tsi.my_port': 14433,
-                       'tsi.unicorex_machine': 'localhost',
-                       'tsi.local_portrange': (50000, 50000, 50010)
-                       }
+        self.config = TSI.get_default_config()
+        self.config['tsi.my_addr'] = 'localhost'
+        self.config['tsi.my_port'] = 14433
+        self.config['tsi.unicorex_machine'] = 'localhost'
+        self.config['tsi.local_portrange'] = (50000, 50000, 50010)
 
     def test_Extract_Port(self):
         print("*** test_Extract_Port")
@@ -30,11 +30,11 @@ class TestServer(unittest.TestCase):
   
     def test_Connect(self):
         print("*** test_Connect")
-        # fork, creating the TSI shepherd and a fake U/X
+        # fork a fake U/X
         pid = os.fork()
         if pid == 0:
+            # this is the TSI
             command, data, _ = Server.connect(self.config, self.LOG)
-            # read a message from the command socket
             testmsg = command.recv(1024)
             self.LOG.info("TESTING: got test message: %s" % testmsg)
             time.sleep(5)
@@ -57,8 +57,8 @@ class TestServer(unittest.TestCase):
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind((host, port))
             server.listen(2)
-            (command, (_, _)) = server.accept()
-            (data, (_, _)) = server.accept()
+            (command, _) = server.accept()
+            (data, _) = server.accept()
             testmsg = b'#TSI_PING\nENDOFMESSAGE'
             self.LOG.info("CLIENT: connected, sending test message: %s" % testmsg)
             command.sendall(testmsg)
@@ -110,8 +110,8 @@ class TestServer(unittest.TestCase):
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind((host, port))
             server.listen(2)
-            (command, (_, _)) = server.accept()
-            (data, (_, _)) = server.accept()
+            (command, _) = server.accept()
+            (data, _) = server.accept()
             self.LOG.info("CLIENT: connected, now closing sockets.")
             command.close()
             data.close()

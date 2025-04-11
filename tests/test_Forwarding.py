@@ -27,16 +27,16 @@ def fake_service(config, LOG):
     fake_service.close()
 
 class TestServer(unittest.TestCase):
+
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {'tsi.my_addr': 'localhost',
-                       'tsi.my_port': 14433,
-                       'tsi.unicorex_machine': 'localhost',
-                       'tsi.local_portrange': (50000, 50000, 50010),
-                       'tsi.switch_uid': False,
-                       'tsi.port_forwarding.rate_limit': 1024*1024,
-                       }
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.my_addr'] = 'localhost'
+        self.config['tsi.my_port'] = 14433
+        self.config['tsi.unicorex_machine'] = 'localhost'
+        self.config['tsi.local_portrange']= (50000, 50000, 50010)
+        self.config['tsi.switch_uid'] = False
+        self.config['tsi.port_forwarding.rate_limit'] = 1024*1024
 
     def test_Forwarding(self):
         print("*** test_Forwarding")

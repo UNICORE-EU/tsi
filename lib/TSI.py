@@ -25,10 +25,11 @@ def assert_version():
     return sys.version_info >= REQUIRED_VERSION
 
 
-def setup_defaults(config):
+def get_default_config() -> dict:
     """
-    Sets some default values in the configuration
+    Sets default configuration values
     """
+    config = {}
     config['tsi.default_job_name'] = 'UnicoreJob'
     config['tsi.nodes_filter'] = ''
     config['tsi.userCacheTtl'] = 600
@@ -36,14 +37,21 @@ def setup_defaults(config):
     config['tsi.fail_on_invalid_gids'] = False
     config['tsi.use_id_to_resolve_gids'] = True
     config['tsi.open_user_sessions'] = False
+    config['tsi.switch_uid'] = True
     config['tsi.debug'] = 0
     config['tsi.use_syslog'] = False
     config['tsi.worker.id'] = 1
+    config['tsi.my_addr'] = ''
+    config['tsi.my_port'] = 4433
     config['tsi.unicorex_machine'] = 'localhost'
     config['tsi.disable_ipv6'] = False
+    config['tsi.local_portrange'] = None
     config['tsi.safe_dir'] = '/tmp'
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
+    config['tsi.use_login_shell'] = True
     config['tsi.child_pids'] = []
+    config['tsi.testing'] = False
+    return config
 
 
 def process_config_value(key, value, config):
@@ -58,7 +66,8 @@ def process_config_value(key, value, config):
             'tsi.use_id_to_resolve_gids',
             'tsi.use_syslog',
             'tsi.debug',
-            'tsi.disable_ipv6'
+            'tsi.disable_ipv6',
+            'tsi.use_login_shell'
     ]
     for bool_key in boolean_keys:
         if bool_key == key:
@@ -111,7 +120,7 @@ def setup_allowed_ips(config, LOG):
     """
     Configures IP addresses of UNICORE/X servers allowed to connect
     """
-    machines = config.get('tsi.unicorex_machine', 'localhost').split(",")
+    machines = config['tsi.unicorex_machine'].split(",")
     ips = []
     LOG.info("Allowed UNICORE/X machines: %s" % machines)
     for machine in machines:
@@ -130,7 +139,7 @@ def setup_portrange(config, LOG):
     """
     Configures the (optional) range of local ports the TSI should use
     """
-    rangespec = config.get("tsi.local_portrange", None)
+    rangespec = config['tsi.local_portrange']
     first = 0
     lower = -1
     upper = -1
@@ -146,7 +155,7 @@ def setup_portrange(config, LOG):
         except:
             raise Exception("Invalid 'tsi.local_portrange' specified, must be 'lower:upper'")
     config["tsi.local_portrange"] = (first, lower, upper)
-      
+
 
 def read_config_file(file_name):
     """
@@ -154,12 +163,9 @@ def read_config_file(file_name):
     a dictionary with the configuration.
     Returns: a dictionary with config values
     """
+    config = get_default_config()
     with open(file_name, "r") as f:
         lines = f.readlines()
-
-    config = {}
-    setup_defaults(config)
-
     for line in lines:
         # only process lines of the form key=value
         match = re.match(r"\s*([a-zA-Z0-9.\-_/]+)\s*=\s*(.+)$", line)
@@ -223,8 +229,9 @@ def execute_script(message, connector, config, LOG):
     the output is discarded, otherwise it is returned to UNICORE/X.
     """
     discard = "#TSI_DISCARD_OUTPUT true\n" in message
-    child_pids = config.get('tsi.child_pids', None)
-    (success, output) = Utils.run_command(message, discard, child_pids)
+    child_pids = config['tsi.child_pids']
+    use_login_shell = config.get('tsi.use_login_shell', True)
+    (success, output) = Utils.run_command(message, discard, child_pids, use_login_shell)
     if success:
         connector.ok(output)
     else:
@@ -306,37 +313,28 @@ def handle_function(function, command, message, connector, config, LOG):
 
 def process(connector, config, LOG):
     """
-    Main processing loop. Reads commands from control_in and invokes the
-    appropriate command.
+    Main processing loop. Reads commands from control_in, invokes the
+    appropriate function and replies to UNICORE/X.
 
         Arguments:
           connector: connection to the UNICORE/X
           config: TSI configuration (dictionary)
           LOG: logger object
     """
-
     my_umask = os.umask(0o22)
     os.umask(my_umask)
     bss = config.get('tsi.bss', BSS.BSS())
     functions = init_functions(bss)
 
-    # read message from control
-    first = True
     while True:
         bss.cleanup(config)
-        if config.get('tsi.testing', False) and not first:
-            LOG.info("Testing mode, exiting main loop")
-            break
-        first = False
         try:
             message = Utils.encode(connector.read_message())
         except IOError:
             LOG.info("Peer shutdown, stopping worker.")
             connector.close()
             return
-
-        os.chdir(config.get('tsi.safe_dir','/tmp'))
-        # check for command and invoke appropriate function
+        os.chdir(config['tsi.safe_dir'])
         command = None
         function = None
         for cmd in functions:
@@ -345,15 +343,16 @@ def process(connector, config, LOG):
                 command = cmd
                 function = functions.get(cmd)
                 break
-        
         if function is None:
             connector.failed("Unknown command %s" % command)
         elif "TSI_PING" == command:
             connector.write_message(MY_VERSION)
         else:
             handle_function(function, command, message, connector, config, LOG)
-        # terminate the current "transaction" with UNICORE/X
         connector.write_message("ENDOFMESSAGE")
+        if config.get('tsi.testing', False):
+            LOG.info("Testing mode, exiting main loop")
+            break
 
 
 def main(argv=None):
@@ -379,7 +378,7 @@ def main(argv=None):
     bss = BSS.BSS()
     LOG.info("Starting TSI %s for %s" % (MY_VERSION, bss.get_variant()))
     BecomeUser.initialize(config, LOG)
-    os.chdir(config.get('tsi.safe_dir','/tmp'))
+    os.chdir(config['tsi.safe_dir'])
     bss.init(config, LOG)
     config['tsi.bss'] = bss
     (socket1, socket2, msg) = Server.connect(config, LOG)

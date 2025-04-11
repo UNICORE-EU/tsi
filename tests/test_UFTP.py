@@ -11,10 +11,9 @@ class TestUFTP(unittest.TestCase):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
 
     def test_submit(self):
-        config = {'tsi.testing': True}
-        TSI.setup_defaults(config)
-        # mock submit cmd
-        config['tsi.submit_cmd'] = "echo 1234.server"
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.submit_cmd'] = 'echo 1234.server'
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % int(100 * time.time())
         os.mkdir(uspace)
@@ -35,7 +34,7 @@ class TestUFTP(unittest.TestCase):
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        UFTP.uftp(msg, connector, config, self.LOG)
+        UFTP.uftp(msg, connector, self.config, self.LOG)
         result = control_out.getvalue()
         if "TSI_FAILED" in result:
             print(result)

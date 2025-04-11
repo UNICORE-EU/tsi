@@ -92,7 +92,7 @@ def getfacl_posix(path, connector, config, LOG):
     getfacl_cmd = config.get('tsi.getfacl', '/bin/false')
     command = "%s %s" % (getfacl_cmd, path)
     LOG.debug(command)
-    (success, result) = run_command(command)
+    (success, result) = run_command(command, login_shell=config['tsi.use_login_shell'])
     if not success:
         connector.failed(result)
     else:
@@ -145,7 +145,7 @@ def setfacl_posix(path, op, val, connector, config, LOG):
             setfacl_cmd, recursive, base_arg, arg, path)
 
     LOG.debug(command)
-    (success, result) = run_command(command)
+    (success, result) = run_command(command, login_shell=config['tsi.use_login_shell'])
     if not success:
         connector.failed(result)
     else:

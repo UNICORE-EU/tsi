@@ -3,16 +3,17 @@ import os
 import signal
 import socket
 import time
-import Log, Server, Utils
+import Log, Server, TSI, Utils
 
 class TestServerSSL(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {}
+        self.config = TSI.get_default_config()
         self.config['tsi.my_addr'] = 'localhost'
         self.config['tsi.my_port'] = 14433
         self.config['tsi.unicorex_machine'] = 'localhost'
         self.config['tsi.unicorex_port'] = 24433
+        self.config['tsi.local_portrange'] = (0, -1, -1)
         self.config['tsi.keystore'] = 'tests/certs/tsi-key-plain.pem'
         self.config['tsi.certificate'] = 'tests/certs/tsi-cert.pem'
         self.config['tsi.truststore'] = 'tests/certs/tsi-truststore.pem'

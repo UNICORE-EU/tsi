@@ -8,10 +8,9 @@ import Log, TSI
 class TestBSSTorque(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {'tsi.testing': True,
-            # mock submit cmd
-            'tsi.submit_cmd': "echo 1234.server" }
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing']= True
+        self.config['tsi.submit_cmd'] = 'echo 1234.server'
         self.bss = torque.BSS.BSS()
         self.bss.init(self.config, self.LOG)
 

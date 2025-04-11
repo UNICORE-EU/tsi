@@ -10,11 +10,12 @@ class TestBSSNobatch(unittest.TestCase):
     def setUp(self):
         # setup logger
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
-        self.config = {'tsi.testing': True, 'tsi.switch_uid': False}
-        TSI.setup_defaults(self.config)
+        self.config = TSI.get_default_config()
+        self.config['tsi.testing'] = True
+        self.config['tsi.switch_uid'] = False
         self.bss = BSS.BSS()
         self.bss.init(self.config, self.LOG)
-        
+   
     def test_parse_status_listing(self):
         with open("tests/input/qstat_nobatch.txt", "r") as sample:
             qstat_output = sample.read()
