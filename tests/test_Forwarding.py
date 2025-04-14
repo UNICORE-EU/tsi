@@ -16,7 +16,7 @@ def fake_service(config, LOG):
     service_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     service_server.bind((host, port))
     service_server.listen(2)
-    (fake_service, (_, _)) = service_server.accept()
+    (fake_service, _) = service_server.accept()
     service_server.close()
     LOG.info("SERVICE: client connected.")
     # read a message from the command socket

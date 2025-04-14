@@ -43,8 +43,8 @@ class TestTSI(unittest.TestCase):
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind((host, port))
             server.listen(2)
-            (command, (_, _)) = server.accept()
-            (data, (_, _)) = server.accept()
+            (command, _) = server.accept()
+            (data, _) = server.accept()
             test_msg = b'#TSI_PING\nENDOFMESSAGE\n'
             LOG.info("CLIENT: connected, sending test message: %s" % test_msg)
             command.sendall(test_msg)
