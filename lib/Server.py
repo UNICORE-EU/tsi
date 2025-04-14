@@ -106,7 +106,7 @@ def connect(config, LOG):
         port = server.getsockname()[1]
         config["tsi.my_port"] = port
     if ssl_mode:
-        server = setup_ssl(config, server, LOG, True)
+        server = setup_ssl(config, server, LOG, server_mode=True)
     LOG.info("Listening (%s) on %s:%s" % (fam, host, port))
     LOG.info("SSL enabled: %s" % ssl_mode)
     server.listen(2)
@@ -188,7 +188,7 @@ def connect(config, LOG):
             for _ in range(0, num_conns):
                 new_socket = open_connection(address, 10, config)
                 if ssl_mode:
-                    new_socket = setup_ssl(config, new_socket, LOG)
+                    new_socket = setup_ssl(config, new_socket, LOG, server_mode=False)
                 configure_socket(new_socket)
                 xnjs_sockets.append(new_socket)
         except EnvironmentError as e:

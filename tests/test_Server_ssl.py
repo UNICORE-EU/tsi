@@ -45,19 +45,21 @@ class TestServerSSL(unittest.TestCase):
             port = self.config['tsi.my_port']
             tsi = socket.create_connection((host, port))
             self.LOG.info("CLIENT: Connected to %s:%s" % (host, port))
-            tsi = SSL.setup_ssl(self.config, tsi, self.LOG, False)
+            tsi = SSL.setup_ssl(self.config, tsi, self.LOG, server_mode=False)
             host = self.config['tsi.unicorex_machine']
             port = self.config['tsi.unicorex_port']
             tsi.sendall(b'newtsiprocess 24433')
             self.LOG.info(
                 "CLIENT: waiting for callback on %s:%s" % (host, port))
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server = SSL.setup_ssl(self.config, server, self.LOG, True)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((host, port))
+            if Server._check_ipv6_support(host, port, self.config):
+                server = socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+            else:
+                server = socket.create_server((host, port), reuse_port=True)
+            server = SSL.setup_ssl(self.config, server, self.LOG, server_mode=True)
             server.listen(2)
-            (command, (_, _)) = server.accept()
-            (data, (_, _)) = server.accept()
+            (command, _) = server.accept()
+            (data, _) = server.accept()
             test_msg = b'#TSI_PING\nENDOFMESSAGE'
             self.LOG.info(
                 "CLIENT: connected, sending test message: %s" % test_msg)

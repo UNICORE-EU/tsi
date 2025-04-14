@@ -11,7 +11,8 @@ def setup_ssl(config, socket, LOG, server_mode=False):
     keypass = config.get('tsi.keypass', None)
     cert = config.get('tsi.certificate')
     truststore = config.get('tsi.truststore', None)
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    protocol = ssl.PROTOCOL_TLS_SERVER if server_mode else ssl.PROTOCOL_TLS_CLIENT
+    context = ssl.SSLContext(protocol)
     context.verify_mode = ssl.CERT_REQUIRED
     context.check_hostname = False
     context.load_cert_chain(certfile=cert, keyfile=keystore,

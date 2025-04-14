@@ -53,9 +53,10 @@ class TestServer(unittest.TestCase):
             port = 24433
             tsi.sendall(b'newtsiprocess 24433')
             self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, port))
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((host, port))
+            if Server._check_ipv6_support(host, port, self.config):
+                server = socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+            else:
+                server = socket.create_server((host, port), reuse_port=True)
             server.listen(2)
             (command, _) = server.accept()
             (data, _) = server.accept()
