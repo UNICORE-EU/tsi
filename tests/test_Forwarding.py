@@ -59,13 +59,14 @@ class TestServer(unittest.TestCase):
             ux_port = 24433
             host = self.config['tsi.unicorex_machine']
             msg = "start-forwarding %s %s:%s nobody:DEFAULT_GID" % (ux_port, host, port+1)
+            if Server._check_ipv6_support(host, port, self.config):
+                server = socket.create_server((host, ux_port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+            else:
+                server = socket.create_server((host, ux_port), reuse_port=True)
             tsi.sendall(bytes(msg, "UTF-8"))
             self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, ux_port))
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((host, ux_port))
             server.listen(2)
-            (proxy_socket, (_, _)) = server.accept()
+            (proxy_socket, _) = server.accept()
             server.close()
             testmsg = b'this is a test\n'
             self.LOG.info("CLIENT: connected, sending test message: %s" % testmsg)
@@ -78,6 +79,8 @@ class TestServer(unittest.TestCase):
             tsi.close()
             self.LOG.info("CLIENT: exiting.")
             os.kill(pid, signal.SIGKILL)
+
+
 
 if __name__ == '__main__':
     unittest.main()
