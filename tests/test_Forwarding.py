@@ -31,9 +31,9 @@ class TestServer(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.config = TSI.get_default_config()
-        self.config['tsi.my_addr'] = 'localhost'
+        self.config['tsi.my_addr'] = '127.0.0.1'
         self.config['tsi.my_port'] = 14433
-        self.config['tsi.unicorex_machine'] = 'localhost'
+        self.config['tsi.unicorex_machine'] = '127.0.0.1'
         self.config['tsi.local_portrange']= (50000, 50000, 50010)
         self.config['tsi.switch_uid'] = False
         self.config['tsi.port_forwarding.rate_limit'] = 1024*1024
@@ -56,10 +56,10 @@ class TestServer(unittest.TestCase):
             port = self.config['tsi.my_port']
             tsi = socket.create_connection((host, port))
             self.LOG.info("CLIENT: pid <%s> Connected to %s:%s" % (os.getpid(), host, port))
-            host = self.config['tsi.unicorex_machine']
-            msg = "start-forwarding 24433 localhost:%s nobody:DEFAULT_GID" % (port+1)
-            tsi.sendall(bytes(msg, "UTF-8"))
             ux_port = 24433
+            host = self.config['tsi.unicorex_machine']
+            msg = "start-forwarding %s %s:%s nobody:DEFAULT_GID" % (ux_port, host, port+1)
+            tsi.sendall(bytes(msg, "UTF-8"))
             self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, ux_port))
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
