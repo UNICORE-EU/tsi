@@ -83,7 +83,7 @@ def connect(config, LOG):
     Parameters: dictionary of config settings, logger
     """
 
-    # register a handler to clean up finished worker TSIs
+    # handle clean up of finished worker TSIs
     signal.signal(signal.SIGCHLD, worker_completed)
 
     host = config['tsi.my_addr']
@@ -95,13 +95,8 @@ def connect(config, LOG):
         except ImportError as e:
             LOG.error("SSL module could not be imported!")
             raise e
-    addr = (host, port)
-    fam = "IPv4"
-    if _check_ipv6_support(host, port, config):
-        fam = "IPv6/IPv4"
-        server = socket.create_server(addr, family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
-    else:
-        server = socket.create_server(addr, reuse_port=True)
+    server = create_server(host, port, config)
+    fam = "IPv6/IPv4" if server.family==socket.AF_INET6 else "IPv4"
     if port==0:
         port = server.getsockname()[1]
         config["tsi.my_port"] = port
@@ -270,6 +265,12 @@ def get_unicorex_port(configuration, params):
         except:
             pass
     return port
+
+def create_server(host: str, port: int, config: dict)->socket.socket:
+    if _check_ipv6_support(host, port, config):
+        return socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+    else:
+        return socket.create_server((host, port), reuse_port=True)
 
 def _check_ipv6_support(host: str, port: int, config: dict) -> bool:
     if config.get('tsi.disable_ipv6', False):

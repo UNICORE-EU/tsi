@@ -104,12 +104,9 @@ class TestServer(unittest.TestCase):
             self.LOG.info("CLIENT: Connected to %s:%s" % (host, port))
             host = self.config['tsi.unicorex_machine']
             port = 24433
+            server = Server.create_server(host, port, self.config)
+            self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, port))
             tsi.sendall(b'newtsiprocess 24433')
-            self.LOG.info(
-                "CLIENT: waiting for callback on %s:%s" % (host, port))
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((host, port))
             server.listen(2)
             (command, _) = server.accept()
             (data, _) = server.accept()

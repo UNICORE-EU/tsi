@@ -49,20 +49,14 @@ class TestServerSSL(unittest.TestCase):
             host = self.config['tsi.unicorex_machine']
             port = self.config['tsi.unicorex_port']
             tsi.sendall(b'newtsiprocess 24433')
-            self.LOG.info(
-                "CLIENT: waiting for callback on %s:%s" % (host, port))
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if Server._check_ipv6_support(host, port, self.config):
-                server = socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
-            else:
-                server = socket.create_server((host, port), reuse_port=True)
+            self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, port))
+            server = Server.create_server(host, port, self.config)
             server = SSL.setup_ssl(self.config, server, self.LOG, server_mode=True)
             server.listen(2)
             (command, _) = server.accept()
             (data, _) = server.accept()
             test_msg = b'#TSI_PING\nENDOFMESSAGE'
-            self.LOG.info(
-                "CLIENT: connected, sending test message: %s" % test_msg)
+            self.LOG.info("CLIENT: connected, sending test message: %s" % test_msg)
             command.sendall(test_msg)
             # send shutdown and cleanup
             self.LOG.info("CLIENT: shutdown")

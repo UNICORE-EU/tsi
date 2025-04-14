@@ -12,9 +12,7 @@ def fake_service(config, LOG):
     host = config['tsi.my_addr']
     port = config['tsi.my_port'] + 1
     LOG.info("SERVICE: pid <%s> listening on %s:%s" % (os.getpid(), host,port))
-    service_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    service_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    service_server.bind((host, port))
+    service_server = Server.create_server(host, port, config)
     service_server.listen(2)
     (fake_service, _) = service_server.accept()
     service_server.close()
@@ -59,12 +57,9 @@ class TestServer(unittest.TestCase):
             ux_port = 24433
             host = self.config['tsi.unicorex_machine']
             msg = "start-forwarding %s %s:%s nobody:DEFAULT_GID" % (ux_port, host, port+1)
-            if Server._check_ipv6_support(host, port, self.config):
-                server = socket.create_server((host, ux_port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
-            else:
-                server = socket.create_server((host, ux_port), reuse_port=True)
-            tsi.sendall(bytes(msg, "UTF-8"))
+            server = Server.create_server(host, ux_port, self.config)
             self.LOG.info("CLIENT: waiting for callback on %s:%s" % (host, ux_port))
+            tsi.sendall(bytes(msg, "UTF-8"))
             server.listen(2)
             (proxy_socket, _) = server.accept()
             server.close()

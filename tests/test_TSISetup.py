@@ -3,10 +3,10 @@ import os
 import socket
 import signal
 import time
-import TSI, Log
+import Log, Server, TSI
 
 
-class TestTSI(unittest.TestCase):
+class TestTSISetup(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog = False)
         self.file_name = "tests/conf/tsi.properties"
@@ -19,29 +19,27 @@ class TestTSI(unittest.TestCase):
         self.assertEqual('NONE', acl['/'])
 
     def test_RunMain(self):
-        config = "tests/conf/tsi.properties"
+        config_file = "tests/conf/tsi.properties"
         pid = os.fork()
         if pid == 0:
             # child, this is the TSI shepherd process
-            TSI.main(["TSI", config])
+            TSI.main(["TSI", config_file])
         else:
             # parent, this is the fake U/X
             LOG = Log.Logger("fake-unicorex", use_syslog=False)
             time.sleep(2)
-            client_config = TSI.read_config_file(config)
-            TSI.finish_setup(client_config, self.LOG)
+            config = TSI.read_config_file(config_file)
+            TSI.finish_setup(config, self.LOG)
             # connect to the server
-            host = client_config['tsi.my_addr']
-            port = int(client_config['tsi.my_port'])
+            host = config['tsi.my_addr']
+            port = int(config['tsi.my_port'])
             tsi = socket.create_connection((host, port))
             LOG.info("CLIENT: Connected to %s:%s" % (host, port))
-            host = client_config['tsi.unicorex_machine']
-            port = int(client_config['tsi.unicorex_port'])
-            tsi.sendall(b'newtsiprocess 24433')
+            host = config['tsi.unicorex_machine']
+            port = int(config['tsi.unicorex_port'])
             LOG.info("CLIENT: waiting for callback on %s:%s" % (host, port))
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((host, port))
+            server = Server.create_server(host, port, config)
+            tsi.sendall(b'newtsiprocess 24433')
             server.listen(2)
             (command, _) = server.accept()
             (data, _) = server.accept()
@@ -57,7 +55,6 @@ class TestTSI(unittest.TestCase):
             data.close()
             tsi.close()
             server.close()
-
             os.kill(pid, signal.SIGKILL)
 
 
