@@ -13,6 +13,7 @@ Version 10.2.0
  - new API call TSI_RUN_ON_LOGIN_NODE, where the user script is written to
    a file in the job directory and executed
  - nicer names for unique files in job directory
+ - code cleanup
 
 Version 10.1.3
 --------------

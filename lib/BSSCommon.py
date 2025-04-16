@@ -2,7 +2,6 @@ import json, os, re, subprocess
 import Quota
 import Utils
 from abc import ABCMeta
-from Log import Logger
 
 class BSSBase(object):
     """Base class for batch system specific functions:
@@ -40,7 +39,7 @@ class BSSBase(object):
     }
 
 
-    def init(self, config, LOG: Logger):
+    def init(self, config, LOG):
         """ setup default commands if necessary """
         defs = BSSBase.defaults
         defs.update(self.defaults)
@@ -260,7 +259,7 @@ class BSSBase(object):
         """ Get list of the processes on this machine.
         """
         ps_cmd = Utils.extract_parameter(message, "PS", config["tsi.get_processes_cmd"])
-        Utils.run_and_report(ps_cmd, connector, self.use_login_shell)
+        Utils.run_and_report(ps_cmd, connector)
 
 
     def parse_job_details(self, raw_info):
