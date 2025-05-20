@@ -7,7 +7,8 @@ Issue tracker:
 Version 10.2.0
 --------------
  - NOTE: requires Python 3.9 or later
- - run scripts via "/bin/bash -l" for a more consistent environment
+ - run scripts via login shell "/bin/bash -l" for a more consistent environment
+   (set 'tsi.use_login_shell=0' to use plain '/bin/bash')
  - improvement: IPv6 support for UNICORE/X connections
  - new property 'tsi.disable_ipv6' to explicitely DISABLE IPv6 support
  - new API call TSI_RUN_ON_LOGIN_NODE, where the user script is written to

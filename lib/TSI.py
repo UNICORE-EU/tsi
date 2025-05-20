@@ -301,8 +301,9 @@ def handle_function(function, command, message, connector, config, LOG):
                 raise RuntimeError(user_switch_status)
         function(message, connector, config, LOG)
     except:
-        connector.failed(str(sys.exc_info()[1]))
-        LOG.error("Error executing %s" % command)
+        msg = str(sys.exc_info()[1])
+        connector.failed(msg)
+        LOG.error("Error executing %s: %s" % (command, msg))
     if switch_uid and command!="_START_FORWARDING":
         BecomeUser.restore_id(config)
         if open_user_session:
