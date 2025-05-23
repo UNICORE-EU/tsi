@@ -112,7 +112,6 @@ def prepare_posix_arg(val, remove):
         ret = "group:" + oargs[1]
     if not remove:
         ret = ret + ":"+ oargs[2]
-    print(ret)
     return ret
 
 
