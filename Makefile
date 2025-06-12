@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=10.2.0
+VERSION=10.2.1
 RELEASE=1
 MVN=mvn -q
 

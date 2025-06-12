@@ -4,6 +4,10 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+Version 10.2.1
+--------------
+ - port forwarding: support connecting to a Unix domain socket
+
 Version 10.2.0
 --------------
  - NOTE: requires Python 3.9 or later

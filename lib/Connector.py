@@ -1,7 +1,7 @@
 """ Wrapper class around common I/O operations """
 
 from os import _exit
-from socket import socket
+from socket import socket, AF_UNIX, SOCK_STREAM
 from time import sleep, time
 import Server
 import threading
@@ -92,12 +92,18 @@ class Forwarder():
     def start_forwarding(self):
         service = Utils.extract_parameter(self.message, "FORWARDING_CONNECT_TO", None)
         if(service==None):
-            self.LOG.error("No service host:port to connect to")
+            self.LOG.error("No service to connect to.")
             self.close(1)
-        service_host, service_port = service.split(":")
-        self.LOG.info("Connecting to %s:%s" % (service_host, service_port))
-        self.service_socket = Server.open_connection((service_host, service_port), 10, self.config)
-        Server.configure_socket(self.service_socket)
+        if service.startswith("file:"):
+            (_, socket_file) = service.split("file:",1)
+            self.LOG.info("Connecting to UNIX domain socket %s" % socket_file)
+            self.service_socket = socket(AF_UNIX, SOCK_STREAM)
+            self.service_socket.connect(socket_file)
+        else:
+            service_host, service_port = service.split(":")
+            self.LOG.info("Connecting to %s:%s" % (service_host, service_port))
+            self.service_socket = Server.open_connection((service_host, service_port), 10, self.config)
+            Server.configure_socket(self.service_socket)
         if self.rate_limit>0:
             lim = "(max. %d kB/sec)" % int(float(self.rate_limit)/1024)
         else:
