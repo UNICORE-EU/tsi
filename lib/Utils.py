@@ -63,7 +63,7 @@ def addperms(path: str, mode: int):
 
 def run_command(cmd: str, discard=False, child_pids=None, login_shell=True):
     """
-    Runs command, capturing the output if the discard flag is True
+    Runs command, capturing the output if the discard flag is True.
     Returns a success flag and the output.
     If the command returns a non-zero exit code, the success flag is
     set to False and the error message is returned.

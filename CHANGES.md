@@ -4,6 +4,18 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+Version 10.2.2
+--------------
+ - new feature: allow to get user's ssh keys via preconfigured
+  command, in addition to or as alternative to reading files like
+  ".ssh/authorized_keys"
+ - fix: correctly parse empty config values
+ - fix: open PAM session for RUN_ON_LOGIN_NODE
+ - fix: fail processing if PAM is enabled and PAM open_session() fails
+ - fix: log errors on INFO level for PAM.open_session()
+ - improvement: Install.sh asks as which user the TSI should run and
+   sets file permissions accordingly
+
 Version 10.2.1
 --------------
  - port forwarding: support connecting to a Unix domain socket

@@ -61,16 +61,21 @@ class PAM(object):
         self.libpam = libpam
         self.pamh = ctypes.c_void_p()
 
-    def check_pam_error(self, method, err, msg):
+    def check_pam_error(self, method, err, msg, fail_on_error=False):
         if PAM_SUCCESS != err:
-            self.LOG.debug("Error %d invoking '%s': %s" % (err, method, msg))
+            m = "Error %d invoking '%s': %s" % (err, method, msg)
+            if fail_on_error:
+                self.LOG.info(m)
+                raise OSError(m)
+            else:
+                self.LOG.debug(m)
 
     def open_session(self, username):
         USER = ctypes.c_char_p(bytes(username, encoding="ascii"))
         err = self.libpam.pam_start(self.MODULE, USER, ctypes.byref(self.conv), ctypes.byref(self.pamh))
         self.check_pam_error("pam_start", err, self.libpam.pam_strerror(self.pamh, err))
         err = self.libpam.pam_open_session(self.pamh, 0)
-        self.check_pam_error("pam_open_session", err, self.libpam.pam_strerror(self.pamh, err))
+        self.check_pam_error("pam_open_session", err, self.libpam.pam_strerror(self.pamh, err), True)
 
     def close_session(self):
         err = self.libpam.pam_close_session(self.pamh, 0)

@@ -88,7 +88,12 @@ def process_config_value(key, value, config):
         allowed_dns.append(dn)
         config['tsi.allowed_dns'] = allowed_dns
     elif key=="tsi.keyfiles":
-        config["tsi.keyfiles"] = value.split(":")
+        kf = []
+        for v in value.split(":"):
+            v = v.strip()
+            if len(v)>0:
+                kf.append(v)
+        config["tsi.keyfiles"] = kf
     elif key=="tsi.njs_machine":
         config["tsi_unicorex_machine"] = value
     elif key=="tsi_njs_port":
@@ -168,7 +173,7 @@ def read_config_file(file_name):
         lines = f.readlines()
     for line in lines:
         # only process lines of the form key=value
-        match = re.match(r"\s*([a-zA-Z0-9.\-_/]+)\s*=\s*(.+)$", line)
+        match = re.match(r"\s*([a-zA-Z0-9.\-_/]+)\s*=\s*(.*)$", line)
         if match:
             key = match.group(1)
             value = match.group(2).strip()
@@ -212,15 +217,31 @@ def get_user_info(message, connector, config, LOG):
         try:
             with open(_file, "r") as f:
                 status += " keyfile %s : OK" % _file
-                for line in f.readlines():
-                    if line.startswith("#"):
-                        continue
-                    response+="Accepted key %d: %s\n" % (i, line.strip())
-                    i+=1
+                response, i = _add_userkeys(f.readlines(), response, i)
         except Exception as e:
             status += " keyfile %s : %s" % (_file, str(e))
+    get_key_cmd = config.get('tsi.get_userkeys_cmd', None)
+    if get_key_cmd is not None:
+        try:
+            use_login_shell = config.get('tsi.use_login_shell', True)
+            success, out = Utils.run_command(get_key_cmd, login_shell=use_login_shell)
+            if success:
+                status += " keycmd %s : OK" % get_key_cmd
+                response, i = _add_userkeys(out.splitlines(), response, i)
+            else:
+                status += " key_cmd %s : %s" % (get_key_cmd, out)
+        except Exception as e:
+            status += " key_cmd %s : %s" % (get_key_cmd, str(e))
     response += "status: %s\n" % status
     connector.write_message(response)
+
+def _add_userkeys(lines, response, index):
+    for line in lines:
+        if line.startswith("#"):
+            continue
+        response+="Accepted key %d: %s\n" % (index, line.strip())
+        index+=1
+    return response, index
 
 
 def execute_script(message, connector, config, LOG):
@@ -277,7 +298,10 @@ def init_functions(bss):
 def handle_function(function, command, message, connector, config, LOG):
     switch_uid = config.get('tsi.switch_uid', True)
     pam_enabled = config.get('tsi.open_user_sessions', False)
-    cmd_spawns = command in [ "TSI_EXECUTESCRIPT", "TSI_SUBMIT", "TSI_UFTP" ]
+    cmd_spawns = command in [ "TSI_EXECUTESCRIPT",
+                             "TSI_RUN_ON_LOGIN_NODE",
+                             "TSI_SUBMIT",
+                             "TSI_UFTP" ]
     open_user_session = pam_enabled and cmd_spawns and switch_uid
     if open_user_session and command!="_START_FORWARDING":
         # fork to avoid TSI process getting put into user slice

@@ -37,6 +37,8 @@ linux.templates.bin=/usr/share/unicore/tsi/bin
 linux.templates.lib=/usr/share/unicore/tsi/lib
 linux.templates.etc=/etc/unicore/tsi
 linux.templates.tsiPath=/usr/share/unicore/tsi/lib
+linux.templates.setpriv=/usr/bin/setpriv
+linux.templates.runuser=unicore
 
 targz.templates.log=logs
 targz.templates.pid=tsi.pid

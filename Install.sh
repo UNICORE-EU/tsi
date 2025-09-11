@@ -9,11 +9,14 @@
 # 
 # This script can also be called non-interactively using
 #   
-#   Install.sh <tsi_choice> <install_dir>
+#   Install.sh <tsi_choice> <install_dir> [<run_user>]
 # 
-# where 'tsi_choice' is one of the platform specific TSIs and 
-# 'install_dir' is the destination directory. 
-# 
+# where
+#   'tsi_choice':  one of the platform specific TSIs
+#   'install_dir': the destination directory
+#   'run_user':    the user to run the TSI as, if 'setpriv' is available
+#                  (defaults to 'unicore')
+#
 # Example:
 #   Install.sh slurm /opt/unicore/tsi_slurm
 # will install the Slurm TSI into '/opt/unicore/tsi_slurm'
@@ -82,6 +85,19 @@ getdir() {
 }
 
 #
+# get the TSI owner name / runtime username from the user
+# as default, $runuser is offered
+#
+getuser() {
+  echo ""
+  echo "Enter username who will run the TSI [$1]"
+  read runas
+  if [ "$runas" != "" ]; then
+    runuser=$runas
+  fi
+}
+
+#
 # let the user confirm the installation
 #
 confirm_tsi() {
@@ -124,8 +140,8 @@ copy_dir() {
 }
 
 #
-# installation
-
+# INSTALL
+#
 interactive="true"
 
 tsi=$1
@@ -144,7 +160,7 @@ fi
 
 
 #
-# test existence of $installdir
+# check existence of $installdir
 #
 if [ -d $installdir ]; then
   if [ "$2" == "" ]; then
@@ -159,6 +175,27 @@ elif [ -f $installdir ]; then
   echo "Installation directory $installdir identical to existing file."
   echo "Installation stopped because of doubtful confirmation,"
   echo "Remove file $installdir first."
+  exit 1
+fi
+
+#
+# if this script runs as 'root', query for runtime user
+#
+if [ "$(id -u)" -eq "0" ]
+then
+  setpriv=$(which setpriv)
+  runuser=${3:-unicore}
+  if [ "$setpriv" != "" ]
+  then
+    if [ "$interactive" = "true" ]; then
+      echo ""
+      echo "Please select which user will own the TSI files,"
+      echo "and be used as the runtime user via 'setpriv'"
+      echo "Use 'root' to run the TSI as root."
+      getuser $runuser
+      echo "Installing for $runuser"
+    fi
+  fi
 fi
 
 #
@@ -173,10 +210,8 @@ mkdir -p $installdir/lib
 #
 # copy common files
 #
- 
 VERBOSE="true"
 CHECKEXIST="true"
-
 echo "Copy common files (bin,conf) first:"
 copy_dir build-tools/src/main/package/executableTemplates $installdir/bin
 copy_dir build-tools/src/main/package/configTemplates $installdir/conf
@@ -185,37 +220,24 @@ tmpdir=/tmp/tsi_install`date +_%H_%M_%S`/lib
 mkdir -p $tmpdir
 
 #
-# copy shared files first into tmp dir
+# copy Python files
 #
-
 VERBOSE=""
 CHECKEXIST=""
-
-echo "Copy shared files (common to all installations)"
+echo "Copy shared Python files (common to all installations)"
 copy_dir lib $tmpdir
-
-#
-# copy specific files into tmp dir
-#
 if [ "$tsi" != "nobatch" ] ; then 
     echo "Adding batch-system specific files"
     copy_dir $tsi $tmpdir
 fi
-
 VERBOSE="true"
 CHECKEXIST="true"
-
-#
-# now copy all modules into install dir
-#
-echo "Copy modules into final install dir"
+echo "Copy Python files into final install dir"
 copy_dir $tmpdir $installdir/lib
-
-# cleanup tmp dir
 rm -rf $tmpdir
 
 #
-# do some variable replacement in the config files
+# replace variables in the config files
 #
 for file in $installdir/conf/* $installdir/bin/* ; do
     sed -i "s%@lib@%$installdir/lib%g" $file
@@ -223,11 +245,17 @@ for file in $installdir/conf/* $installdir/bin/* ; do
     sed -i "s%@log@%$installdir/logs%g" $file
     sed -i "s%@pid@%$installdir/LAST_PID%g" $file
     sed -i "s%@cdInstall@%cd $installdir%g" $file
+    sed -i "s%@runuser@%$runuser%g" $file
+    sed -i "s%@setpriv@%$setpriv%g" $file
 done
 
 #
-# restrict file permissions
+# set file permissions
 #
+if [ "$setpriv" != "" ]
+then
+  chown -R $runuser:$runuser $installdir
+fi
 chmod 755 $installdir
 chmod 700 $installdir/*
 chmod 755 $installdir/lib
