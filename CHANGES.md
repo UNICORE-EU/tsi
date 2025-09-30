@@ -4,6 +4,11 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+
+Version 10.3.0
+--------------
+ - n/a
+
 Version 10.2.2
 --------------
  - new feature: allow to get user's ssh keys via preconfigured
