@@ -7,10 +7,6 @@ Issue tracker:
 
 Version 10.3.0
 --------------
- - n/a
-
-Version 10.2.2
---------------
  - new feature: allow to get user's ssh keys via preconfigured
   command, in addition to or as alternative to reading files like
   ".ssh/authorized_keys"
