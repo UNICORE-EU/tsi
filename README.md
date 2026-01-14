@@ -1,5 +1,8 @@
 # UNICORE Target System Interface (TSI)
 
+[![Test](https://github.com/UNICORE-EU/tsi/actions/workflows/tsi-build.yml/badge.svg)](https://github.com/UNICORE-EU/tsi/actions/workflows/tsi-build.yml)
+
+
 This repository contains the source code for the
 UNICORE TSI server, which is the component used to
 interface to a resource manager such as Slurm
