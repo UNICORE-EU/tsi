@@ -216,22 +216,33 @@ def get_user_info(message, connector, config, LOG):
         _file = os.path.join(home, keyfile)
         try:
             with open(_file, "r") as f:
-                status += " keyfile %s : OK" % _file
+                status += " keyfile '%s': OK." % _file
                 response, i = _add_userkeys(f.readlines(), response, i)
         except Exception as e:
-            status += " keyfile %s : %s" % (_file, str(e))
+            status += " keyfile '%s': %s\n" % (_file, str(e))
+    use_login_shell = config.get('tsi.use_login_shell', True)
     get_key_cmd = config.get('tsi.get_userkeys_cmd', None)
     if get_key_cmd is not None:
         try:
-            use_login_shell = config.get('tsi.use_login_shell', True)
             success, out = Utils.run_command(get_key_cmd, login_shell=use_login_shell)
             if success:
-                status += " keycmd %s : OK" % get_key_cmd
+                status += " key_cmd: OK."
                 response, i = _add_userkeys(out.splitlines(), response, i)
             else:
-                status += " key_cmd %s : %s" % (get_key_cmd, out)
+                status += " key_cmd '%s': ERROR %s." % (get_key_cmd, out)
         except Exception as e:
-            status += " key_cmd %s : %s" % (get_key_cmd, str(e))
+            status += " key_cmd '%s': %s." % (get_key_cmd, str(e))
+    get_userinfo_cmd = config.get('tsi.get_userinfo_cmd', None)
+    if get_userinfo_cmd is not None:
+        try:
+            success, out = Utils.run_command(get_userinfo_cmd, login_shell=use_login_shell)
+            if success:
+                status += " info_cmd: OK."
+                response = _add_userinfo(out.splitlines(), response)
+            else:
+                status += " info_cmd '%s': ERROR %s." % (get_userinfo_cmd, out)
+        except Exception as e:
+            status += " info_cmd '%s': %s." % (get_userinfo_cmd, str(e))
     response += "status: %s\n" % status
     connector.write_message(response)
 
@@ -243,6 +254,12 @@ def _add_userkeys(lines, response, index):
         index+=1
     return response, index
 
+def _add_userinfo(lines, response):
+    for line in lines:
+        if line.startswith("#"):
+            continue
+        response+="Attribute: %s\n" % line.strip()
+    return response
 
 def execute_script(message, connector, config, LOG):
     """ Executes a script. If the script contains a line

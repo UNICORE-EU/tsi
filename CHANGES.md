@@ -4,6 +4,10 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+Version 10.4.0
+--------------
+ - new feature: allow to get extended user attributes via preconfigured
+   command
 
 Version 10.3.0
 --------------

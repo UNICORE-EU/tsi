@@ -76,6 +76,7 @@ ENDOFMESSAGE
         uc = UserCache.UserCache(2, self.LOG)
         self.config['tsi.user_cache'] = uc
         self.config['tsi.get_userkeys_cmd'] = "echo test123_userkey"
+        self.config['tsi.get_userinfo_cmd'] = "echo 'name=testuser\nlocation=somewhere\nfoo=bar'"
         msg = """#TSI_GET_USER_INFO
         #TSI_IDENTITY %s NONE
 ENDOFMESSAGE
@@ -88,7 +89,12 @@ ENDOFMESSAGE
         TSI.process(connector, self.config, self.LOG)
         result = control_out.getvalue()
         print(result)
+        self.assertTrue("info_cmd: OK" in result)
         self.assertTrue("test123_userkey" in result)
+        self.assertTrue("Attribute: foo=bar" in result)
+        self.assertTrue("Attribute: name=testuser" in result)
+        self.assertTrue("Attribute: location=somewhere" in result)
+        self.assertTrue("info_cmd: OK" in result)
         os.chdir(cwd)
            
     def test_Exec(self):
