@@ -3,20 +3,18 @@
 [![Test](https://github.com/UNICORE-EU/tsi/actions/workflows/tsi-build.yml/badge.svg)](https://github.com/UNICORE-EU/tsi/actions/workflows/tsi-build.yml)
 
 
-This repository contains the source code for the
-UNICORE TSI server, which is the component used to
-interface to a resource manager such as Slurm
-and to access files on the cluster.
+This repository contains the source code for the UNICORE TSI server, which is the component used to
+interface to a resource manager such as Slurm and to access files on the cluster.
 
-This server will run as "root" on the cluster login node(s).
+This server will usually run with elevated privileges (as "root" or via "setpriv")
+on one or more of the cluster's login nodes.
 
 ## Downloads
 
-TSI code is distributed within the Core server bundle,
-and also as a separate generic tar.gz file with an Install.sh script for installation.
+[TSI releases](https://github.com/UNICORE-EU/tsi/releases) are done either as a generic tar.gz file with an Install.sh
+script for installation, for Slurm, as rpm or deb packages. The TSI is also included in the
+[Server bundle](https://github.com/UNICORE-EU/server-bundle/releases)
 
-Check the SourceForge
-[Core server downloads](https://sourceforge.net/projects/unicore/files/Servers/Core)
 
 ## Documentation
 
