@@ -353,7 +353,7 @@ def handle_function(function, command, message, connector, config, LOG):
         os._exit(0)
 
 
-def process(connector, config, LOG):
+def process(connector, config, LOG, one_shot=False):
     """
     Main processing loop. Reads commands from control_in, invokes the
     appropriate function and replies to UNICORE/X.
@@ -386,14 +386,14 @@ def process(connector, config, LOG):
                 function = functions.get(cmd)
                 break
         if function is None:
-            connector.failed("Unknown command %s" % command)
+            connector.failed("Unknown #TSI_* command")
         elif "TSI_PING" == command:
             connector.write_message(MY_VERSION)
         else:
             handle_function(function, command, message, connector, config, LOG)
         connector.write_message("ENDOFMESSAGE")
-        if config.get('tsi.testing', False):
-            LOG.info("Testing mode, exiting main loop")
+        if one_shot or config.get('tsi.testing', False):
+            LOG.info("Exiting main loop")
             break
 
 
@@ -413,12 +413,12 @@ def main(argv=None):
     config = read_config_file(config_file)
     verbose = config['tsi.debug']
     use_syslog = config['tsi.use_syslog']
-    LOG = Logger("TSI-main", verbose, use_syslog)
+    LOG = Logger("UNICORE-TSI-main", verbose, use_syslog)
     LOG.info("Debug logging: %s" % verbose)
     LOG.info("Opening PAM sessions for user tasks: %s" % config['tsi.open_user_sessions'])
     finish_setup(config, LOG)
     bss = BSS.BSS()
-    LOG.info("Starting TSI %s for %s" % (MY_VERSION, bss.get_variant()))
+    LOG.info("Starting UNICORE TSI %s for %s" % (MY_VERSION, bss.get_variant()))
     BecomeUser.initialize(config, LOG)
     os.chdir(config['tsi.safe_dir'])
     bss.init(config, LOG)
@@ -426,12 +426,12 @@ def main(argv=None):
     (socket1, socket2, msg) = Server.connect(config, LOG)
     number = config.get('tsi.worker.id', 1)
     if msg==None:
-        LOG.reinit("TSI-worker", verbose, use_syslog)
+        LOG.reinit("UNICORE-TSI-worker", verbose, use_syslog)
         LOG.info("Worker %s started." % str(number))
         connector = Connector.Connector(socket1, socket2, LOG)
         process(connector, config, LOG)
     else:
-        LOG.reinit("TSI-port-forwarding", verbose, use_syslog)
+        LOG.reinit("UNICORE-TSI-port-forwarding", verbose, use_syslog)
         LOG.info("Port forwarder worker %s started." % str(number))
         forwarder = Connector.Forwarder(socket1, msg, config, LOG)
         handle_function(start_forwarding, "_START_FORWARDING", msg, forwarder, config, LOG)

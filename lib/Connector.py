@@ -1,5 +1,6 @@
 """ Wrapper class around common I/O operations """
 
+import base64
 from os import _exit
 from socket import socket, AF_UNIX, SOCK_STREAM
 from time import sleep, time
@@ -146,3 +147,75 @@ class Forwarder():
                     sleep(0.001*sleep_time)
         self.LOG.info("Stopping TCP forwarding %s" % desc)
         self.close()
+
+
+class StreamConnector(Connector):
+    def encode(self, message):
+        if type(message) is type(u" "):
+            return message
+        else:
+            return message.decode("UTF-8")
+
+    def __init__(self, in_stream, out_stream, LOG):
+        self.in_stream = in_stream
+        self.out_stream = out_stream
+        self.LOG = LOG
+        self.buf_size = 32768
+
+    def read_message(self, termination="ENDOFMESSAGE\n"):
+        """ Read message terminated by ENDOFMESSAGE from control channel """
+        message = ''
+        while True:
+            line = self.in_stream.readline()
+            if len(line) == 0:
+                continue
+            self.LOG.debug(line)
+            if line == termination:
+                break
+            message += line
+        return message
+
+    def write_message(self, message):
+        """ Write message to control channel """
+        if message is not None:
+            self.out_stream.write(self.encode(message))
+            self.out_stream.write(u"\n")
+            self.out_stream.flush()
+
+    def failed(self, message):
+        """
+        Write single line of TSI_FAILED and error message to control channel
+        """
+        self.write_message("TSI_FAILED: " + message.replace("\n", ":"))
+
+    def ok(self, message=None):
+        """ Write TSI_OK line and any message to control channel """
+        self.write_message("TSI_OK")
+        if message is not None:
+            self.write_message(message)
+
+    def read_data(self, maxlen):
+        return self._read_encoded()
+ 
+    def write_data(self, data):
+        return self._write_encoded(data, "BASE64")
+
+    _encoders = {"BASE64": base64.b64encode}
+
+    def _write_encoded(self, data, encoding = "BASE64"):
+        encoder  = self._encoders.get(encoding)
+        self.write_message(f"---BEGIN DATA {encoding}---")
+        self.write_message(encoder(data))
+        self.write_message(f"---END DATA---")
+        return len(data)
+
+    _decoders = {"BASE64": base64.b64decode}
+
+    def _read_encoded(self):
+        msg  = self.read_message(termination="---END DATA---")
+        header, msg = msg.split("\n", 1)
+        if not header.startswith("---BEGIN DATA"):
+            raise ValueError("Expected encoded data chunk")
+        encoding = "BASE64" # TODO read from header
+        decoder  = self._decoders.get(encoding)
+        return decoder(msg)

@@ -137,11 +137,8 @@ def become_user(user, requested_groups, config: dict, LOG: Logger):
     HOME
     """
 
-    euid = config['tsi.effective_uid']
+    euid = config.get('tsi.effective_uid')
     setting_uids = config['tsi.switch_uid']
-    user_cache: UserCache = config['tsi.user_cache']
-    fail_on_invalid_gids = config['tsi.fail_on_invalid_gids']
-    primary = requested_groups[0]
 
     if not setting_uids:
         if euid == 0:
@@ -150,6 +147,9 @@ def become_user(user, requested_groups, config: dict, LOG: Logger):
         else:
             return True
 
+    user_cache: UserCache = config['tsi.user_cache']
+    fail_on_invalid_gids = config['tsi.fail_on_invalid_gids']
+    primary = requested_groups[0]
     new_uid = user_cache.get_uid_4user(user)
 
     if new_uid == -1:
@@ -203,10 +203,9 @@ def restore_id(config: dict):
     """
     Restore the process' UID and GID to the stored values (usually root)
     """
-    euid, egid = (config['tsi.effective_uid'], config['tsi.effective_gid'])
     setting_uids = config['tsi.switch_uid']
-
     if setting_uids:
+        euid, egid = (config['tsi.effective_uid'], config['tsi.effective_gid'])
         os.setresuid(euid, euid, euid)
         os.setgid(egid)
         os.setgroups([egid])
