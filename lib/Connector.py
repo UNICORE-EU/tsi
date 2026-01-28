@@ -150,11 +150,6 @@ class Forwarder():
 
 
 class StreamConnector(Connector):
-    def encode(self, message):
-        if type(message) is type(u" "):
-            return message
-        else:
-            return message.decode("UTF-8")
 
     def __init__(self, in_stream, out_stream, LOG):
         self.in_stream = in_stream
@@ -178,7 +173,7 @@ class StreamConnector(Connector):
     def write_message(self, message):
         """ Write message to control channel """
         if message is not None:
-            self.out_stream.write(self.encode(message))
+            self.out_stream.write(Utils.encode(message))
             self.out_stream.write(u"\n")
             self.out_stream.flush()
 
@@ -194,7 +189,7 @@ class StreamConnector(Connector):
         if message is not None:
             self.write_message(message)
 
-    def read_data(self, maxlen):
+    def read_data(self, _):
         return self._read_encoded()
  
     def write_data(self, data):

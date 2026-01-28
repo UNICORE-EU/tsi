@@ -8,10 +8,11 @@ from syslog import closelog, openlog, syslog, LOG_DEBUG, LOG_ERR, LOG_INFO, LOG_
 
 class Logger(object):
 
-    def __init__(self, name="TSI", verbose=False, use_syslog=True):
+    def __init__(self, name="TSI", verbose=False, use_syslog=True, quiet=False):
         self.verbose = verbose
         self.use_syslog = use_syslog
         self.name = name
+        self.quiet = quiet
         if use_syslog:
             try:
                 openlog(name)
@@ -19,14 +20,16 @@ class Logger(object):
                 self.use_syslog = False
 
     def out(self, level, message):
-        tstamp = datetime.now().isoformat()[:19]
-        print ("%s [%s][%s][%s] %s" % (tstamp, level, self.name, getpid(), message))
-        stdout.flush()
+        if not self.quiet:
+            tstamp = datetime.now().isoformat()[:19]
+            print ("%s [%s][%s][%s] %s" % (tstamp, level, self.name, getpid(), message))
+            stdout.flush()
 
-    def reinit(self, name="TSI-worker", verbose=False, use_syslog=True):
+    def reinit(self, name="TSI-worker", verbose=False, use_syslog=True, quiet=False):
         self.verbose = verbose
         self.use_syslog = use_syslog
         self.name = name
+        self.quiet = quiet
         if self.use_syslog:
             closelog()
             try:

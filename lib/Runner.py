@@ -24,7 +24,7 @@ def main(argv=None):
     config = read_config_file(config_file)
     verbose = config['tsi.debug']
     use_syslog = config['tsi.use_syslog']
-    LOG = Logger("UNICORE-TSI-run", verbose, use_syslog)
+    LOG = Logger("UNICORE-TSI-run", verbose, use_syslog, True)
     LOG.info("Debug logging: %s" % verbose)
     config['tsi.switch_uid'] = False
     config['tsi.open_user_sessions'] = False
