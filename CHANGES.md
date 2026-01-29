@@ -4,6 +4,13 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+Version 1x.x.0
+--------------
+ - add one-shot mode of operation, where the TSI will read
+   a command and possibly file data from stdin and write 
+   results and possibly file data to stdout. This is launched
+   via the script bin/process.sh
+
 Version 10.4.0
 --------------
  - new feature: allow to get extended user attributes via preconfigured
