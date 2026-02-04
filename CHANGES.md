@@ -4,7 +4,7 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
-Version 1x.x.0
+Version 11.0.0
 --------------
  - add one-shot mode of operation, where the TSI will read
    a command and possibly file data from stdin and write 
