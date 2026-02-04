@@ -6,7 +6,8 @@ import os
 import re
 import socket
 import sys
-import ACL, BecomeUser, BSS, Connector, PAM, Reservation, Server, IO, UFTP, Utils
+import ACL, BecomeUser, BSS, PAM, Reservation, Server, IO, UFTP, Utils
+from Connector import Connector, Forwarder
 from Log import Logger
 
 #
@@ -54,7 +55,7 @@ def get_default_config() -> dict:
     return config
 
 
-def process_config_value(key, value, config):
+def process_config_value(key: str, value: str, config: dict):
     """
     Handles key=value line from config file, checking for correctness
     and storing the appropriate settings in the config dictionary
@@ -102,7 +103,7 @@ def process_config_value(key, value, config):
         config[key] = value
 
 
-def setup_acl(config, LOG):
+def setup_acl(config: dict, LOG: Logger):
     """
     Configures the ACL settings
     """
@@ -121,7 +122,7 @@ def setup_acl(config, LOG):
         LOG.info("NFS ACL support disabled (commands not configured)")
 
 
-def setup_allowed_ips(config, LOG):
+def setup_allowed_ips(config: dict, LOG: Logger):
     """
     Configures IP addresses of UNICORE/X servers allowed to connect
     """
@@ -140,11 +141,11 @@ def setup_allowed_ips(config, LOG):
             LOG.error("Could not resolve: '%s'" % machine)
     config['tsi.allowed_ips'] = ips
 
-def setup_portrange(config, LOG):
+def setup_portrange(config: dict, LOG: Logger):
     """
     Configures the (optional) range of local ports the TSI should use
     """
-    rangespec = config['tsi.local_portrange']
+    rangespec: str = config['tsi.local_portrange']
     first = 0
     lower = -1
     upper = -1
@@ -162,7 +163,7 @@ def setup_portrange(config, LOG):
     config["tsi.local_portrange"] = (first, lower, upper)
 
 
-def read_config_file(file_name):
+def read_config_file(file_name: str):
     """
     Read the config properties file, check values, and return
     a dictionary with the configuration.
@@ -181,25 +182,25 @@ def read_config_file(file_name):
     return config
 
 
-def finish_setup(config, LOG):
+def finish_setup(config: dict, LOG: Logger):
     setup_acl(config, LOG)
     setup_allowed_ips(config, LOG)
     setup_portrange(config, LOG)
 
 
-def ping(message, connector, config, LOG):
+def ping(msg: str, connector: Connector, config: dict, LOG: Logger):
     """ Returns TSI version."""
-    connector.write_message(MY_VERSION)
+    connector.ok(MY_VERSION)
 
 
-def ping_uid(message, connector, config, LOG):
+def ping_uid(msg: str, connector: Connector, config: dict, LOG: Logger):
     """ Returns TSI version and process' UID. Used for unit testing."""
-    connector.write_message(MY_VERSION)
+    connector.ok(MY_VERSION)
     connector.write_message(" running as UID [%s]" % config.get('tsi.effective_uid', "n/a"))
 
 
-def get_user_info(message, connector, config, LOG):
-    id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", message, re.M)
+def get_user_info(msg: str, connector: Connector, config: dict, LOG: Logger):
+    id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", msg, re.M)
     if id_info is None:
         connector.failed("No user/group info given")
         return
@@ -244,7 +245,7 @@ def get_user_info(message, connector, config, LOG):
         except Exception as e:
             status += " info_cmd '%s': %s." % (get_userinfo_cmd, str(e))
     response += "status: %s\n" % status
-    connector.write_message(response)
+    connector.ok(response)
 
 def _add_userkeys(lines, response, index):
     for line in lines:
@@ -261,21 +262,21 @@ def _add_userinfo(lines, response):
         response+="Attribute: %s\n" % line.strip()
     return response
 
-def execute_script(message, connector, config, LOG):
+def execute_script(msg: str, connector: Connector, config: dict, LOG: Logger):
     """ Executes a script. If the script contains a line
     #TSI_DISCARD_OUTPUT true
     the output is discarded, otherwise it is returned to UNICORE/X.
     """
-    discard = "#TSI_DISCARD_OUTPUT true\n" in message
+    discard = "#TSI_DISCARD_OUTPUT true\n" in msg
     child_pids = config['tsi.child_pids']
     use_login_shell = config.get('tsi.use_login_shell', True)
-    (success, output) = Utils.run_command(message, discard, child_pids, use_login_shell)
+    (success, output) = Utils.run_command(msg, discard, child_pids, use_login_shell)
     if success:
         connector.ok(output)
     else:
         connector.failed(output)
 
-def start_forwarding(message, forwarder, config, LOG):
+def start_forwarding(msg: str, forwarder: Forwarder, config: dict, LOG: Logger):
     """ starts forwarding threads """
     forwarder.start_forwarding()
 
@@ -312,7 +313,7 @@ def init_functions(bss):
     }
 
 
-def handle_function(function, command, message, connector, config, LOG):
+def handle_function(function, command: str, msg: str, connector: Connector, config: dict, LOG: Logger):
     switch_uid = config.get('tsi.switch_uid', True)
     pam_enabled = config.get('tsi.open_user_sessions', False)
     cmd_spawns = command in [ "TSI_EXECUTESCRIPT",
@@ -328,7 +329,7 @@ def handle_function(function, command, message, connector, config, LOG):
             return
     try:
         if switch_uid:
-            id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", message, re.M)
+            id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", msg, re.M)
             if id_info is None:
                 raise RuntimeError("No user/group info given")
             user = id_info.group(1)
@@ -340,7 +341,7 @@ def handle_function(function, command, message, connector, config, LOG):
             user_switch_status = BecomeUser.become_user(user, groups, config, LOG)
             if user_switch_status is not True:
                 raise RuntimeError(user_switch_status)
-        function(message, connector, config, LOG)
+        function(msg, connector, config, LOG)
     except:
         msg = str(sys.exc_info()[1])
         connector.failed(msg)
@@ -353,7 +354,7 @@ def handle_function(function, command, message, connector, config, LOG):
         os._exit(0)
 
 
-def process(connector, config, LOG, one_shot=False):
+def process(connector: Connector, config: dict, LOG: Logger, one_shot=False):
     """
     Main processing loop. Reads commands from control_in, invokes the
     appropriate function and replies to UNICORE/X.
@@ -428,12 +429,12 @@ def main(argv=None):
     if msg==None:
         LOG.reinit("UNICORE-TSI-worker", verbose, use_syslog)
         LOG.info("Worker %s started." % str(number))
-        connector = Connector.Connector(socket1, socket2, LOG)
+        connector = Connector(socket1, socket2, LOG)
         process(connector, config, LOG)
     else:
         LOG.reinit("UNICORE-TSI-port-forwarding", verbose, use_syslog)
         LOG.info("Port forwarder worker %s started." % str(number))
-        forwarder = Connector.Forwarder(socket1, msg, config, LOG)
+        forwarder = Forwarder(socket1, msg, config, LOG)
         handle_function(start_forwarding, "_START_FORWARDING", msg, forwarder, config, LOG)
     return 0
 

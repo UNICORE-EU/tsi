@@ -50,8 +50,9 @@
 import os
 import re
 
+from Connector import Connector
 from Utils import run_command, extract_parameter
-
+from Log import Logger
 
 def check_support(path, acl):
     """ Checks if a directory is on a FS configured with ACL support.
@@ -87,7 +88,7 @@ def unset_posix():
         del os.environ['POSIXLY_CORRECT']
 
 
-def getfacl_posix(path, connector, config, LOG):
+def getfacl_posix(path, connector: Connector, config, LOG: Logger):
     unset_posix()
     getfacl_cmd = config.get('tsi.getfacl', '/bin/false')
     command = "%s %s" % (getfacl_cmd, path)
@@ -103,7 +104,7 @@ def getfacl_posix(path, connector, config, LOG):
                 connector.write_message(line)
 
 
-def prepare_posix_arg(val, remove):
+def prepare_posix_arg(val: str, remove):
     ret = ""
     oargs = val.split(" ")
     if re.match(r"[D]?U", oargs[0]) is not None:
@@ -115,7 +116,7 @@ def prepare_posix_arg(val, remove):
     return ret
 
 
-def setfacl_posix(path, op, val, connector, config, LOG):
+def setfacl_posix(path: str, op: str, val: str, connector: Connector, config, LOG: Logger):
     unset_posix()
     setfacl_cmd = config.get('tsi.setfacl', '/bin/false')
 
@@ -151,9 +152,9 @@ def setfacl_posix(path, op, val, connector, config, LOG):
         connector.ok()
 
 
-def process_acl(message, connector, config, LOG):
-    operation = extract_parameter(message, "ACL_OPERATION")
-    path = extract_parameter(message, "ACL_PATH")
+def process_acl(msg: str, connector: Connector, config: dict, LOG: Logger):
+    operation = extract_parameter(msg, "ACL_OPERATION")
+    path = extract_parameter(msg, "ACL_PATH")
     acl = config.get('tsi.acl', {})
     if operation == "CHECK_SUPPORT":
         support = check_support(path, acl)
@@ -172,8 +173,8 @@ def process_acl(message, connector, config, LOG):
                 "ERROR: Getting ACL on this file system is unsupported.")
     elif operation == "SETFACL":
         support = check_support(path, acl)
-        command = extract_parameter(message, "ACL_COMMAND")
-        command_spec = extract_parameter(message, "ACL_COMMAND_SPEC")
+        command = extract_parameter(msg, "ACL_COMMAND")
+        command_spec = extract_parameter(msg, "ACL_COMMAND_SPEC")
         if command_spec is None:
             connector.failed("Missing parameter TSI_ACL_COMMAND_SPEC")
         if command is None:

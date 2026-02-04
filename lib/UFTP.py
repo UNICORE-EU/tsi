@@ -11,7 +11,7 @@ from Connector import Connector
 from Log import Logger
 from Utils import expand_variables, extract_parameter, run_command
 
-def open_session(host, port, secret):
+def open_session(host: str, port: int, secret: str):
     ''' open an FTP session at the given UFTP server
         and return the session object '''
     ftp = FTP()
@@ -23,7 +23,7 @@ def open_session(host, port, secret):
 def log_reply(reply):
     print("uftpd: %s" % reply)
 
-def uftp(message: str, connector: Connector, config: dict, LOG: Logger):
+def uftp(msg: str, connector: Connector, config: dict, LOG: Logger):
     """
     Launches a child process that reads/writes a file via UFTP
 
@@ -43,26 +43,26 @@ def uftp(message: str, connector: Connector, config: dict, LOG: Logger):
         TSI_STDERR           - file to write standard error to
     """
 
-    host = extract_parameter(message, 'UFTP_HOST')
-    port = int(extract_parameter(message, 'UFTP_PORT'))
-    secret = extract_parameter(message, 'UFTP_SECRET')
-    operation = extract_parameter(message, 'UFTP_OPERATION')
-    write_mode = extract_parameter(message, 'UFTP_WRITE_MODE', "FULL")
-    remote_path = expand_variables(extract_parameter(message, 'UFTP_REMOTE_FILE'))
-    local_path = expand_variables(extract_parameter(message, 'UFTP_LOCAL_FILE'))
-    offset = int(extract_parameter(message, 'UFTP_OFFSET', "0"))
-    length = int(extract_parameter(message, 'UFTP_LENGTH', "-1"))
+    host = extract_parameter(msg, 'UFTP_HOST')
+    port = int(extract_parameter(msg, 'UFTP_PORT'))
+    secret = extract_parameter(msg, 'UFTP_SECRET')
+    operation = extract_parameter(msg, 'UFTP_OPERATION')
+    write_mode = extract_parameter(msg, 'UFTP_WRITE_MODE', "FULL")
+    remote_path = expand_variables(extract_parameter(msg, 'UFTP_REMOTE_FILE'))
+    local_path = expand_variables(extract_parameter(msg, 'UFTP_LOCAL_FILE'))
+    offset = int(extract_parameter(msg, 'UFTP_OFFSET', "0"))
+    length = int(extract_parameter(msg, 'UFTP_LENGTH', "-1"))
 
-    uspace_dir = extract_parameter(message, "USPACE_DIR")
-    outcome_dir = extract_parameter(message, "OUTCOME_DIR")
-    stdout = outcome_dir + "/" + extract_parameter(message, "STDOUT", "stdout")
-    stderr = outcome_dir + "/" + extract_parameter(message, "STDERR", "stderr")
-    pid_file = outcome_dir + "/" + extract_parameter(message, "PID_FILE", "UNICORE_SCRIPT_PID")
-    exit_code_file = outcome_dir + "/" + extract_parameter(message, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
+    uspace_dir = extract_parameter(msg, "USPACE_DIR")
+    outcome_dir = extract_parameter(msg, "OUTCOME_DIR")
+    stdout = outcome_dir + "/" + extract_parameter(msg, "STDOUT", "stdout")
+    stderr = outcome_dir + "/" + extract_parameter(msg, "STDERR", "stderr")
+    pid_file = outcome_dir + "/" + extract_parameter(msg, "PID_FILE", "UNICORE_SCRIPT_PID")
+    exit_code_file = outcome_dir + "/" + extract_parameter(msg, "EXIT_CODE_FILE", "UNICORE_SCRIPT_EXIT_CODE")
 
     uftp_client = __file__
 
-    cmds = [message,
+    cmds = [msg,
             "export UFTP_HOST=%s" % host,
             "export UFTP_PORT=%s" % port,
             "export UFTP_SECRET=%s" % secret,
@@ -87,7 +87,8 @@ def uftp(message: str, connector: Connector, config: dict, LOG: Logger):
     (success, reply) = run_command(cmd, True, child_pids, use_login_shell)
     if not success:
         connector.failed("Failed to launch uftp command: %s" % reply)
-
+    else:
+        connector.ok()
 
 
 def main():

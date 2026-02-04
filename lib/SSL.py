@@ -2,10 +2,12 @@
 # SSL-related functions
 #
 
+import socket
 import ssl
 import Utils
+from Log import Logger
 
-def setup_ssl(config, socket, LOG, server_mode=False):
+def setup_ssl(config: dict, socket: socket.socket, _: Logger, server_mode=False) -> ssl.SSLSocket:
     """ Wraps the given socket with an SSL context """
     keystore = config.get('tsi.keystore')
     keypass = config.get('tsi.keypass', None)
@@ -24,7 +26,7 @@ def setup_ssl(config, socket, LOG, server_mode=False):
     return context.wrap_socket(socket, server_side=server_mode)
 
 
-def verify_peer(config, socket, LOG):
+def verify_peer(config: dict, socket: ssl.SSLSocket, LOG: Logger):
     """ check that the peer is OK by comparing the DN to our ACL """
     acl = config.get('tsi.allowed_dns', [])
     subject = socket.getpeercert()['subject']

@@ -10,6 +10,10 @@ Version 1x.x.0
    a command and possibly file data from stdin and write 
    results and possibly file data to stdout. This is launched
    via the script bin/process.sh
+ - clean-up API: TSI always responds with either TSI_OK or TSI_FAILED
+  on the command connection, followed by any additional messages
+  NOTE this is not compatible with 10.4.0 and earlier UNICORE/X
+ - code clean-up
 
 Version 10.4.0
 --------------

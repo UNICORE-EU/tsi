@@ -151,14 +151,14 @@ class Forwarder():
 
 class StreamConnector(Connector):
 
-    def __init__(self, in_stream, out_stream, LOG):
+    def __init__(self, in_stream, out_stream, LOG: Logger):
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.LOG = LOG
         self.buf_size = 32768
 
     def read_message(self, termination="ENDOFMESSAGE"):
-        """ Read message terminated by ENDOFMESSAGE from control channel """
+        """ Read message from stdin """
         message = ''
         while True:
             line = self.in_stream.readline()
@@ -171,46 +171,33 @@ class StreamConnector(Connector):
         return message
 
     def write_message(self, message):
-        """ Write message to control channel """
+        """ Write message to stdout """
         if message is not None:
             self.out_stream.write(Utils.encode(message))
             self.out_stream.write(u"\n")
             self.out_stream.flush()
 
     def failed(self, message):
-        """
-        Write single line of TSI_FAILED and error message to control channel
-        """
+        """ TSI_FAILED and error message to stdout """
         self.write_message("TSI_FAILED: " + message.replace("\n", ":"))
 
     def ok(self, message=None):
-        """ Write TSI_OK line and any message to control channel """
+        """ TSI_OK and message to stdout """
         self.write_message("TSI_OK")
         if message is not None:
             self.write_message(message)
 
     def read_data(self, _):
-        return self._read_encoded()
- 
-    def write_data(self, data):
-        return self._write_encoded(data, "BASE64")
-
-    _encoders = {"BASE64": base64.encodebytes}
-
-    def _write_encoded(self, data, encoding = "BASE64"):
-        encoder  = self._encoders.get(encoding)
-        self.write_message(f"---BEGIN DATA {encoding}---")
-        self.write_message(encoder(data))
-        self.write_message(f"---END DATA---")
-        return len(data)
-
-    _decoders = {"BASE64": base64.b64decode}
-
-    def _read_encoded(self):
+        """ Read a block of base64 data from stdin and return the decoded data """
         msg  = self.read_message(termination="---END DATA---")
         header, msg = msg.split("\n", 1)
-        if not header.startswith("---BEGIN DATA"):
-            raise ValueError("Expected encoded data chunk")
-        encoding = "BASE64" # TODO read from header
-        decoder  = self._decoders.get(encoding)
-        return decoder(msg)
+        if not header.startswith("---BEGIN DATA BASE64"):
+            raise ValueError("Expected base64 encoded data chunk")
+        return base64.b64decode(msg)
+
+    def write_data(self, data):
+        """ Write data to stdout as a base64 encoded block """
+        self.write_message("---BEGIN DATA BASE64---")
+        self.write_message(base64.b64encode(data))
+        self.write_message("---END DATA---")
+        return len(data)

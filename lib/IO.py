@@ -9,20 +9,21 @@ import re
 import os
 import os.path
 import stat
+from Connector import Connector
 from Utils import expand_variables, extract_parameter, run_command
+from Log import Logger
 
-
-def get_file_chunk(message, connector, config, LOG):
+def get_file_chunk(msg: str, connector: Connector, config: dict, LOG: Logger):
     """Return part of a file to UNICORE/X via the data_out stream.
        The message sent by UNICORE/X is scanned for:
            TSI_FILE   - name of file to return
            TSI_START  - start byte
            TSI_LENGTH - how many bytes to return
     """
-    path = extract_parameter(message, 'FILE')
+    path = extract_parameter(msg, 'FILE')
     path = expand_variables(path)
-    start = int(extract_parameter(message, 'START'))
-    length = int(extract_parameter(message, 'LENGTH'))
+    start = int(extract_parameter(msg, 'START'))
+    length = int(extract_parameter(msg, 'LENGTH'))
 
     LOG.debug("Getting data from %s start at %d length %d" % (path, start, length))
 
@@ -54,24 +55,24 @@ def get_file_chunk(message, connector, config, LOG):
             must_write -= written
 
 
-def put_file_chunk(message, connector, config, LOG):
+def put_file_chunk(msg: str, connector: Connector, config: dict, LOG: Logger):
     """Write part of a file, reading data from UNICORE/X via the data_in stream.
        The message sent by UNICORE/X is scanned for:
            TSI_FILE   - name of file to write and mode
            TSI_FILESACTION  - what to do (overwrite = 1 , append = 3)
            TSI_LENGTH - how many bytes to return
     """
-    path_and_mode = extract_parameter(message, "FILE")
+    path_and_mode = extract_parameter(msg, "FILE")
     mode_index = path_and_mode.rindex(" ")
 
     path = expand_variables(path_and_mode[:mode_index])
     mode = path_and_mode[mode_index + 1:]
 
-    action = extract_parameter(message, "FILESACTION")
+    action = extract_parameter(msg, "FILESACTION")
     if action is None:
         action = "1"
 
-    length = int(extract_parameter(message, "LENGTH"))
+    length = int(extract_parameter(msg, "LENGTH"))
 
     LOG.debug("Writing %d bytes of data to %s" % (length, path))
 
@@ -98,9 +99,11 @@ def put_file_chunk(message, connector, config, LOG):
                 write_offset += written
                 must_write -= written
 
-    # change mode to requested mode
-    os.chmod(path, int(mode, 8))
-
+    # change mode to requested mode - ignore failure
+    try:
+        os.chmod(path, int(mode, 8))
+    except OSError as e:
+        LOG.debug(f"Cannot chmod: {repr(e)}")
 
 _mode_table = (
     (stat.S_IRUSR, "r"),
@@ -206,7 +209,7 @@ def get_info(path):
            + " " + modt + " " + path + "\n" + perms + " " + user + " " + group
 
 
-def list_directory(connector, path, recursive):
+def list_directory(connector: Connector, path: str, recursive: bool):
     """ List a directory (which is supposed to exist) """
     entries = os.listdir(path)
     for entry in entries:
@@ -221,7 +224,7 @@ def list_directory(connector, path, recursive):
             pass
 
 
-def ls(message, connector, config, LOG):
+def ls(msg: str, connector: Connector, config: dict, LOG: Logger):
     """List directory or get information about a file
        The message sent by UNICORE/X is scanned for:
            TSI_FILE     - name of file/path to list
@@ -252,9 +255,9 @@ def ls(message, connector, config, LOG):
    This is required even when the listing is non-recursive.
 
     """
-    path = extract_parameter(message, "FILE")
+    path = extract_parameter(msg, "FILE")
     path = expand_variables(path)
-    mode = extract_parameter(message, "LS_MODE")
+    mode = extract_parameter(msg, "LS_MODE")
 
     allowed = ["R", "A", "N"]
     if mode not in allowed:
@@ -264,7 +267,7 @@ def ls(message, connector, config, LOG):
 
     as_single_file = "A" == mode
     recurse = "R" == mode
-    connector.write_message("START_LISTING")
+    connector.ok("START_LISTING")
     if os.path.exists(path):
         try:
             if os.path.isdir(path) and not as_single_file:
@@ -272,13 +275,12 @@ def ls(message, connector, config, LOG):
             else:
                 info = get_info(path)
                 connector.write_message(info)
-        except:
-            # this is somewhat wierd, but the perl TSI did it the same way
-            pass
+        except OSError as e:
+            LOG.debug(repr(e))
     connector.write_message("END_LISTING")
 
 
-def df(message, connector, config, LOG):
+def df(msg: str, connector: Connector, config: dict, LOG: Logger):
     """ determines the free space on a given partition and
     reports results on stdout in the format expected by UNICORE/X.
     The format of the output is as follows:
@@ -295,7 +297,7 @@ def df(message, connector, config, LOG):
     Every line is terminated by \n
     """
 
-    path = extract_parameter(message, "FILE")
+    path = extract_parameter(msg, "FILE")
     path = expand_variables(path)
 
     # TODO might want to add a cache or do not check
@@ -312,11 +314,12 @@ def df(message, connector, config, LOG):
                 if m is not None:
                     total = m.group(2)
                     free = m.group(4)
-        except:
+        except Exception as e:
             connector.failed("Wrong or unexpected output from 'df' "
                              "command: %s" % result)
+            LOG.debug("Wrong or unexpected output from 'df' command: %s %s" % (result, repr(e)))
             return
-        connector.write_message("START_DF")
+        connector.ok("START_DF")
         connector.write_message("TOTAL %s" % total)
         connector.write_message("FREE %s" % free)
         connector.write_message("USER %s" % user)

@@ -93,7 +93,7 @@ class BSS(BSSBase):
         child = subprocess.Popen(cmd, shell=True, start_new_session=True)
         child_pids = config['tsi.child_pids']
         child_pids.append(child.pid)
-        connector.write_message(job_id)
+        connector.ok(job_id)
 
 
     def extract_info(self, qstat_line):

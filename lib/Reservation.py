@@ -13,16 +13,16 @@ def init(config, LOG):
     pass
 
 
-def make_reservation(message, connector, config, LOG):
+def make_reservation(msg, connector, config, LOG):
     """ Make a reservation """
     connector.failed("Reservation not supported!")
 
 
-def query_reservation(message, connector, config, LOG):
+def query_reservation(msg, connector, config, LOG):
     """ Query a reservation """
     connector.failed("Reservation not supported!")
 
 
-def cancel_reservation(message, connector, config, LOG):
+def cancel_reservation(msg, connector, config, LOG):
     """ Cancel a reservation """
     connector.failed("Reservation not supported!")

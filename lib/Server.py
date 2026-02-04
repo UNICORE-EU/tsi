@@ -13,8 +13,9 @@ import signal
 import socket
 import sys
 import time
+from Log import Logger
 
-def configure_socket(sock):
+def configure_socket(sock: socket.socket):
     """
     Setup socket options (keepalive).
     """
@@ -43,7 +44,7 @@ def worker_completed(signal, frame):
         pass
 
 
-def verify_ip(config, unicorex_host, LOG):
+def verify_ip(config, unicorex_host, LOG: Logger):
     if 'tsi.allowed_ips' not in config:
         LOG.warning('No list of allowed IPs set. Not production ready')
         return True
@@ -62,7 +63,7 @@ def close_quietly(closeable):
         pass
 
 
-def connect(config, LOG):
+def connect(config: dict, LOG: Logger):
     """
     Accept connection from UNICORE/X and handle the control command
 
@@ -251,11 +252,11 @@ def open_connection(address, timeout, config):
     raise Exception("Cannot connect - no free local ports in configured range %s:%s" % (_lower, _upper))
 
 
-def get_unicorex_port(configuration, params):
+def get_unicorex_port(config: dict, params):
     """ Get the UNICORE/X port. If not set in config, extract it
         from the params sent by UNICORE/X
     """
-    port = configuration.get('tsi.unicorex_port', None)
+    port = config.get('tsi.unicorex_port', None)
     if port is None:
         try:
             if " " in params:
