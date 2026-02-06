@@ -160,8 +160,7 @@ class StreamConnector(Connector):
     def read_message(self, termination="ENDOFMESSAGE"):
         """ Read message from stdin """
         message = ''
-        while True:
-            line = self.in_stream.readline()
+        for line in self.in_stream:
             if len(line) == 0:
                 continue
             self.LOG.debug(line)

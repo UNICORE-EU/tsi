@@ -188,7 +188,7 @@ def finish_setup(config: dict, LOG: Logger):
     setup_portrange(config, LOG)
 
 
-def ping(msg: str, connector: Connector, config: dict, LOG: Logger):
+def ping(connector: Connector):
     """ Returns TSI version."""
     connector.ok(MY_VERSION)
 
@@ -389,7 +389,7 @@ def process(connector: Connector, config: dict, LOG: Logger, one_shot=False):
         if function is None:
             connector.failed("Unknown #TSI_* command")
         elif "TSI_PING" == command:
-            connector.write_message(MY_VERSION)
+            ping(connector)
         else:
             handle_function(function, command, message, connector, config, LOG)
         connector.write_message("ENDOFMESSAGE")
