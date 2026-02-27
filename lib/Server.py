@@ -78,6 +78,9 @@ def connect(config: dict, LOG: Logger):
         This then starts bi-directional TCP forwarding.
         The forwarding process will be owned by the given user/group.
 
+    'set key=value'
+        Set a config settings parameter (currently unused)
+
     'shutdown'
         Stop the TSI server and exit
 

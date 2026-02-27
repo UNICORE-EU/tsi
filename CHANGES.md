@@ -4,6 +4,11 @@ Changelog for the UNICORE TSI
 Issue tracker:
   https://github.com/UNICORE-EU/tsi/issues
 
+COMPATIBILITY NOTE:
+
+  * TSI 11.x is not compatible with 10.x and earlier UNICORE/X versions *
+
+
 Version 11.0.0
 --------------
  - add one-shot mode of operation, where the TSI will read
