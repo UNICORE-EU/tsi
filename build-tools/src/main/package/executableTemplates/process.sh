@@ -7,22 +7,7 @@
 #
 # (to start a TSI server, please use 'start.sh'!)
 
-@cdInstall@
+PYTHON="python3"
+export PYTHONPATH=@lib@
 
-#
-# Read basic settings
-#
-. @etc@/startup.properties
-
-PARAM=$*
-if [ "$PARAM" = "" ]
-then
-  PARAM=${CONF}/tsi.properties
-fi
-
-export PYTHONPATH=${PY}
-
-#
-# go
-#
-$PYTHON $PY/Runner.py $PARAM
+$PYTHON @lib@/Runner.py

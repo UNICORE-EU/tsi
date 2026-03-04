@@ -72,11 +72,14 @@ def connect(config: dict, LOG: Logger):
         for communicating with UNICORE/X, fork a new process,
         and return the socket pair to the main loop for user command processing
 
-    'start-forwarding <ux-port> <servicehost:serviceport> <user> <group>'
+    'start-forwarding <ux-port> <service_spec> <user> <group>'
         Connect to the given service, callback to U/X to open a socket,
         fork a new process, and return both sockets to the main loop.
         This then starts bi-directional TCP forwarding.
         The forwarding process will be owned by the given user/group.
+        "service_spec" can be either "file:domain_socket_filename" to
+        connect to a UNIX domain socket, or "host:port" to connect
+        to a TCP socket
 
     'set key=value'
         Set a config settings parameter (currently unused)
