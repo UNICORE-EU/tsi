@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=11.0.0
+VERSION=11.0.1
 RELEASE=1
 MVN=mvn -q
 
@@ -124,16 +124,9 @@ lsf-prepare: clean
 	$(call copy-bssfiles,lsf)
 
 #
-# LL
-#
-ll-prepare: clean
-	$(call prepare-specific,tsi-loadleveler)
-	$(call copy-bssfiles,loadleveler)
-
-#
 # All the linux packages for the current OS
 #
-packages: nobatch-package torque-package slurm-package lsf-package ll-package
+packages: nobatch-package torque-package slurm-package lsf-package
 
 #
 # Everything
@@ -149,11 +142,16 @@ tgz: clean
 	@mkdir -p target
 	@mkdir -p build
 	@rm -rf build/*
-	@cp -R build-tools docs lib loadleveler lsf slurm build/
+	@cp -R build-tools docs lib lsf slurm torque build/
 	@cp README.md CHANGES.md LICENSE Install.sh build/
 	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
 
+zipped-slurm: tgz
+	@echo "Building single file executable unicore-tsi-slurm-${VERSION}.pyz"
+	@cd build/
+	@cp slurm/BSS.py lib/	
+	@${PYTHON} -m zipapp --main "Runner:main" --output target/unicore-tsi-slurm-${VERSION}.pyz lib
 
 clean:
 	@find -name "*~" -delete

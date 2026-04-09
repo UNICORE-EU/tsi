@@ -678,10 +678,6 @@ Contact
 
 UNICORE Homepage:        https://www.unicore.eu
 
-Support mailing list:    unicore-support@lists.sourceforge.net
-
-Developers mailing list: unicore-devel@lists.sourceforge.net (needs registration)
-
-TSI issues management:   https://sourceforge.net/p/unicore/issues
-
 Source code:             https://github.com/UNICORE-EU/tsi
+
+TSI issues management:   https://github.com/UNICORE-EU/tsi/issues

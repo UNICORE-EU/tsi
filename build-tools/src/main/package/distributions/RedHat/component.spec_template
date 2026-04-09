@@ -11,7 +11,7 @@ Group: System Environment/Daemons
 URL: https://www.unicore.eu
 #Requires: 
 BuildArch: @component-architecture@
-Packager: UNICORE unicore-support@lists.sourceforge.net
+Packager: Bernd Schuller b.schuller@fz-juelich.de
 
 @preamble@
 
@@ -26,10 +26,10 @@ provides an interface to the local resource manager (e.g. Slurm) and
 the local file system. It is installed on the cluster frontend.
 
 %changelog
-* @release-timestamp@ Bernd Schuller <unicore-support@lists.sourceforge.net>
+* @release-timestamp@ Bernd Schuller <b.schuller@fz-juelich.de>
 -Latest
 
-* Fri Feb 11 2011 Bjoern Hagemeier <unicore-support@lists.sourceforge.net> 
+* Fri Feb 11 2011 Bjoern Hagemeier <b.schuller@fz-juelich.de> 
 -Initial rpm package
 
 @install_command@

@@ -1,4 +1,4 @@
 @component-prefix@@component-name@@component-suffix@ (@component-version@-@component-release@@component-disttag@) unstable; urgency=low
 
   * v@component-version@
- -- Bernd Schuller <unicore-support@lists.sourceforge.net>  @release-timestamp@
+ -- Bernd Schuller <b.schuller@fz-juelich.de>  @release-timestamp@

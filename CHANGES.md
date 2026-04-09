@@ -8,6 +8,11 @@ COMPATIBILITY NOTE:
 
   * TSI 11.x is not compatible with 10.x and earlier UNICORE/X versions *
 
+Version 11.0.1
+--------------
+ - fix: batch submission always used "bash -l" even if "tsi.use_login_shell"
+   is set to false
+ - remove loadleveler variant
 
 Version 11.0.0
 --------------
@@ -264,11 +269,8 @@ Version 7.5.1
 -------------
  - fix: typo in BSSCommon.py leading to errors when aborting jobs
    "TSI_FAILED: global name 'TSI' is not defined"
-   (https://sourceforge.net/p/unicore/issues/69)
  - fix: handle missing TSI_TIME correctly
-   (https://sourceforge.net/p/unicore/issues/70)
  - fix: IP check was not implemented
-   (https://sourceforge.net/p/unicore/issues/72)
  - fix: several small issues in the manual were fixed
 
 Version 7.5.0

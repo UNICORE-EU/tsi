@@ -125,7 +125,7 @@ class BSS(BSSBase):
         Returns the script to submit to the BSS (as a list of lines)
         """
         submit_cmds = []
-        submit_cmds.append("#!/bin/bash -l")
+        submit_cmds.append("#!/bin/bash")
         outcome_dir = extract_parameter(message, "OUTCOME_DIR")
         stderr = extract_parameter(message, "STDERR", "stderr")
         stdout = extract_parameter(message, "STDOUT", "stdout")

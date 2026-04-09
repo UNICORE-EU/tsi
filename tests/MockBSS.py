@@ -2,7 +2,6 @@
 Minimal BSS impl for testing the general functions in BSSCommon.py
 """
 
-import re
 from BSSCommon import BSSBase
 
 class BSS(BSSBase):

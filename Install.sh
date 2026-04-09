@@ -28,7 +28,7 @@ cd $(dirname $0)
 #
 # list of all TSIs
 #
-alltsis="nobatch torque slurm lsf loadleveler"
+alltsis="nobatch torque slurm lsf"
 
 #
 # list all TSIs

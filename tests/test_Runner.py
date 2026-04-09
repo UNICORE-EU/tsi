@@ -7,18 +7,16 @@ import Log, Runner
 class TestRunner(unittest.TestCase):
     def setUp(self):
         self.LOG = Log.Logger("tsi.testing", use_syslog = False)
-        self.file_name = "tests/conf/tsi.properties"
 
     def test_Runner(self):
         child_read, pw = os.pipe()
         pr, child_write = os.pipe()
-        config_file = "tests/conf/tsi.properties"
         pid = os.fork()
         if pid == 0:
             # child, this is the one-shot TSI runner process
             os.dup2(child_read, 0)
             os.dup2(child_write, 1)
-            Runner.main(["TSI", config_file])
+            Runner.main()
         else:
             # parent, this is the fake U/X
             try:

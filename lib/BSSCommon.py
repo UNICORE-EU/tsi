@@ -50,11 +50,10 @@ class BSSBase(object):
                 value = defs[key]
                 config[key] = value
                 LOG.info("Using default: '%s' = '%s'" % (key, value))
-        # use login shell (/bin/bash -l) for actions
         self.use_login_shell = config['tsi.use_login_shell']
         # check if BSS commands are accessible
         if not config['tsi.testing']:
-            (success, output) = Utils.run_command(config['tsi.qstat_cmd'])
+            (success, output) = Utils.run_command(config['tsi.qstat_cmd'], login_shell=self.use_login_shell)
             if not success:
                 msg = "Could not run command to check job statuses! " \
                         "Please check that the correct TSI is installed, and " \
@@ -151,8 +150,8 @@ class BSSBase(object):
             Utils.addperms(submit_file_name, 0o770)
             # run job submission command
             cmd = config['tsi.submit_cmd'] + " ./" + submit_file_name
-            (success, reply) = Utils.run_command(cmd)
-        
+            (success, reply) = Utils.run_command(cmd, login_shell=self.use_login_shell)
+
         if not success:
             connector.failed(reply)
         elif is_alloc:

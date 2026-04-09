@@ -8,22 +8,21 @@ import MockConnector
 
 class TestBSSNobatch(unittest.TestCase):
     def setUp(self):
-        # setup logger
         self.LOG = Log.Logger("tsi.testing", use_syslog=False)
         self.config = TSI.get_default_config()
         self.config['tsi.testing'] = True
         self.config['tsi.switch_uid'] = False
         self.bss = BSS.BSS()
         self.bss.init(self.config, self.LOG)
-   
+
     def test_parse_status_listing(self):
         with open("tests/input/qstat_nobatch.txt", "r") as sample:
             qstat_output = sample.read()
         result = self.bss.parse_status_listing(qstat_output)
         self.assertTrue("QSTAT\n" in result)
 
-    
     def test_submit(self):
+        print("... test_submit")
         cwd = os.getcwd()
         uspace = cwd + "/build/uspace-%s" % int(time.time())
         os.mkdir(uspace)
@@ -49,7 +48,7 @@ ENDOFMESSAGE
         control_out = io.StringIO()
         connector = MockConnector.MockConnector(control_in, control_out, None,
                                                 None, self.LOG)
-        TSI.process(connector, self.config, self.LOG)
+        self.bss.submit(msg, connector, self.config, self.LOG)
         result = control_out.getvalue()
         if "TSI_FAILED" in result:
             print(result)
