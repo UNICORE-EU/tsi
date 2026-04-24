@@ -149,9 +149,12 @@ tgz: clean
 
 zipped-slurm: tgz
 	@echo "Building single file executable unicore-tsi-slurm-${VERSION}.pyz"
-	@cd build/
-	@cp slurm/BSS.py lib/	
-	@${PYTHON} -m zipapp --main "Runner:main" --output target/unicore-tsi-slurm-${VERSION}.pyz lib
+	@cp build/slurm/BSS.py build/lib/
+	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
+	@cd build && ${PYTHON} -m zipapp --main "Runner:main" --output ../target/unicore-tsi-slurm-${VERSION}.pyz lib
+
+zipped-slurm-test: zipped-slurm
+	@printf "#TSI_PING\nENDOFMESSAGE\n" | python3 target/unicore-tsi-slurm-${VERSION}.pyz
 
 clean:
 	@find -name "*~" -delete
