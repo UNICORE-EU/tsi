@@ -8,6 +8,10 @@ COMPATIBILITY NOTE:
 
   * TSI 11.x is not compatible with 10.x and earlier UNICORE/X versions *
 
+Version 11.0.2
+--------------
+ - update "torque" variant to also work with OpenPBS
+
 Version 11.0.1
 --------------
  - fix: batch submission always used "bash -l" even if "tsi.use_login_shell"

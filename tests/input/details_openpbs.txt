@@ -1,0 +1,51 @@
+Job Id: 4.0d84d92bfbad
+    Job_Name = STDIN
+    Job_Owner = demouser@0d84d92bfbad
+    resources_used.cpupercent = 0
+    resources_used.cput = 00:00:00
+    resources_used.mem = 0kb
+    resources_used.ncpus = 1
+    resources_used.vmem = 0kb
+    resources_used.walltime = 00:00:00
+    job_state = F
+    queue = workq
+    server = 0d84d92bfbad
+    Checkpoint = u
+    ctime = Fri Jul 17 07:51:46 2026
+    Error_Path = 0d84d92bfbad:/tmp/STDIN.e4
+    exec_host = 0d84d92bfbad/0
+    exec_vnode = (0d84d92bfbad:ncpus=1)
+    Hold_Types = n
+    Join_Path = n
+    Keep_Files = n
+    Mail_Points = a
+    mtime = Fri Jul 17 07:51:47 2026
+    Output_Path = 0d84d92bfbad:/tmp/STDIN.o4
+    Priority = 0
+    qtime = Fri Jul 17 07:51:46 2026
+    Rerunable = True
+    Resource_List.ncpus = 1
+    Resource_List.nodect = 1
+    Resource_List.place = pack
+    Resource_List.select = 1:ncpus=1
+    stime = Fri Jul 17 07:51:46 2026
+    obittime = Fri Jul 17 07:51:47 2026
+    jobdir = /home/demouser
+    substate = 92
+    Variable_List = PBS_O_HOME=/home/demouser,PBS_O_LANG=C.UTF-8,
+	PBS_O_LOGNAME=demouser,
+	PBS_O_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bi
+	n:/snap/bin:/opt/pbs/bin,PBS_O_MAIL=/var/mail/demouser,
+	PBS_O_SHELL=/bin/bash,PBS_O_INTERACTIVE_AUTH_METHOD=resvport,
+	PBS_O_INTERACTIVE_ENCRYPT_METHOD=,PBS_O_WORKDIR=/tmp,
+	PBS_O_SYSTEM=Linux,PBS_O_QUEUE=workq,PBS_O_HOST=0d84d92bfbad
+    comment = Job run at Fri Jul 17 at 07:51 on (0d84d92bfbad:ncpus=1) and fini
+	shed
+    etime = Fri Jul 17 07:51:46 2026
+    run_count = 1
+    Stageout_status = 1
+    Exit_status = 0
+    history_timestamp = 1784274707
+    project = _pbs_project_default
+    Submit_Host = 0d84d92bfbad
+

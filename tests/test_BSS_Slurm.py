@@ -305,8 +305,7 @@ echo "Hello World!"
         os.chdir(basedir)
         with open("tests/input/details_slurm.txt", "r") as f:
             raw = f.read()
-        parsed = self.bss.parse_job_details(raw)
-        print(parsed)
+        print(self.bss.parse_job_details(raw))
 
     def test_report_details(self):
         os.chdir(basedir)
@@ -316,8 +315,10 @@ echo "Hello World!"
                                                 None, self.LOG)
         msg = "#TSI_BSSID tests/input/details_slurm.txt\n"
         self.bss.get_job_details(msg, connector, self.config, self.LOG)
-        result = control_out.getvalue()
-        print(result)
+        _p = control_out.getvalue().replace("TSI_OK", "").strip()
+        result = json.loads(_p)
+        #print(json.dumps(result, indent=2))
+        self.assertEqual("8017847", result["JobId"])
 
     def test_parse_partitions(self):
         os.chdir(basedir)

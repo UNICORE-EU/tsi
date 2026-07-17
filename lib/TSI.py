@@ -10,9 +10,7 @@ import ACL, BecomeUser, BSS, PAM, Reservation, Server, IO, UFTP, Utils
 from Connector import Connector, Forwarder
 from Log import Logger
 
-#
-# the TSI version
-#
+# TSI version
 MY_VERSION = "__VERSION__"
 
 # minimum required Python version

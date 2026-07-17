@@ -2,7 +2,7 @@
 
 batch system specific functions.
 
-This is the "Torque" version.
+This is the "Torque" version, which should work also for OpenPBS.
 
 Check the manual for advice on how to create a custom version.
 """
@@ -51,9 +51,9 @@ class BSS(BSSBase):
             if user_nodes_filter != "NONE":
                 nodes_filter = nodes_filter + ":" + user_nodes_filter
 
-        processors = extract_number(message, "PROCESSORS")
         processors_per_node = extract_number(message,
                                                 "PROCESSORS_PER_NODE")
+        processors = extract_number(message, "PROCESSORS")
         total_processors = extract_number(message, "TOTAL_PROCESSORS")
         array_spec = extract_number(message, "ARRAY")
         array_limit = extract_number(message, "ARRAY_LIMIT")
@@ -64,8 +64,7 @@ class BSS(BSSBase):
                                            "NONE")
         req_time = extract_number(message, "TIME")
 
-        # Jobname:
-        # check that it fits the rules
+        # Jobname: check that it fits the rules
         match = re.search(r"([a-zA-Z]\S{0,14})", jobname)
         if match is not None:
             jobname = match.group(1)
@@ -81,9 +80,12 @@ class BSS(BSSBase):
 
         # Nodes / CPUs
         if nodes > 0:
-            submit_cmds.append("#PBS -l nodes=%s:ppn=%s%s" % (
-                nodes, processors_per_node, nodes_filter))
-        
+            spec = "nodes=%s" %  nodes
+            if(processors_per_node>0):
+                spec = "%s:ppn=%s" % (spec, processors_per_node)
+            submit_cmds.append("#PBS -l %s%s" % (
+                spec, nodes_filter))
+
         if req_time > 0:
             # Job time requirement. Wallclock time in seconds.
             submit_cmds.append("#PBS -l walltime=%s" % req_time)
@@ -107,8 +109,6 @@ class BSS(BSSBase):
 
         submit_cmds.append("#PBS -o %s/%s" % (outcome_dir, stdout))
         submit_cmds.append("#PBS -e %s/%s" % (outcome_dir, stderr))
-
-        submit_cmds.append("#PBS -d %s" % uspace_dir)
 
         if umask is not None:
             submit_cmds.append("#PBS -W umask=%s" % umask)
@@ -137,20 +137,52 @@ class BSS(BSSBase):
         queue_name = match.group(2)
         return (bssid, state, queue_name)
 
+    def parse_job_details(self, raw_info: str):
+        """ Converts the raw job info into a dictionary """
+        result = {}
+        merged_lines = []
+        _last = ""
+        try:
+            lines = raw_info.splitlines()
+            lines.append("_end_\n")
+            multi = False
+            for line in lines:
+                if line.startswith("\t"):
+                    multi=True
+                    _last += line.strip()
+                else:
+                    if multi:
+                        merged_lines.append(_last)
+                        multi = False
+                        _last = ""
+                    else:
+                        _last = line
+                    merged_lines.append(line)
+            for line in merged_lines:
+                try:
+                    kv = line.split("=",1)
+                    result[kv[0].strip()] = kv[1].strip()
+                except:
+                    pass
+        except:
+            result['errorMessage'] = "Could not parse BSS job details"
+            result['BSSJobDetails'] = raw_info
+        return result
+
     def convert_status(self, bss_state):
         """ converts BSS status to UNICORE status """
         ustate = "UNKNOWN"
 
-        # Torque returns on of these states:
+        # Torque / OpenPBS returns on of these states:
         #
-        #   C -  Job is completed after having run
-        #   E -  Job is exiting after having run.
-        #   H -  Job is held.
-        #   Q -  job is queued, eligible to run or routed.
-        #   R -  job is running.
-        #   T -  job is being moved to new location.
-        #   W -  job is waiting for its execution time
-        #        (-a option) to be reached.
+        #   C, F -  Job is completed after having run
+        #   E    -  Job is exiting after having run.
+        #   S, H -  Job is held.
+        #   Q    -  job is queued, eligible to run or routed.
+        #   R    -  job is running.
+        #   T    -  job is being moved to new location.
+        #   W    -  job is waiting for its execution time
+        #           (-a option) to be reached.
 
         if bss_state in ["Q", "T", "W"]:
             ustate = "QUEUED"
@@ -158,7 +190,7 @@ class BSS(BSSBase):
             ustate = "RUNNING"
         elif bss_state in ["S", "H"]:
             ustate = "SUSPENDED"
-        elif bss_state == "C":
+        elif bss_state in ["C", "F"]:
             ustate = "COMPLETED"
 
         return ustate

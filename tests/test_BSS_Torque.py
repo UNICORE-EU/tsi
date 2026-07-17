@@ -1,9 +1,13 @@
+
+import io, json
 import os
 import time
 import unittest
 import torque.BSS
 import Log, TSI
+import MockConnector
 
+basedir = os.getcwd()
 
 class TestBSSTorque(unittest.TestCase):
     def setUp(self):
@@ -81,6 +85,19 @@ sleep 3
         self.assertTrue(self.has_directive(submit_cmds, "#PBS -A", "myproject"))
         self.assertTrue(self.has_directive(submit_cmds, "#PBS -t", "10%2"))
 
+    def test_report_details(self):
+        os.chdir(basedir)
+        self.config['tsi.details_cmd'] = "cat "
+        control_out = io.StringIO()
+        connector = MockConnector.MockConnector(None, control_out, None,
+                                                None, self.LOG)
+        msg = "#TSI_BSSID tests/input/details_openpbs.txt\n"
+        self.bss.get_job_details(msg, connector, self.config, self.LOG)
+        _p = control_out.getvalue().replace("TSI_OK", "").strip()
+        result = json.loads(_p)
+        #print(json.dumps(result, indent=2))
+        self.assertIn("PBS_O_HOME", result["Variable_List"])
+        self.assertEqual("STDIN", result["Job_Name"])
 
 if __name__ == '__main__':
     unittest.main()
