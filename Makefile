@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=11.2.0
+VERSION=11.2.1
 RELEASE=1
 MVN=mvn -q
 
@@ -154,6 +154,7 @@ zipped-slurm-test: zipped-slurm
 
 zipped-nobatch: tgz
 	@echo "Building single file executable unicore-tsi-nobatch-${VERSION}.pyz"
+	@cp lib/BSS.py build/lib/
 	@cd build && ${PYTHON} -m zipapp --main "Runner:main" --output ../target/unicore-tsi-nobatch-${VERSION}.pyz lib
 
 zipped-nobatch-test: zipped-nobatch
