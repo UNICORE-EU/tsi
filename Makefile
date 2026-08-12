@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=11.0.2
+VERSION=11.2.0
 RELEASE=1
 MVN=mvn -q
 
@@ -83,7 +83,7 @@ endef
 
 
 #
-# attempts to build all packages (even if they are the "wrong" kind on the current OS)
+# build all packages
 #
 %-all: %-deb %-rpm %-tgz
 	echo "Done."
@@ -129,11 +129,6 @@ lsf-prepare: clean
 packages: nobatch-package torque-package slurm-package lsf-package
 
 #
-# Everything
-#
-all: nobatch-all torque-all slurm-all lsf-all ll-all tgz
-
-#
 # Generic binary tgz containing everything required to install the TSI
 # using the Install.sh script
 #
@@ -147,14 +142,22 @@ tgz: clean
 	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@tar czf target/unicore-tsi-${VERSION}.tgz --xform="s%^build/%unicore-tsi-${VERSION}/%" --exclude-vcs build/*
 
+zip: zipped-slurm zipped-nobatch
+
 zipped-slurm: tgz
 	@echo "Building single file executable unicore-tsi-slurm-${VERSION}.pyz"
 	@cp build/slurm/BSS.py build/lib/
-	@sed -i "s/__VERSION__/${VERSION}/" build/lib/TSI.py
 	@cd build && ${PYTHON} -m zipapp --main "Runner:main" --output ../target/unicore-tsi-slurm-${VERSION}.pyz lib
 
 zipped-slurm-test: zipped-slurm
 	@printf "#TSI_PING\nENDOFMESSAGE\n" | python3 target/unicore-tsi-slurm-${VERSION}.pyz
+
+zipped-nobatch: tgz
+	@echo "Building single file executable unicore-tsi-nobatch-${VERSION}.pyz"
+	@cd build && ${PYTHON} -m zipapp --main "Runner:main" --output ../target/unicore-tsi-nobatch-${VERSION}.pyz lib
+
+zipped-nobatch-test: zipped-nobatch
+	@printf "#TSI_PING\nENDOFMESSAGE\n" | python3 target/unicore-tsi-nobatch-${VERSION}.pyz
 
 clean:
 	@find -name "*~" -delete

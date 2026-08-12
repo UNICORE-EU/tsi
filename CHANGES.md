@@ -8,7 +8,7 @@ COMPATIBILITY NOTE:
 
   * TSI 11.x is not compatible with 10.x and earlier UNICORE/X versions *
 
-Version 11.0.2
+Version 11.2.0
 --------------
  - update "torque" variant to also work with OpenPBS
 
