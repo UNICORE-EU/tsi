@@ -275,9 +275,9 @@ def get_unicorex_port(config: dict, params):
 
 def create_server(host: str, port: int, config: dict)->socket.socket:
     if _check_ipv6_support(host, port, config):
-        return socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True, reuse_port=True)
+        return socket.create_server((host, port), family=socket.AF_INET6, dualstack_ipv6=True)
     else:
-        return socket.create_server((host, port), reuse_port=True)
+        return socket.create_server((host, port))
 
 def _check_ipv6_support(host: str, port: int, config: dict) -> bool:
     if config.get('tsi.disable_ipv6', False):

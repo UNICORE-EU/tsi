@@ -34,9 +34,9 @@ class BSSBase(object):
                 children.remove(child_pid)
 
     defaults = {
-        'tsi.qstat_cmd': 'ps -e -os,args',
+        'tsi.qstat_cmd': 'ps -e -os,args | grep UNICORE_Job_ || /bin/true',
         'tsi.abort_cmd': r'SID=$(ps -e -osid,args | grep "nice .* ./UNICORE_Job_%s" | grep -v "grep " | egrep -o "^\s*([0-9]+)" ); pkill -SIGTERM -s $SID',
-        'tsi.get_processes_cmd': 'ps -e',
+        'tsi.get_processes_cmd': 'ps ax | grep UNICORE_Job_ || /bin/true',
         'tsi.get_partitions_cmd': 'echo'
     }
 
@@ -167,7 +167,7 @@ class BSSBase(object):
 
     def run_on_login_node(self, message: str, connector: Connector, config: dict, LOG: Logger):
         """Run a script on the TSI node, i.e. fork a child process to
-        execute the script. The user script is written to a "UNICORE_JOB_*"
+        execute the script. The user script is written to a "UNICORE_Job_*"
         file in the job directory and the child PID is reported back.
         """
         message = Utils.expand_variables(message)

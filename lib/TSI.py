@@ -47,7 +47,7 @@ def get_default_config() -> dict:
     config['tsi.local_portrange'] = None
     config['tsi.safe_dir'] = '/tmp'
     config['tsi.keyfiles'] = ['.ssh/authorized_keys']
-    config['tsi.use_login_shell'] = True
+    config['tsi.use_login_shell'] = False
     config['tsi.child_pids'] = []
     config['tsi.testing'] = False
     return config

@@ -61,7 +61,7 @@ def addperms(path: str, mode: int):
     os.chmod(path, mode)
 
 
-def run_command(cmd: str, discard=False, child_pids=None, login_shell=True):
+def run_command(cmd: str, discard=False, child_pids=None, login_shell=False):
     """
     Runs command, capturing the output if the discard flag is True.
     Returns a success flag and the output.
@@ -71,9 +71,9 @@ def run_command(cmd: str, discard=False, child_pids=None, login_shell=True):
     """
     output = ""
     try:
-        cmds = ["/bin/bash", "-l", "-c", cmd]
-        if not login_shell:
-            cmds.pop(1)
+        cmds = ["/bin/bash", "-c", cmd]
+        if login_shell:
+            cmds.insert(1, "-l")
         if not discard:
             raw_output = subprocess.check_output(cmds, bufsize=4096, stderr=subprocess.STDOUT)
             output = raw_output.decode("UTF-8")

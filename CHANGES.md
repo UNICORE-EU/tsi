@@ -8,6 +8,13 @@ COMPATIBILITY NOTE:
 
   * TSI 11.x is not compatible with 10.x and earlier UNICORE/X versions *
 
+Version 11.3.0
+--------------
+ - generate shorter process list by filtering for UNICORE-related processes
+ - send variant (Slurm, nobatch, ...) as part of version info
+ - set "tsi.use_login_shell" setting default (back) to False, since it can
+   create hard-to-debug error
+
 Version 11.2.0
 --------------
  - update "torque" variant to also work with OpenPBS
