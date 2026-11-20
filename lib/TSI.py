@@ -325,6 +325,7 @@ def handle_function(function, command: str, msg: str, connector: Connector, conf
         if pid != 0:
             os.waitpid(pid, 0)
             return
+    user = "n/a"
     try:
         if switch_uid:
             id_info = re.search(r".*#TSI_IDENTITY (\S+) (\S+)\n.*", msg, re.M)
@@ -343,7 +344,7 @@ def handle_function(function, command: str, msg: str, connector: Connector, conf
     except:
         msg = str(sys.exc_info()[1])
         connector.failed(msg)
-        LOG.error("Error executing %s: %s" % (command, msg))
+        LOG.error("Error executing %s for user '%s': %s" % (command, user, msg))
     if switch_uid and command!="_START_FORWARDING":
         BecomeUser.restore_id(config)
         if open_user_session:

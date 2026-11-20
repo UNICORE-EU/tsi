@@ -13,7 +13,8 @@ Version 11.3.0
  - generate shorter process list by filtering for UNICORE-related processes
  - send variant (Slurm, nobatch, ...) as part of version info
  - set "tsi.use_login_shell" setting default (back) to False, since it can
-   create hard-to-debug error
+   lead to hard-to-debug errors
+ - log/error handling improvement: add requested user name to error message
 
 Version 11.2.0
 --------------

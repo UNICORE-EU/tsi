@@ -4,7 +4,7 @@
 #  - building RPM and other packages
 #
 
-VERSION=11.2.1
+VERSION=11.3.0
 RELEASE=1
 MVN=mvn -q
 
@@ -124,9 +124,9 @@ lsf-prepare: clean
 	$(call copy-bssfiles,lsf)
 
 #
-# All the linux packages for the current OS
+# Typical release: tgz, zips, Slurm linux packages
 #
-packages: nobatch-package torque-package slurm-package lsf-package
+release: tgz zip slurm-deb slurm-rpm
 
 #
 # Generic binary tgz containing everything required to install the TSI
